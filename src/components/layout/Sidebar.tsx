@@ -48,7 +48,7 @@ export function Sidebar() {
               <Icon strokeWidth={isActive ? 2.5 : 2} className="w-5 h-5" />
               <span className={`text-sm tracking-wide ${isActive ? 'font-semibold' : 'font-medium'}`}>
                 {item.label}
-              </span
+              </span>
             </Link>
           );
         })}

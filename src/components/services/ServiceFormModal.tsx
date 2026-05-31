@@ -165,7 +165,7 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, initialData }: Ser
                     placeholder="0.00"
                     required
                   />
-                </div}
+                </div>
               </Field>
 
               {error && (

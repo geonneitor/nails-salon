@@ -1,0 +1,248 @@
+'use client';
+
+// ============================================================
+// src/components/calendar/AppointmentDetailModal.tsx
+// Modal de detalle de cita. Diseño Zen premium con glassmorphism.
+// ============================================================
+
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Clock, User, Scissors, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supabase';
+
+interface AppointmentDetailModalProps {
+  appointment: AppointmentWithRelations | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onStatusChange?: (id: string, status: AppointmentStatus) => void;
+}
+
+const STATUS_CONFIG: Record<AppointmentStatus, { label: string; color: string; bg: string }> = {
+  confirmed_advance: {
+    label: 'Confirmado',
+    color: 'text-primario-zen',
+    bg: 'bg-primario-zen/10 border-primario-zen/30',
+  },
+  pending_advance: {
+    label: 'Pendiente de Anticipo',
+    color: 'text-amber-700',
+    bg: 'bg-amber-50 border-amber-200',
+  },
+  free: {
+    label: 'Sin anticipo',
+    color: 'text-primario-zen/60',
+    bg: 'bg-secundario-zen/30 border-secundario-zen',
+  },
+};
+
+function DetailRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className="mt-0.5 text-primario-zen/50">{icon}</div>
+      <div>
+        <p className="text-[10px] uppercase tracking-widest text-primario-zen/40 font-semibold mb-0.5">
+          {label}
+        </p>
+        <p className="text-primario-zen text-sm font-medium">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+export function AppointmentDetailModal({
+  appointment,
+  isOpen,
+  onClose,
+  onStatusChange,
+}: AppointmentDetailModalProps) {
+  if (!appointment) return null;
+
+  const status = STATUS_CONFIG[appointment.status];
+  const startDate = new Date(appointment.start_time);
+  const endDate = new Date(appointment.end_time);
+  const duration = Math.round((endDate.getTime() - startDate.getTime()) / 60000);
+
+  // Obtener nombre del servicio o resumen del ticket
+  let serviceName = appointment.service?.name;
+  if (!serviceName && appointment.ticket_details?.activeServices) {
+    serviceName = appointment.ticket_details.activeServices
+      .map((s) => {
+        if (s === 'fullset') return 'Full Set';
+        if (s === 'disenos') return 'Diseños';
+        if (s === 'deco') return 'Deco';
+        if (s === 'repo') return 'Repo';
+        if (s === 'gel') return 'Gel Protec';
+        if (s === 'mani') return 'Manicura';
+        if (s === 'pedi') return 'Pedicura';
+        return s;
+      })
+      .join(' + ');
+  }
+  if (!serviceName) serviceName = 'Servicio Personalizado';
+
+  const price = appointment.total_price ?? appointment.service?.price ?? 0;
+
+  const renderTicketDetailsBreakdown = () => {
+    const details = appointment.ticket_details;
+    if (!details || !details.activeServices) return null;
+
+    const lines: string[] = [];
+    if (details.activeServices.includes('fullset') && details.fs_sistema) {
+      lines.push(`Full Set: ${details.fs_sistema}, ${details.fs_forma || ''}, Largo ${details.fs_largo || ''} (Extra tonos: ${details.fs_tonos || 0})`);
+    }
+    if (details.activeServices.includes('disenos') && details.dis) {
+      Object.entries(details.dis).forEach(([key, val]) => {
+        if (val > 0) lines.push(`${key} ×${val} uñas`);
+      });
+      if (details.dis_tonos && details.dis_tonos > 0) lines.push(`Tonos extra diseños: ${details.dis_tonos}`);
+    }
+    if (details.activeServices.includes('deco') && details.deco) {
+      Object.entries(details.deco).forEach(([key, val]) => {
+        if (val > 0) lines.push(`${key} ×${val} uñas`);
+      });
+      if (details.deco_tonos && details.deco_tonos > 0) lines.push(`Tonos extra deco: ${details.deco_tonos}`);
+    }
+    if (details.activeServices.includes('repo') && details.repo) {
+      Object.entries(details.repo).forEach(([key, val]) => {
+        if (val > 0) lines.push(`Repo: ${key} ×${val}`);
+      });
+      if (details.repo_tonos && details.repo_tonos > 0) lines.push(`Tonos extra repo: ${details.repo_tonos}`);
+    }
+    if (details.activeServices.includes('gel') && details.gel) {
+      lines.push(`Gel: ${details.gel} (Extra tonos: ${details.gel_tonos || 0})`);
+    }
+    if (details.activeServices.includes('mani') && details.mani) {
+      lines.push(`Manicura: ${details.mani} (Extra tonos: ${details.mani_tonos || 0})`);
+    }
+    if (details.activeServices.includes('pedi') && details.pedi) {
+      lines.push(`Pedicura: ${details.pedi} (Extra tonos: ${details.pedi_tonos || 0})`);
+    }
+
+    if (lines.length === 0) return null;
+
+    return (
+      <div className="mt-4 p-4 rounded-2xl bg-secundario-zen/20 border border-secundario-zen/50 text-xs text-primario-zen flex flex-col gap-1 font-sans">
+        <p className="font-bold border-b border-secundario-zen/30 pb-1.5 mb-1.5 uppercase tracking-wider text-[10px] text-primario-zen/50">Desglose de Cotización</p>
+        {lines.map((line, idx) => (
+          <p key={idx} className="leading-tight">• {line}</p>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-primario-zen/20 backdrop-blur-sm z-40"
+          />
+
+          {/* Panel */}
+          <motion.div
+            key="panel"
+            initial={{ opacity: 0, y: 40, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+            className="fixed bottom-0 left-0 right-0 md:top-0 md:bottom-0 md:m-auto md:h-fit md:max-w-md w-full bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 z-50 p-8 max-h-[90vh] overflow-y-auto"
+          >
+            {/* Header */}
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-primario-zen/40 font-semibold mb-1 font-sans">
+                  {format(startDate, "EEEE, d 'de' MMMM yyyy", { locale: es })}
+                </p>
+                <h2 className="font-serif text-primario-zen text-2xl tracking-wide leading-tight">
+                  {serviceName}
+                </h2>
+              </div>
+              <button
+                onClick={onClose}
+                aria-label="Cerrar detalle"
+                className="p-2 rounded-full text-primario-zen/40 hover:text-primario-zen hover:bg-secundario-zen/40 transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Status Badge */}
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold uppercase tracking-wider mb-6 font-sans ${status.bg} ${status.color}`}>
+              {appointment.status === 'confirmed_advance' ? (
+                <CheckCircle2 className="w-3.5 h-3.5" />
+              ) : (
+                <AlertCircle className="w-3.5 h-3.5" />
+              )}
+              {status.label}
+            </div>
+
+            {/* Details Grid */}
+            <div className="flex flex-col gap-5 font-sans">
+              <DetailRow
+                icon={<User className="w-4 h-4" />}
+                label="Cliente"
+                value={appointment.customer.name}
+              />
+              {appointment.customer.phone && (
+                <DetailRow
+                  icon={<span className="text-xs font-bold">📞</span>}
+                  label="Teléfono"
+                  value={appointment.customer.phone}
+                />
+              )}
+              <DetailRow
+                icon={<Scissors className="w-4 h-4" />}
+                label="Servicio"
+                value={serviceName}
+              />
+              <DetailRow
+                icon={<Clock className="w-4 h-4" />}
+                label="Horario"
+                value={`${format(startDate, 'h:mm a')} – ${format(endDate, 'h:mm a')} (${duration} min)`}
+              />
+              <DetailRow
+                icon={<User className="w-4 h-4" />}
+                label="Empleado"
+                value={appointment.employee.name}
+              />
+              <DetailRow
+                icon={<CreditCard className="w-4 h-4" />}
+                label="Total"
+                value={`$${price} MXN`}
+              />
+            </div>
+
+            {/* Render ticket breakdown if exists */}
+            {renderTicketDetailsBreakdown()}
+
+            {/* Action Buttons */}
+            {onStatusChange && appointment.status !== 'confirmed_advance' && (
+              <button
+                id={`confirm-appointment-${appointment.id}`}
+                onClick={() => onStatusChange(appointment.id, 'confirmed_advance')}
+                className="w-full bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm mt-6 font-sans"
+              >
+                Confirmar Anticipo
+              </button>
+            )}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}

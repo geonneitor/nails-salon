@@ -12,6 +12,8 @@ interface CustomerDetailModalProps {
   customer: Customer | null;
   isOpen: boolean;
   onClose: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
@@ -76,16 +78,39 @@ export function CustomerDetailModal({ customer, isOpen, onClose }: CustomerDetai
                 <DetailRow icon={<Mail className="w-4 h-4" />} label="Correo" value={customer.email} />
               )}
               {customer.birthday && (
-                <DetailRow 
-                  icon={<Calendar className="w-4 h-4" />} 
-                  label="Cumpleaños" 
-                  value={format(new Date(customer.birthday), 'd MMMM yyyy')} 
+                <DetailRow
+                  icon={<Calendar className="w-4 h-4" />}
+                  label="Cumpleaños"
+                  value={format(new Date(customer.birthday), 'd MMMM yyyy')}
                 />
               )}
               {customer.service_notes && (
                 <DetailRow icon={<ClipboardList className="w-4 h-4" />} label="Notas Médicas / Servicio" value={customer.service_notes} />
               )}
               <DetailRow icon={<User className="w-4 h-4" />} label="Cliente desde" value={format(new Date(customer.created_at), 'MMM yyyy')} />
+            </div>
+
+            <div className="flex gap-3 mt-8 pt-6 border-t border-secundario-zen/40">
+              <button
+                onClick={() => {
+                  onEdit?.();
+                  onClose();
+                }}
+                className="flex-1 bg-primario-zen text-fondo-zen py-3 rounded-2xl uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm"
+              >
+                Editar
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm('¿Estás seguro de que deseas eliminar esta clienta? Esta acción no se puede deshacer.')) {
+                    onDelete?.();
+                    onClose();
+                  }
+                }}
+                className="px-4 py-3 rounded-2xl border border-red-200 text-red-600 uppercase tracking-widest text-xs font-semibold hover:bg-red-50 transition-all"
+              >
+                Eliminar
+              </button>
             </div>
           </motion.div>
         </>

@@ -2,10 +2,10 @@
 
 // ============================================================
 // src/components/services/ServiceFormModal.tsx
-// Formulario premium para crear un nuevo servicio.
+// Formulario premium para crear o editar un servicio.
 // ============================================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import type { Service } from '@/types/supabase';
@@ -13,7 +13,8 @@ import type { Service } from '@/types/supabase';
 interface ServiceFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (payload: Omit<Service, 'id' | 'created_at' | 'project_id'>) => Promise<unknown>;
+  onSubmit: (payload: any) => Promise<unknown>;
+  initialData?: Service | null;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -30,13 +31,28 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const INPUT_CLASS =
   'w-full bg-secundario-zen/20 border border-secundario-zen/60 text-primario-zen text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all placeholder:text-primario-zen/30';
 
-export function ServiceFormModal({ isOpen, onClose, onSubmit }: ServiceFormModalProps) {
+export function ServiceFormModal({ isOpen, onClose, onSubmit, initialData }: ServiceFormModalProps) {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('60');
   const [price, setPrice] = useState('');
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        setName(initialData.name);
+        setDuration(initialData.duration_minutes.toString());
+        setPrice(initialData.price.toString());
+      } else {
+        setName('');
+        setDuration('60');
+        setPrice('');
+      }
+      setError(null);
+    }
+  }, [isOpen, initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,20 +64,20 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit }: ServiceFormModal
     }
 
     setSubmitting(true);
-    const result = await onSubmit({
+    const payload = {
+      ...(initialData ? { id: initialData.id } : {}),
       name: name.trim(),
       duration_minutes: parseInt(duration, 10),
       price: parseFloat(price),
-    });
+    };
+
+    const result = await onSubmit(payload);
     setSubmitting(false);
 
     if (result) {
-      setName('');
-      setDuration('60');
-      setPrice('');
       onClose();
     } else {
-      setError('Hubo un problema al registrar el servicio.');
+      setError(initialData ? 'Hubo un problema al actualizar el servicio.' : 'Hubo un problema al registrar el servicio.');
     }
   };
 
@@ -69,7 +85,6 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit }: ServiceFormModal
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
-          {/* Backdrop */}
           <motion.div
             key="cb-backdrop"
             initial={{ opacity: 0 }}
@@ -79,7 +94,6 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit }: ServiceFormModal
             className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
           />
 
-          {/* Panel */}
           <motion.div
             key="cb-panel"
             initial={{ opacity: 0, y: 50, scale: 0.97 }}
@@ -88,14 +102,13 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit }: ServiceFormModal
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
             className="relative w-full md:max-w-md bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-8 max-h-[90vh] overflow-y-auto"
           >
-            {/* Header */}
             <div className="flex justify-between items-start mb-6">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-primario-zen/40 font-semibold mb-1">
-                  Catálogo
+                  {initialData ? 'Edición' : 'Catálogo'}
                 </p>
                 <h2 className="font-serif text-primario-zen text-2xl tracking-wide">
-                  Nuevo Servicio
+                  {initialData ? 'Editar Servicio' : 'Nuevo Servicio'}
                 </h2>
               </div>
               <button
@@ -152,7 +165,7 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit }: ServiceFormModal
                     placeholder="0.00"
                     required
                   />
-                </div>
+                </div}
               </Field>
 
               {error && (
@@ -169,7 +182,7 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit }: ServiceFormModal
                 {submitting ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
                 ) : (
-                  'Guardar Servicio'
+                  initialData ? 'Guardar Cambios' : 'Guardar Servicio'
                 )}
               </button>
             </form>

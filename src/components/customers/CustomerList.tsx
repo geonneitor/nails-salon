@@ -1,7 +1,7 @@
 'use client';
 // ============================================================
 // src/components/customers/CustomerList.tsx
-// Lista de clientas con búsqueda y modal de detalle.
+// Lista de clientas con búsqueda, edición y eliminación.
 // ============================================================
 import { useState } from 'react';
 import { Search, Loader2 } from 'lucide-react';
@@ -12,16 +12,35 @@ import { useCustomers } from '@/hooks/useCustomers';
 import type { Customer } from '@/types/supabase';
 
 export function CustomerList() {
-  const { customers, isLoading, error, createCustomer } = useCustomers();
+  const { customers, isLoading, error, createCustomer, updateCustomer, deleteCustomer } = useCustomers();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  const filteredCustomers = customers.filter(c => 
+  const filteredCustomers = customers.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (c.phone && c.phone.includes(searchTerm)) ||
     (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const handleOpenCreateForm = () => {
+    setEditingCustomer(null);
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEditForm = (customer: Customer) => {
+    setEditingCustomer(customer);
+    setIsFormOpen(true);
+  };
+
+  const handleFormSubmit = async (payload: any) => {
+    if (editingCustomer) {
+      return await updateCustomer(editingCustomer.id, payload);
+    } else {
+      return await createCustomer(payload);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -39,7 +58,7 @@ export function CustomerList() {
           />
         </div>
         <button
-          onClick={() => setIsFormOpen(true)}
+          onClick={handleOpenCreateForm}
           className="bg-primario-zen text-fondo-zen px-6 py-3 rounded-2xl uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm whitespace-nowrap"
         >
           + Nueva
@@ -60,9 +79,9 @@ export function CustomerList() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredCustomers.length > 0 ? (
             filteredCustomers.map(customer => (
-              <CustomerCard 
-                key={customer.id} 
-                customer={customer} 
+              <CustomerCard
+                key={customer.id}
+                customer={customer}
                 onClick={() => setSelectedCustomer(customer)}
               />
             ))
@@ -76,16 +95,19 @@ export function CustomerList() {
         </div>
       )}
 
-      <CustomerDetailModal 
+      <CustomerDetailModal
         customer={selectedCustomer}
         isOpen={!!selectedCustomer}
         onClose={() => setSelectedCustomer(null)}
+        onEdit={() => handleOpenEditForm(selectedCustomer!)}
+        onDelete={() => deleteCustomer(selectedCustomer!.id)}
       />
 
       <CustomerFormModal
         isOpen={isFormOpen}
         onClose={() => setIsFormOpen(false)}
-        onSubmit={createCustomer}
+        onSubmit={handleFormSubmit}
+        initialData={editingCustomer}
       />
     </div>
   );

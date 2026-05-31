@@ -8,7 +8,7 @@ export default function CustomersPage() {
         <div className="w-full max-w-5xl">
           <div className="flex justify-between items-end mb-8 border-b border-secundario-zen/50 pb-4">
             <h1 className="text-primario-zen font-serif text-3xl uppercase tracking-widest">
-              Customers
+              Clientas
             </h1>
           </div>
           <CustomerList />

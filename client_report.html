@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resumen de Proyecto | ZEN Studio Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bormiolo&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primario-zen: #8A8469;
+            --fondo-zen: #FDFBEE;
+            --secundario-zen: #E5E1D3;
+            --texto-oscuro: #4A473C;
+            --accent: #D4CFAF;
+        }
+
+        body {
+            background-color: var(--fondo-zen);
+            color: var(--texto-oscuro);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            letter-spacing: 0.3em;
+            color: var(--primario-zen);
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .brand-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .dot {
+            width: 4px;
+            height: 4px;
+            background: var(--primario-zen);
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        .subtitle {
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            font-size: 0.85rem;
+            color: var(--primario-zen);
+            margin-top: 20px;
+            font-weight: 600;
+        }
+
+        section {
+            margin-bottom: 60px;
+            background: white;
+            padding: 40px;
+            border-radius: 32px;
+            border: 1px solid var(--secundario-zen);
+            box-shadow: 0 10px 30px rgba(138, 132, 105, 0.05);
+        }
+
+        h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primario-zen);
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--secundario-zen);
+            padding-bottom: 15px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .feature-item {
+            margin-bottom: 20px;
+        }
+
+        .feature-item strong {
+            color: var(--primario-zen);
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .feature-item p {
+            font-size: 0.95rem;
+            color: #666;
+            margin: 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--primario-zen);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .highlight-box {
+            background: var(--fondo-zen);
+            border-left: 4px solid var(--primario-zen);
+            padding: 20px;
+            font-style: italic;
+            color: var(--texto-oscuro);
+            margin: 20px 0;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--primario-zen);
+            margin-top: 40px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .premium-border {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .premium-border::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primario-zen), transparent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="brand">ZEN</h1>
+            <div class="brand-dots">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <p class="subtitle">Reporte de Implementación de Software</p>
+        </header>
+
+        <section class="premium-border">
+            <div class="status-badge">Estado Actual: Operativo v1.0</div>
+            <h2>Visión General</h2>
+            <p>
+                Se ha desarrollado un sistema de gestión de alta gama diseñado específicamente para la experiencia de un salón de uñas premium. El enfoque se ha centrado en la <strong>simplicidad operativa</strong> y una <strong>estética minimalista</strong> que refleje la identidad de la marca ZEN.
+            </p>
+            <div class="highlight-box">
+                "El objetivo no es solo administrar citas, sino elevar la percepción de calidad desde la herramienta de gestión."
+            </div>
+        </section>
+
+        <section>
+            <h2>Funcionalidades Implementadas</h2>
+            <div class="grid">
+                <div class="feature-item">
+                    <strong>📅 Calendario Inteligente</strong>
+                    <p>Vista de agenda interactiva con indicadores de estatus dinámicos y gestión de bloques de tiempo.</p>
+                </div>
+                <div class="feature-item">
+                    <strong>👥 Gestión de Clientas</strong>
+                    <p>Control total de la base de datos: registro, edición, historial de visitas y notas personalizadas.</p>
+                </div>
+                <div class="feature-item">
+                    <strong>💅 Catálogo de Servicios</strong>
+                    <p>Administración de servicios con definición de precios y duraciones exactas.</p>
+                </div>
+                <div class="feature-item">
+                    <strong>🧮 Cotizador a la Carta</strong>
+                    <p>Módulo avanzado de cálculo dinámico que permite sumar servicios, tonos extra y largos de uña en tiempo real.</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Actualizaciones Recientes</h2>
+            <div class="feature-item">
+                <strong>📱 Optimización Móvil Total</strong>
+                <p>La app ahora es 100% responsiva. Se ha implementado una <em>Downbar</em> (barra de navegación inferior) para facilitar la navegación con una mano en iPhone y Android, eliminando la fricción del menú lateral en pantallas pequeñas.</p>
+            </div>
+            <div class="feature-item">
+                <strong>🌐 Localización Completa</strong>
+                <p>Toda la interfaz ha sido traducida al español, asegurando que la experiencia de usuario sea natural y profesional para el equipo de trabajo.</p>
+            </div>
+            <div class="feature-item">
+                <strong>⚙️ Ciclo de Vida de Datos (CRUD)</strong>
+                <p>Se han habilitado las funciones de actualización y borrado para clientes y servicios, permitiendo mantener la base de datos limpia y actualizada sin necesidad de soporte técnico.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>Arquitectura Técnica</h2>
+            <p style="font-size: 0.9rem; color: #777;">
+                Construido sobre <strong>Next.js 15</strong> y <strong>Supabase</strong>, garantizando una velocidad de carga instantánea y seguridad de grado bancario en la persistencia de los datos. El diseño utiliza una paleta de colores orgánica y tipografías Serif para evocar lujo y serenidad.
+            </p>
+        </section>
+
+        <footer>
+            &copy; 2026 ZEN Studio Management &bull; Diseño Premium
+        </footer>
+    </div>
+</body>
+</html>

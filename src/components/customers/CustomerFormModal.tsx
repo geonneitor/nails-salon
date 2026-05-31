@@ -2,10 +2,10 @@
 
 // ============================================================
 // src/components/customers/CustomerFormModal.tsx
-// Formulario premium para crear una nueva clienta.
+// Formulario premium para crear o editar una clienta.
 // ============================================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import type { Customer } from '@/types/supabase';
@@ -13,7 +13,8 @@ import type { Customer } from '@/types/supabase';
 interface CustomerFormModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (payload: Omit<Customer, 'id' | 'created_at' | 'visit_count' | 'project_id'>) => Promise<unknown>;
+  onSubmit: (payload: any) => Promise<unknown>;
+  initialData?: Customer | null;
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -30,15 +31,34 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const INPUT_CLASS =
   'w-full bg-secundario-zen/20 border border-secundario-zen/60 text-primario-zen text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all placeholder:text-primario-zen/30';
 
-export function CustomerFormModal({ isOpen, onClose, onSubmit }: CustomerFormModalProps) {
+export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: CustomerFormModalProps) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [birthday, setBirthday] = useState('');
   const [serviceNotes, setServiceNotes] = useState('');
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialData) {
+        setName(initialData.name);
+        setPhone(initialData.phone || '');
+        setEmail(initialData.email || '');
+        setBirthday(initialData.birthday || '');
+        setServiceNotes(initialData.service_notes || '');
+      } else {
+        setName('');
+        setPhone('');
+        setEmail('');
+        setBirthday('');
+        setServiceNotes('');
+      }
+      setError(null);
+    }
+  }, [isOpen, initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,24 +70,22 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit }: CustomerFormMod
     }
 
     setSubmitting(true);
-    const result = await onSubmit({
+    const payload = {
+      ...(initialData ? { id: initialData.id } : {}),
       name: name.trim(),
       phone: phone.trim() || null,
       email: email.trim() || null,
       birthday: birthday || null,
       service_notes: serviceNotes.trim() || null,
-    });
+    };
+
+    const result = await onSubmit(payload);
     setSubmitting(false);
 
     if (result) {
-      setName('');
-      setPhone('');
-      setEmail('');
-      setBirthday('');
-      setServiceNotes('');
       onClose();
     } else {
-      setError('Hubo un problema al registrar la clienta.');
+      setError(initialData ? 'Hubo un problema al actualizar la clienta.' : 'Hubo un problema al registrar la clienta.');
     }
   };
 
@@ -75,7 +93,6 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit }: CustomerFormMod
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
-          {/* Backdrop */}
           <motion.div
             key="cb-backdrop"
             initial={{ opacity: 0 }}
@@ -85,7 +102,6 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit }: CustomerFormMod
             className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
           />
 
-          {/* Panel */}
           <motion.div
             key="cb-panel"
             initial={{ opacity: 0, y: 50, scale: 0.97 }}
@@ -94,14 +110,13 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit }: CustomerFormMod
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
             className="relative w-full md:max-w-md bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-8 max-h-[90vh] overflow-y-auto"
           >
-            {/* Header */}
             <div className="flex justify-between items-start mb-6">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-primario-zen/40 font-semibold mb-1">
-                  Registro
+                  {initialData ? 'Edición' : 'Registro'}
                 </p>
                 <h2 className="font-serif text-primario-zen text-2xl tracking-wide">
-                  Nueva Clienta
+                  {initialData ? 'Editar Clienta' : 'Nueva Clienta'}
                 </h2>
               </div>
               <button
@@ -175,9 +190,9 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit }: CustomerFormMod
                 className="w-full bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
               >
                 {submitting ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Registrando...</>
+                  <><Loader2 className="w-4 h-4 animate-spin" /> {initialData ? 'Actualizando...' : 'Registrando...'}</>
                 ) : (
-                  'Registrar Clienta'
+                  initialData ? 'Guardar Cambios' : 'Registrar Clienta'
                 )}
               </button>
             </form>

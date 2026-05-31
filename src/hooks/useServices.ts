@@ -45,5 +45,44 @@ export function useServices() {
     return data as Service;
   };
 
-  return { services, isLoading, error, createService };
+  const updateService = async (id: string, payload: Partial<Omit<Service, 'id' | 'created_at' | 'project_id'>>) => {
+    if (!activeProject) {
+      setError('No hay un proyecto activo seleccionado.');
+      return null;
+    }
+    const { data, error: e } = await supabase
+      .from('services')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (e) {
+      setError(e.message);
+      return null;
+    }
+
+    setServices((prev) =>
+      prev.map((s) => (s.id === id ? (data as Service) : s))
+    );
+    return data as Service;
+  };
+
+  const deleteService = async (id: string) => {
+    if (!activeProject) return false;
+    const { error: e } = await supabase
+      .from('services')
+      .delete()
+      .eq('id', id);
+
+    if (e) {
+      setError(e.message);
+      return false;
+    }
+
+    setServices((prev) => prev.filter((s) => s.id !== id));
+    return true;
+  };
+
+  return { services, isLoading, error, createService, updateService, deleteService };
 }

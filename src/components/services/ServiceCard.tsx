@@ -1,20 +1,48 @@
 // ============================================================
 // src/components/services/ServiceCard.tsx
-// Tarjeta individual de servicio.
+// Tarjeta individual de servicio con acciones de edición y borrado.
 // ============================================================
-import { Clock, DollarSign } from 'lucide-react';
+import { Clock, DollarSign, Pencil, Trash2 } from 'lucide-react';
 import type { Service } from '@/types/supabase';
 
 interface ServiceCardProps {
   service: Service;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export function ServiceCard({ service }: ServiceCardProps) {
+export function ServiceCard({ service, onEdit, onDelete }: ServiceCardProps) {
   return (
     <div className="group flex flex-col gap-3 rounded-2xl bg-[#FDFBEE] p-5 shadow-sm border border-secundario-zen/40 hover:shadow-md hover:border-secundario-zen transition-all duration-300">
-      <h3 className="font-serif text-primario-zen text-lg tracking-wide">
-        {service.name}
-      </h3>
+      <div className="flex justify-between items-start">
+        <h3 className="font-serif text-primario-zen text-lg tracking-wide">
+          {service.name}
+        </h3>
+        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit?.();
+            }}
+            className="p-2 rounded-full bg-secundario-zen/40 text-primario-zen hover:bg-primario-zen hover:text-fondo-zen transition-colors"
+            title="Editar servicio"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (confirm(`¿Estás seguro de que deseas eliminar el servicio "${service.name}"?`)) {
+                onDelete?.();
+              }
+            }}
+            className="p-2 rounded-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-colors"
+            title="Eliminar servicio"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
 
       <div className="flex items-center gap-4 mt-2">
         <p className="text-primario-zen/70 text-sm flex items-center gap-1.5 bg-secundario-zen/20 px-3 py-1.5 rounded-xl border border-secundario-zen/40">

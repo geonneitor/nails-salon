@@ -63,5 +63,44 @@ export function useCustomers() {
     return data as Customer;
   };
 
-  return { customers, isLoading, error, createCustomer };
+  const updateCustomer = async (id: string, payload: Partial<Omit<Customer, 'id' | 'created_at' | 'visit_count' | 'project_id'>>) => {
+    if (!activeProject) {
+      setError('No hay un proyecto activo seleccionado.');
+      return null;
+    }
+    const { data, error: e } = await supabase
+      .from('customers')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (e) {
+      setError(e.message);
+      return null;
+    }
+
+    setCustomers((prev) =>
+      prev.map((c) => (c.id === id ? (data as Customer) : c))
+    );
+    return data as Customer;
+  };
+
+  const deleteCustomer = async (id: string) => {
+    if (!activeProject) return false;
+    const { error: e } = await supabase
+      .from('customers')
+      .delete()
+      .eq('id', id);
+
+    if (e) {
+      setError(e.message);
+      return false;
+    }
+
+    setCustomers((prev) => prev.filter((c) => c.id !== id));
+    return true;
+  };
+
+  return { customers, isLoading, error, createCustomer, updateCustomer, deleteCustomer };
 }

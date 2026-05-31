@@ -81,7 +81,7 @@ export function AppointmentCard({ appointment, onClick }: AppointmentCardProps) 
       {/* Footer / Acción */}
       <div className="mt-2">
         <button className="bg-primario-zen text-fondo-zen px-5 py-2 rounded-full uppercase tracking-widest text-[10px] font-semibold hover:bg-opacity-90 transition-all">
-          Ver Detalles
+          Ver Detalle
         </button>
       </div>
     </div>

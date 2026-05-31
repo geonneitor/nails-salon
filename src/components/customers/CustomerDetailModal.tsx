@@ -30,7 +30,7 @@ function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: strin
   );
 }
 
-export function CustomerDetailModal({ customer, isOpen, onClose }: CustomerDetailModalProps) {
+export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelete }: CustomerDetailModalProps) {
   if (!customer) return null;
 
   return (

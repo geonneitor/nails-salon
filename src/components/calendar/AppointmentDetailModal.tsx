@@ -266,7 +266,7 @@ export function AppointmentDetailModal({
                         </button>
                       ))
                     )}
-                  </div}
+                  </div>
                   <button
                     onClick={() => setIsEditingEmployee(false)}
                     className="mt-2 text-center text-[10px] uppercase tracking-widest text-primario-zen/40 hover:text-primario-zen transition-colors font-semibold"

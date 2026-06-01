@@ -15,20 +15,16 @@ import { AppointmentCard } from './AppointmentCard';
 import { AppointmentDetailModal } from './AppointmentDetailModal';
 import { NewAppointmentModal } from './NewAppointmentModal';
 import { useAppointments } from '@/hooks/useAppointments';
+import { useProject } from '@/context/ProjectContext';
 import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supabase';
 
-/**
- * ID del proyecto activo. En una versión final esto vendrá del
- * contexto de sesión (AppContext / auth), pero por ahora se
- * lee de la variable de entorno para evitar hardcoding.
- */
-const PROJECT_ID = process.env.NEXT_PUBLIC_PROJECT_ID ?? null;
-
 export function CalendarView() {
+  const { activeProject } = useProject();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithRelations | null>(null);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+
 
   // Semana actual: lunes → domingo
   const weekStart = useMemo(
@@ -46,20 +42,24 @@ export function CalendarView() {
 
   // Hook real de Supabase
   const { appointments, isLoading, error, updateAppointment, createAppointment, refetch } = useAppointments({
-    projectId: PROJECT_ID,
+    projectId: activeProject?.id,
     dateRange: {
       from: weekStart.toISOString(),
       to: weekEnd.toISOString(),
     },
   });
 
+
   const handlePrevWeek = () => setCurrentDate(addDays(currentDate, -7));
   const handleNextWeek = () => setCurrentDate(addDays(currentDate, 7));
 
-  // Citas del día seleccionado
-  const dailyAppointments = appointments.filter((a) =>
-    isSameDay(new Date(a.start_time), selectedDate)
-  );
+  // Citas del día seleccionado, ordenadas por hora de inicio
+  const dailyAppointments = useMemo(() => {
+    return appointments
+      .filter((a) => isSameDay(new Date(a.start_time), selectedDate))
+      .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  }, [appointments, selectedDate]);
+
 
   const handleStatusChange = async (id: string, status: AppointmentStatus) => {
     await updateAppointment(id, { status });

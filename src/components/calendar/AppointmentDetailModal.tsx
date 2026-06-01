@@ -5,11 +5,14 @@
 // Modal de detalle de cita. Diseño Zen premium con glassmorphism.
 // ============================================================
 
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, User, Scissors, CreditCard, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, Clock, User, Scissors, CreditCard, CheckCircle2, AlertCircle, Edit3 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supabase';
+import { useAppointments } from '@/hooks/useAppointments';
+import { useEmployees } from '@/hooks/useEmployees';
 
 interface AppointmentDetailModalProps {
   appointment: AppointmentWithRelations | null;
@@ -64,6 +67,10 @@ export function AppointmentDetailModal({
   onClose,
   onStatusChange,
 }: AppointmentDetailModalProps) {
+  const [isEditingEmployee, setIsEditingEmployee] = useState(false);
+  const { updateAppointment } = useAppointments();
+  const { employees, isLoading: employeesLoading } = useEmployees();
+
   if (!appointment) return null;
 
   const status = STATUS_CONFIG[appointment.status];
@@ -90,6 +97,14 @@ export function AppointmentDetailModal({
   if (!serviceName) serviceName = 'Servicio Personalizado';
 
   const price = appointment.total_price ?? appointment.service?.price ?? 0;
+
+  const handleEmployeeChange = async (employeeId: string) => {
+    const success = await updateAppointment(appointment.id, { employee_id: employeeId });
+    if (success) {
+      setIsEditingEmployee(false);
+      onClose(); // Close to force refetch in parent
+    }
+  };
 
   const renderTicketDetailsBreakdown = () => {
     const details = appointment.ticket_details;
@@ -215,11 +230,52 @@ export function AppointmentDetailModal({
                 label="Horario"
                 value={`${format(startDate, 'h:mm a')} – ${format(endDate, 'h:mm a')} (${duration} min)`}
               />
-              <DetailRow
-                icon={<User className="w-4 h-4" />}
-                label="Empleado"
-                value={appointment.employee.name}
-              />
+              {!isEditingEmployee ? (
+                <DetailRow
+                  icon={<User className="w-4 h-4" />}
+                  label="Empleado"
+                  value={appointment.employee.name}
+                  action={
+                    <button
+                      onClick={() => setIsEditingEmployee(true)}
+                      className="p-1.5 rounded-full text-primario-zen/40 hover:text-primario-zen hover:bg-secundario-zen/40 transition-all"
+                      title="Cambiar empleado"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                  }
+                />
+              ) : (
+                <div className="flex flex-col gap-2 p-3 rounded-2xl bg-secundario-zen/30 border border-secundario-zen/50">
+                  <p className="text-[10px] uppercase tracking-widest text-primario-zen/50 font-bold mb-1">Cambiar Empleada</p>
+                  <div className="flex flex-col gap-1">
+                    {employeesLoading ? (
+                      <p className="text-xs italic text-primario-zen/60">Cargando empleadas...</p>
+                    ) : (
+                      employees.map(emp => (
+                        <button
+                          key={emp.id}
+                          onClick={() => handleEmployeeChange(emp.id)}
+                          className={`text-left px-3 py-2 rounded-lg text-xs transition-all ${
+                            emp.id === appointment.employee_id
+                            ? 'bg-primario-zen text-fondo-zen font-bold'
+                            : 'hover:bg-secundario-zen/50 text-primario-zen'
+                          }`}
+                        >
+                          {emp.name}
+                        </button>
+                      ))
+                    )}
+                  </div}
+                  <button
+                    onClick={() => setIsEditingEmployee(false)}
+                    className="mt-2 text-center text-[10px] uppercase tracking-widest text-primario-zen/40 hover:text-primario-zen transition-colors font-semibold"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
+
               <DetailRow
                 icon={<CreditCard className="w-4 h-4" />}
                 label="Total"

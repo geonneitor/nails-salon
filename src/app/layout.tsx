@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AppProvider } from '@/context/AppContext';
+import { ThemeProvider } from '@/context/ThemeContext';
+import { ProjectProvider } from '@/context/ProjectContext';
 
 export const metadata: Metadata = {
   title: 'Salón de Uñas - Gestión de Citas',
@@ -13,8 +15,14 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
-        <AppProvider>{children}</AppProvider>
+        <AppProvider>
+          <ProjectProvider>
+            <ThemeProvider>{children}</ThemeProvider>
+          </ProjectProvider>
+        </AppProvider>
       </body>
     </html>
   );
 }
+
+

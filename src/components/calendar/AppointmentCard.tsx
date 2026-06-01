@@ -52,7 +52,7 @@ export function AppointmentCard({ appointment, onClick }: AppointmentCardProps) 
   const price = appointment.total_price ?? appointment.service?.price ?? 0;
 
   return (
-    <div 
+    <div
       onClick={onClick}
       className="group relative flex flex-col gap-3 rounded-2xl bg-[#FDFBEE] p-5 cursor-pointer transition-all duration-300 shadow-sm border border-secundario-zen/40 hover:shadow-md hover:border-secundario-zen"
     >
@@ -66,13 +66,20 @@ export function AppointmentCard({ appointment, onClick }: AppointmentCardProps) 
       </div>
 
       {/* Cuerpo: Servicio, Fecha, Cliente y Hora */}
-      <div>
+      <div className="flex flex-col gap-1">
         <p className="text-primario-zen font-serif text-lg">
           {serviceName} - {dateFormatted}
         </p>
-        <p className="text-primario-zen/70 text-sm mt-0.5">
-          {appointment.customer?.name} - {timeFormatted}
-        </p>
+        <div className="flex justify-between items-end">
+          <p className="text-primario-zen/70 text-sm">
+            {appointment.customer?.name} - {timeFormatted}
+          </p>
+          {appointment.created_at && (
+            <p className="text-[9px] text-primario-zen/40 font-sans italic">
+              Creada: {format(new Date(appointment.created_at), 'd MMM, h:mm a')}
+            </p>
+          )}
+        </div>
         <p className="font-semibold text-primario-zen mt-1.5 text-xs">
           ${price} MXN · {appointment.total_duration ?? appointment.service?.duration_minutes ?? 0} min
         </p>
@@ -86,4 +93,5 @@ export function AppointmentCard({ appointment, onClick }: AppointmentCardProps) 
       </div>
     </div>
   );
+
 }

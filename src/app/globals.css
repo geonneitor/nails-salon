@@ -2,9 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --background: #F7F5F0; /* fondo-zen */
   --foreground: #4A533E; /* primario-zen */
+}
+
+.dark {
+  --background: #1A1C18; /* fondo-zen-night */
+  --foreground: #A3B18A; /* primario-zen-night */
 }
 
 body {
@@ -12,4 +21,31 @@ body {
   color: var(--foreground);
   font-family: var(--font-calgary), serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* Curtain Effect Animation */
+.theme-transition {
+  transition: opacity 0.8s ease-in-out;
+}
+
+.curtain-closing {
+  animation: curtain-fade 0.8s ease-in-out forwards;
+}
+
+@keyframes curtain-fade {
+  0% {
+    filter: brightness(1);
+    opacity: 1;
+  }
+  50% {
+    filter: brightness(0.5);
+    opacity: 0.7;
+  }
+  100% {
+    filter: brightness(1);
+    opacity: 1;
+  }
+}
+

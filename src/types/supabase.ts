@@ -113,5 +113,5 @@ export type AppointmentWithRelations = Appointment & {
 
 export type CreateAppointmentPayload = Omit<Appointment, 'id' | 'created_at'>;
 export type UpdateAppointmentPayload = Partial<
-  Pick<Appointment, 'start_time' | 'end_time' | 'status' | 'ticket_details' | 'total_price' | 'total_duration'>
+  Pick<Appointment, 'employee_id' | 'start_time' | 'end_time' | 'status' | 'ticket_details' | 'total_price' | 'total_duration'>
 >;

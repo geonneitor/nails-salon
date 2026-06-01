@@ -42,7 +42,7 @@ export function CalendarView() {
 
   // Hook real de Supabase
   const { appointments, isLoading, error, updateAppointment, createAppointment, refetch } = useAppointments({
-    projectId: activeProject?.id,
+    projectId: activeProject?.id ?? null,
     dateRange: {
       from: weekStart.toISOString(),
       to: weekEnd.toISOString(),
@@ -186,18 +186,19 @@ export function CalendarView() {
           </div>
 
           {/* Error state */}
-          {error && !PROJECT_ID && (
+          {error && !activeProject && (
             <div className="text-center py-8 bg-amber-50 rounded-2xl border border-amber-200">
               <p className="text-amber-700 text-xs font-semibold uppercase tracking-widest mb-1">
                 Sin proyecto configurado
               </p>
               <p className="text-amber-600/70 text-sm">
-                Agrega <code className="bg-amber-100 px-1 rounded">NEXT_PUBLIC_PROJECT_ID</code> a tu <code>.env.local</code>
+                Por favor selecciona un proyecto activo en la configuración.
               </p>
             </div>
           )}
 
-          {error && PROJECT_ID && (
+
+          {error && activeProject && (
             <div className="text-center py-8 bg-red-50 rounded-2xl border border-red-200">
               <p className="text-red-700 text-sm">{error}</p>
             </div>

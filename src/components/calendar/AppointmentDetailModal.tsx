@@ -43,20 +43,25 @@ function DetailRow({
   icon,
   label,
   value,
+  action,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
+  action?: React.ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-4">
-      <div className="mt-0.5 text-primario-zen/50">{icon}</div>
-      <div>
-        <p className="text-[10px] uppercase tracking-widest text-primario-zen/40 font-semibold mb-0.5">
-          {label}
-        </p>
-        <p className="text-primario-zen text-sm font-medium">{value}</p>
+    <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start gap-4">
+        <div className="mt-0.5 text-primario-zen/50">{icon}</div>
+        <div>
+          <p className="text-[10px] uppercase tracking-widest text-primario-zen/40 font-semibold mb-0.5">
+            {label}
+          </p>
+          <p className="text-primario-zen text-sm font-medium">{value}</p>
+        </div>
       </div>
+      {action}
     </div>
   );
 }

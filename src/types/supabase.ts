@@ -17,6 +17,7 @@ export interface Project {
   id: string;
   name: string;
   created_at: string; // TIMESTAMPTZ → ISO string en cliente
+  owner_id?: string | null; // Opcional: añadido por migración posterior
 }
 
 export interface Employee {
@@ -94,6 +95,10 @@ export interface TimeBlock {
   reason: string;
   created_at: string;
 }
+
+export type TimeBlockWithEmployee = TimeBlock & {
+  employee: Pick<Employee, 'id' | 'name'>;
+};
 
 export interface UserRole {
   id: string; // Refs auth.users(id)

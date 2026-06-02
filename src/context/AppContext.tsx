@@ -3,6 +3,7 @@
 // ============================================================
 // src/context/AppContext.tsx
 // Estado global: sesión de usuario, rol de app y proyecto activo.
+// Único punto de verdad para "proyecto activo" en la aplicación.
 // ============================================================
 
 import {
@@ -34,6 +35,8 @@ interface AppContextValue {
   setActiveProject: (project: Project) => void;
   /** Inicia una sesión de demo sin requerir credenciales. */
   loginDemo: () => void;
+  /** Crea un nuevo proyecto (salón). */
+  createProject: (name: string) => Promise<Project | null>;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -83,14 +86,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRole('admin');
 
     // Cargar proyectos y asignar el primero
-    supabase.from('projects').select('*').order('created_at', { ascending: true }).then(({ data }) => {
-      const projectList = data ?? [];
-      setProjects(projectList);
-      if (projectList.length > 0) {
-        setActiveProject(projectList[0]);
-      }
-    });
+    supabase
+      .from('projects')
+      .select('*')
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        const projectList: Project[] = data ?? [];
+        setProjects(projectList);
+        if (projectList.length > 0) {
+          setActiveProject(projectList[0]);
+        }
+      });
   }, []);
+
+  const createProject = useCallback(async (name: string): Promise<Project | null> => {
+    const { data, error: e } = await supabase
+      .from('projects')
+      .insert({ name })
+      .select()
+      .single();
+
+    if (e) {
+      console.error('Error creating project:', e);
+      return null;
+    }
+
+    const newProject = data as Project;
+    setProjects((prev) => [...prev, newProject].sort((a, b) => a.name.localeCompare(b.name)));
+    return newProject;
+  }, []);
+
 
   useEffect(() => {
     // Resolver la sesión inicial
@@ -100,7 +125,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (authUser) {
         loadUserData(authUser).finally(() => setIsLoading(false));
       } else {
-        setIsLoading(false);
+        // Sin sesión: caer en modo demo usando NEXT_PUBLIC_PROJECT_ID.
+        // Esto permite probar la UI sin haber pasado por Supabase Auth.
+        bootDemoFromEnv().finally(() => setIsLoading(false));
       }
     });
 
@@ -112,9 +139,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (authUser) {
           loadUserData(authUser);
         } else {
-          setRole(null);
-          setProjects([]);
-          setActiveProject(null);
+          // Si el usuario cierra sesión, mantenemos el modo demo con env.
+          bootDemoFromEnv();
         }
       }
     );
@@ -122,18 +148,61 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [loadUserData]);
 
+  /**
+   * Carga el proyecto indicado en `NEXT_PUBLIC_PROJECT_ID` y lo marca
+   * como `activeProject`. Si no existe, intenta caer al primer proyecto
+   * disponible. Solo se usa en modo demo (sin auth).
+   */
+  const bootDemoFromEnv = useCallback(async () => {
+    const envProjectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+    if (!envProjectId) {
+      // Sin env var: intentar al menos cargar la lista de proyectos
+      const { data } = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: true });
+      const list: Project[] = data ?? [];
+      setProjects(list);
+      setActiveProject((prev) => prev ?? list[0] ?? null);
+      return;
+    }
+
+    // Verificar que el proyecto del env existe
+    const { data: project, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('id', envProjectId)
+      .single();
+
+    if (!error && project) {
+      setProjects([project as Project]);
+      setActiveProject((prev) => prev ?? (project as Project));
+      setRole('admin'); // demo: permisos de admin
+    } else {
+      // Env var inválida: fallback al primer proyecto
+      const { data } = await supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: true });
+      const list: Project[] = data ?? [];
+      setProjects(list);
+      setActiveProject((prev) => prev ?? list[0] ?? null);
+    }
+  }, []);
+
   const value = useMemo<AppContextValue>(
-    () => ({ user, role, activeProject, projects, isLoading, setActiveProject, loginDemo }),
-    [user, role, activeProject, projects, isLoading, loginDemo]
+    () => ({ user, role, activeProject, projects, isLoading, setActiveProject, loginDemo, createProject }),
+    [user, role, activeProject, projects, isLoading, loginDemo, createProject]
+
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
-// ----- Hook de consumo -----
+// ----- Hooks de consumo -----
 
 /**
- * Hook para acceder al contexto global de la app.
+ * Hook principal para acceder al contexto global de la app.
  * @throws si se usa fuera de <AppProvider>.
  */
 export function useApp(): AppContextValue {
@@ -142,4 +211,14 @@ export function useApp(): AppContextValue {
     throw new Error('useApp debe usarse dentro de <AppProvider>.');
   }
   return ctx;
+}
+
+/**
+ * Shim de compatibilidad: `useProject` ahora vive sobre `AppContext`.
+ * Mantiene el contrato: { activeProject, projects, isLoading, setActiveProject, ... }.
+ * Se conservará este nombre por legibilidad en los componentes de UI.
+ */
+export function useProject() {
+  const { activeProject, projects, isLoading, setActiveProject } = useApp();
+  return { activeProject, projects, isLoading, setActiveProject };
 }

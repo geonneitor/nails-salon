@@ -1,5 +1,6 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { EmployeeList } from '@/components/settings/EmployeeList';
+import { ProjectList } from '@/components/settings/ProjectList';
 
 export default function AjustesPage() {
   return (
@@ -19,8 +20,11 @@ export default function AjustesPage() {
                 Configuración del equipo y preferencias del estudio.
               </p>
             </div>
-            <div className="lg:col-span-2">
-              <EmployeeList />
+            <div className="lg:col-span-2 flex flex-col gap-10">
+              <ProjectList />
+              <div className="pt-6 border-t border-secundario-zen/50">
+                <EmployeeList />
+              </div>
             </div>
           </div>
           

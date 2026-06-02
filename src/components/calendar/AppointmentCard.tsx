@@ -13,10 +13,11 @@ interface AppointmentCardProps {
   onClick?: () => void;
 }
 
+// Paleta cerrada: solo tonos del Brand Board Zen.
 const STATUS_INDICATOR: Record<AppointmentStatus, string> = {
-  confirmed_advance: 'bg-primario-zen',
-  pending_advance: 'bg-yellow-600',
-  free: 'bg-transparent border border-primario-zen',
+  confirmed_advance: 'bg-primario-zen', // Olivo sólido = confirmado con anticipo
+  pending_advance: 'bg-secundario-zen border border-primario-zen/40', // Beige-arena con borde = pendiente
+  free: 'bg-transparent border border-dashed border-primario-zen/60', // Borde punteado = gratis
 };
 
 const STATUS_LABEL: Record<AppointmentStatus, string> = {
@@ -54,13 +55,15 @@ export function AppointmentCard({ appointment, onClick }: AppointmentCardProps) 
   return (
     <div
       onClick={onClick}
-      className="group relative flex flex-col gap-3 rounded-2xl bg-[#FDFBEE] p-5 cursor-pointer transition-all duration-300 shadow-sm border border-secundario-zen/40 hover:shadow-md hover:border-secundario-zen"
+      className="group relative flex flex-col gap-3 rounded-2xl bg-fondo-zen p-5 cursor-pointer transition-all duration-300 shadow-sm border border-secundario-zen/60 hover:border-primario-zen/30"
     >
       {/* Encabezado: ZEN logo + Status */}
       <div className="flex justify-between items-start">
         <span className="font-serif text-primario-zen tracking-widest text-lg">ZEN</span>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] uppercase tracking-wider text-primario-zen/60 font-semibold">{statusLabel}</span>
+          <span className="text-[10px] uppercase tracking-wider text-primario-zen/60 font-semibold">
+            {statusLabel}
+          </span>
           <span className={`w-2 h-2 rounded-full ${dotClass}`}></span>
         </div>
       </div>
@@ -93,5 +96,4 @@ export function AppointmentCard({ appointment, onClick }: AppointmentCardProps) 
       </div>
     </div>
   );
-
 }

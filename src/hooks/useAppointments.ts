@@ -6,14 +6,18 @@ import type {
   CreateAppointmentPayload,
   UpdateAppointmentPayload,
 } from '@/types/supabase';
-import { useApp } from '@/context/AppContext';
 
 interface UseAppointmentsOptions {
-  /** ID del proyecto activo (Opcional en la demo, usará el mock internamente). */
+  /**
+   * ID del proyecto del que se quieren obtener citas.
+   * Este prop tiene PRIORIDAD sobre cualquier `activeProject` del contexto.
+   * Si se omite, el hook no realizará queries (retorna lista vacía).
+   */
   projectId: string | null;
   /**
-   * Filtra citas de un rango de fechas (ISO strings).
-   * Ej: { from: '2026-06-01T00:00:00Z', to: '2026-06-07T23:59:59Z' }
+   * Filtra citas que INTERSECTAN este rango (no solo las que inician dentro).
+   * Esto garantiza que citas que cruzan límites de día/semana aparezcan en
+   * ambas vistas (ej. viernes 23:00 → sábado 01:00).
    */
   dateRange?: { from: string; to: string };
 }
@@ -31,6 +35,7 @@ interface UseAppointmentsReturn {
 
 /**
  * Verifica si el slot propuesto colisiona con alguna cita existente del mismo empleado.
+ * Dos rangos se intersectan si: newStart < existEnd && newEnd > existStart.
  */
 function hasScheduleCollision(
   existing: Pick<Appointment, 'employee_id' | 'start_time' | 'end_time'>[],
@@ -53,16 +58,16 @@ export function useAppointments({
   projectId,
   dateRange,
 }: UseAppointmentsOptions = { projectId: null }): UseAppointmentsReturn {
-  const { activeProject } = useApp();
   const [appointments, setAppointments] = useState<AppointmentWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const effectiveProjectId = activeProject?.id || projectId;
-
-  /** Construye el query base con sus JOINs */
+  /**
+   * Construye el query base con sus JOINs y filtro de intersección de rango.
+   * Sin proyectoId, retorna null y el caller debe manejar el estado vacío.
+   */
   const buildQuery = useCallback(() => {
-    if (!effectiveProjectId) return null;
+    if (!projectId) return null;
 
     let query = supabase
       .from('appointments')
@@ -72,19 +77,28 @@ export function useAppointments({
         employee:employees ( id, name ),
         service:services ( id, name, duration_minutes, price )
       `)
-      .eq('project_id', effectiveProjectId)
+      .eq('project_id', projectId)
       .order('start_time', { ascending: true });
 
     if (dateRange) {
+      // Intersección: trae citas cuyo rango [start, end] solapa con [from, to].
+      // Lógica: cita.inicio <= rango.fin  AND  cita.fin >= rango.inicio
       query = query
-        .gte('start_time', dateRange.from)
-        .lte('start_time', dateRange.to);
+        .lte('start_time', dateRange.to)
+        .gte('end_time', dateRange.from);
     }
 
     return query;
-  }, [dateRange, effectiveProjectId]);
+  }, [dateRange, projectId]);
 
   const fetchAppointments = useCallback(async () => {
+    if (!projectId) {
+      setAppointments([]);
+      setIsLoading(false);
+      setError(null);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -104,23 +118,23 @@ export function useAppointments({
     }
 
     setIsLoading(false);
-  }, [buildQuery]);
+  }, [buildQuery, projectId]);
 
   // ----- Suscripción Realtime -----
   useEffect(() => {
     fetchAppointments();
 
-    if (!effectiveProjectId) return;
+    if (!projectId) return;
 
     const channel = supabase
-      .channel(`appointments:project:${effectiveProjectId}`)
+      .channel(`appointments:project:${projectId}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'appointments',
-          filter: `project_id=eq.${effectiveProjectId}`,
+          filter: `project_id=eq.${projectId}`,
         },
         () => {
           fetchAppointments();
@@ -131,13 +145,13 @@ export function useAppointments({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchAppointments, effectiveProjectId]);
+  }, [fetchAppointments, projectId]);
 
   // ----- Mutaciones -----
 
   const createAppointment = useCallback(
     async (payload: CreateAppointmentPayload): Promise<Appointment | null> => {
-      if (!effectiveProjectId) {
+      if (!projectId) {
         setError('No hay un proyecto activo seleccionado.');
         return null;
       }
@@ -147,15 +161,13 @@ export function useAppointments({
       }
 
       if (hasScheduleCollision(appointments, payload)) {
-        setError(
-          `El empleado ya tiene una cita en el rango seleccionado.`
-        );
+        setError(`El empleado ya tiene una cita en el rango seleccionado.`);
         return null;
       }
 
       const { data, error: insertError } = await supabase
         .from('appointments')
-        .insert({ ...payload, project_id: effectiveProjectId })
+        .insert({ ...payload, project_id: projectId })
         .select()
         .single();
 
@@ -166,7 +178,7 @@ export function useAppointments({
 
       return data as Appointment;
     },
-    [appointments, effectiveProjectId]
+    [appointments, projectId]
   );
 
   const updateAppointment = useCallback(

@@ -108,7 +108,7 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="relative w-full md:max-w-md bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-8 max-h-[90vh] overflow-y-auto"
+            className="relative w-full md:max-w-md bg-fondo-zen rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-8 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex justify-between items-start mb-6">
               <div>

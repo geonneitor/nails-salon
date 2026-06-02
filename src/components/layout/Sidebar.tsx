@@ -2,19 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calendar, Users, Scissors, Settings, LogOut } from 'lucide-react';
-
-const NAV_ITEMS = [
-  { label: 'Calendario', href: '/calendar', icon: Calendar },
-  { label: 'Clientas', href: '/customers', icon: Users },
-  { label: 'Servicios', href: '/services', icon: Scissors },
-  { label: 'Ajustes', href: '/settings', icon: Settings },
-];
-
-'use client';
-
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { Calendar, Users, Scissors, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { useState } from 'react';
@@ -56,7 +43,7 @@ export function Sidebar() {
           >
             <span className="truncate">
               {activeProject ? activeProject.name : 'Seleccionar Salón'}
-            </span>
+            </span_ la de la derecha es la que manda
             <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </button>
 

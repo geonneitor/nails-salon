@@ -43,7 +43,7 @@ export function Sidebar() {
           >
             <span className="truncate">
               {activeProject ? activeProject.name : 'Seleccionar Salón'}
-            </span_ la de la derecha es la que manda
+            </span>
             <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </button>
 

@@ -117,7 +117,7 @@ export function NewAppointmentModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
           {/* Backdrop */}
           <motion.div
             key="nb"
@@ -125,7 +125,7 @@ export function NewAppointmentModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-primario-zen/20 backdrop-blur-sm z-40"
+            className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
           />
 
           {/* Panel */}
@@ -135,7 +135,7 @@ export function NewAppointmentModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 md:top-0 md:bottom-0 md:m-auto md:h-fit md:max-w-xl w-full bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 z-50 p-6 md:p-8 max-h-[95vh] overflow-y-auto"
+            className="relative w-full md:max-w-xl bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-6 md:p-8 max-h-[95vh] overflow-y-auto"
           >
             {/* Header */}
             <div className="flex justify-between items-start mb-6">
@@ -272,7 +272,7 @@ export function NewAppointmentModal({
               </form>
             )}
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );

@@ -36,14 +36,14 @@ export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelet
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-primario-zen/20 backdrop-blur-sm z-40"
+            className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
           />
           <motion.div
             key="panel"
@@ -51,7 +51,7 @@ export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelet
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:max-w-md w-full bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 z-50 p-8 max-h-[90vh] overflow-y-auto"
+            className="relative w-full md:max-w-md bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-8 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex justify-between items-start mb-6">
               <div>
@@ -113,7 +113,7 @@ export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelet
               </button>
             </div>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );

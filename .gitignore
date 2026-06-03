@@ -28,3 +28,10 @@ yarn-error.log*
 
 # Supabase (Si tienes logs o archivos temporales)
 supabase/.temp/
+
+# Build artifacts
+tsconfig.tsbuildinfo
+
+# Archivos locales / documentación de conversación
+client_report.html
+conversación 1.md

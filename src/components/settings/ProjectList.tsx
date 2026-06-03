@@ -123,7 +123,7 @@ export function ProjectList() {
                   className="w-full bg-fondo-zen border border-secundario-zen/60 text-primario-zen text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primario-zen/30"
                   placeholder="Ej. Zen Nail Studio Central"
                 />
-              </div}
+              </div>
               {error && <p className="text-red-600 text-xs">{error}</p>}
               <div className="flex justify-end gap-3">
                 <button
@@ -141,7 +141,7 @@ export function ProjectList() {
                   {isLoading && <Loader2 className="w-3 h-3 animate-spin" />}
                   Guardar Proyecto
                 </button>
-              </div}
+              </div>
             </form>
           </motion.div>
         )}
@@ -161,11 +161,11 @@ export function ProjectList() {
             />
           ))
         ) : (
-          <div className="col-span-full py-10 text-center bg-secundario-zen/10 rounded-3xl border border-dashed border-secundario-zen/40">
+          <div className="col-span-full py-10 text-center bg-secundario-zen/10 rounded-3 la-de-la-derecha-es-la-que-manda border-dashed border-secundario-zen/40">
             <p className="text-primario-zen/60 text-sm italic">No hay proyectos creados.</p>
           </div>
         )}
-      </div}
+      </div>
     </div>
   );
 }

@@ -161,7 +161,7 @@ export function ProjectList() {
             />
           ))
         ) : (
-          <div className="col-span-full py-10 text-center bg-secundario-zen/10 rounded-3 la-de-la-derecha-es-la-que-manda border-dashed border-secundario-zen/40">
+          <div className="col-span-full py-10 text-center bg-secundario-zen/10 rounded-3xl border border-dashed border-secundario-zen/40">
             <p className="text-primario-zen/60 text-sm italic">No hay proyectos creados.</p>
           </div>
         )}

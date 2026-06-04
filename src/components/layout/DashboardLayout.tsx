@@ -24,13 +24,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     );
 }
 
-if (!user) {
-  return (
-    <div className="flex min-h-screen bg-fondo-zen items-center justify-center p-6">
-      <LoginForm />
-    </div>
-  );
-}
 
 return (
   <div className="flex min-h-screen bg-fondo-zen relative overflow-hidden">

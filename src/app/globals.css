@@ -2,27 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --background: #F7F5F0; /* fondo-zen */
-  --foreground: #4A533E; /* primario-zen */
+/* Modifica esta línea en tu globals.css para que acepte tanto el root como el ID 'zen-light' */
+:root, [data-theme='zen-light'] {
+  --fondo-zen: #F7F5F0;
+  --primario-zen: #4A533E;
+  --secundario-zen: #E8E2D6;
 }
 
-.dark {
-  --background: #1A1C18; /* fondo-zen-night */
-  --foreground: #A3B18A; /* primario-zen-night */
+[data-theme='zen-dark'] {
+  --fondo-zen: #1A1C18;
+  --primario-zen: #A3B18A;
+  --secundario-zen: #343A2E;
+}
+
+[data-theme='high-contrast'] {
+  --fondo-zen: #FFFFFF;
+  --primario-zen: #000000;
+  --secundario-zen: #DDDDDD;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--fondo-zen);
+  color: var(--primario-zen);
   font-family: var(--font-calgary), serif;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-              color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
 /* Curtain Effect Animation */
@@ -48,4 +52,3 @@ body {
     opacity: 1;
   }
 }
-

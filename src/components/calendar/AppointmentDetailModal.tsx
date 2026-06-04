@@ -73,7 +73,7 @@ export function AppointmentDetailModal({
   onStatusChange,
 }: AppointmentDetailModalProps) {
   const [isEditingEmployee, setIsEditingEmployee] = useState(false);
-  const { updateAppointment } = useAppointments();
+  const { updateAppointment, error: updateError } = useAppointments();
   const { employees, isLoading: employeesLoading } = useEmployees();
 
   if (!appointment) return null;
@@ -162,7 +162,7 @@ export function AppointmentDetailModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center md:items-center">
           {/* Backdrop */}
           <motion.div
             key="backdrop"
@@ -290,6 +290,13 @@ export function AppointmentDetailModal({
 
             {/* Render ticket breakdown if exists */}
             {renderTicketDetailsBreakdown()}
+
+            {/* Error de actualización */}
+            {updateError && (
+              <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-4 py-3 font-sans mt-4">
+                {updateError}
+              </p>
+            )}
 
             {/* Action Buttons */}
             {onStatusChange && appointment.status !== 'confirmed_advance' && (

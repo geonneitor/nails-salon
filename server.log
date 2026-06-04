@@ -1,0 +1,1392 @@
+
+> nail-salon-app@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://172.20.176.1:3000
+- Environments: .env.local
+✓ Ready in 18.9s
+⚠ Slow filesystem detected. The benchmark took 2729ms. If C:\Users\USER END\Desktop\web_local\.next/dev is a network drive, consider moving it to a local folder.
+See more: https://nextjs.org/docs/app/guides/local-development
+✓ Finished writing to filesystem cache in 33.6s
+✓ Finished writing to filesystem cache in 10.2s
+
+○ Compiling / ...
+ GET / 200 in 2.9min (next.js: 2.9min, application-code: 2.5s)
+[browser] AuthApiError: Invalid Refresh Token: Refresh Token Not Found
+    at handleError (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_%40supabase_auth-js_dist_module_0.pzobh._.js:945:11)
+    at async _handleRequest (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_%40supabase_auth-js_dist_module_0.pzobh._.js:995:9)
+    at async _request (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_%40supabase_auth-js_dist_module_0.pzobh._.js:975:18)
+    at async (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_%40supabase_auth-js_dist_module_0.pzobh._.js:7651:24)
+    at async (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_%40supabase_auth-js_dist_module_0.pzobh._.js:681:36) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_%40supabase_auth-js_dist_module_0.pzobh._.js:7753:33)
+✓ Compiled in 664ms
+ GET / 200 in 630ms (next.js: 179ms, application-code: 451ms)
+ GET / 200 in 326ms (next.js: 47ms, application-code: 278ms)
+ GET / 200 in 174ms (next.js: 13ms, application-code: 161ms)
+ GET / 200 in 175ms (next.js: 75ms, application-code: 100ms)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13914:21)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13358:52) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13914:21)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13358:52) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13914:21)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13358:52) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13914:21)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13358:52) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13914:21)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13358:52) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13914:21)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13358:52) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+ GET / 200 in 529ms (next.js: 18ms, application-code: 511ms)
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m     );
+  [90m24 |[0m   }
+  [90m25 |[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13914:21)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13358:52) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+ GET /calendar 500 in 2.7s (next.js: 2.2s, application-code: 471ms)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13914:21)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13358:52) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13851:21)
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m     );
+  [90m24 |[0m   }
+  [90m25 |[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+ GET /calendar 500 in 86ms (next.js: 35ms, application-code: 50ms)
+[browser] Uncaught Error: ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/DashboardLayout.tsx:22:12)
+    at <unknown> (Error: (./src/components/layout/DashboardLayout.tsx:22:12)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+✓ Finished filesystem cache database compaction in 41s
+⨯ ./src/components/layout/DashboardLayout.tsx:23:5
+Expected '>', got ')'
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+  [90m22 |[0m       </div
+[31m[1m>[0m [90m23 |[0m     );
+  [90m   |[0m     [31m[1m^[0m
+  [90m24 |[0m   }
+  [90m25 |[0m
+  [90m26 |[0m   [36mif[0m (!user) {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+ GET /calendar 500 in 205ms (next.js: 90ms, application-code: 115ms)
+[browser] Uncaught Error: ./src/components/layout/DashboardLayout.tsx:23:5
+Expected '>', got ')'
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+  22 |       </div
+> 23 |     );
+     |     ^
+  24 |   }
+  25 |
+  26 |   if (!user) {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/DashboardLayout.tsx:23:5)
+    at <unknown> (Error: (./src/components/layout/DashboardLayout.tsx:23:5)
+○ Compiling /calendar ...
+[browser] ./src/components/layout/DashboardLayout.tsx:23:5
+Expected '>', got ')'
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+  22 |       </div
+> 23 |     );
+     |     ^
+  24 |   }
+  25 |
+  26 |   if (!user) {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:23:5
+Expected '>', got ')'
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+  22 |       </div
+> 23 |     );
+     |     ^
+  24 |   }
+  25 |
+  26 |   if (!user) {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:23:5
+Expected '>', got ')'
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+  22 |       </div
+> 23 |     );
+     |     ^
+  24 |   }
+  25 |
+  26 |   if (!user) {
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+⨯ ReferenceError: useEffect is not defined
+    at DashboardLayout (src\components\layout\DashboardLayout.tsx:12:3)
+  10 |   const { user, isLoading, preferences } = useApp();
+  11 |
+> 12 |   useEffect(() => {
+     |   ^
+  13 |     if (preferences?.theme) {
+  14 |       document.documentElement.setAttribute('data-theme', preferences.theme);
+  15 |     } {
+  digest: '3736551502'
+}
+⨯ ReferenceError: useEffect is not defined
+    at DashboardLayout (src\components\layout\DashboardLayout.tsx:12:3)
+  10 |   const { user, isLoading, preferences } = useApp();
+  11 |
+> 12 |   useEffect(() => {
+     |   ^
+  13 |     if (preferences?.theme) {
+  14 |       document.documentElement.setAttribute('data-theme', preferences.theme);
+  15 |     } {
+  digest: '3736551502'
+}
+⨯ ReferenceError: useEffect is not defined
+    at DashboardLayout (src\components\layout\DashboardLayout.tsx:12:3)
+  10 |   const { user, isLoading, preferences } = useApp();
+  11 |
+> 12 |   useEffect(() => {
+     |   ^
+  13 |     if (preferences?.theme) {
+  14 |       document.documentElement.setAttribute('data-theme', preferences.theme);
+  15 |     } {
+  digest: '3736551502'
+}
+⨯ ReferenceError: useEffect is not defined
+    at DashboardLayout (src\components\layout\DashboardLayout.tsx:12:3)
+  10 |   const { user, isLoading, preferences } = useApp();
+  11 |
+> 12 |   useEffect(() => {
+     |   ^
+  13 |     if (preferences?.theme) {
+  14 |       document.documentElement.setAttribute('data-theme', preferences.theme);
+  15 |     } {
+  digest: '3736551502'
+}
+ GET /calendar 500 in 8.3s (next.js: 5.6s, application-code: 2.7s)
+⨯ ReferenceError: useEffect is not defined
+    at DashboardLayout (src\components\layout\DashboardLayout.tsx:12:3)
+  10 |   const { user, isLoading, preferences } = useApp();
+  11 |
+> 12 |   useEffect(() => {
+     |   ^
+  13 |     if (preferences?.theme) {
+  14 |       document.documentElement.setAttribute('data-theme', preferences.theme);
+  15 |     } {
+  digest: '3736551502'
+}
+ GET /calendar 500 in 1195ms (next.js: 133ms, application-code: 1062ms)
+[browser] Uncaught ReferenceError: useEffect is not defined
+    at DashboardLayout (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/src_0u.q~w~._.js:6281:5)
+    at Object.react_stack_bottom_frame (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:15037:24)
+    at renderWithHooks (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:4620:24)
+    at updateFunctionComponent (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6081:21)
+    at beginWork (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:6665:639)
+    at runWithFiberInDEV (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:965:74)
+    at performUnitOfWork (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9555:97)
+    at workLoopSync (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9449:40)
+    at renderRootSync (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9433:13)
+    at performWorkOnRoot (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:9098:47)
+    at performWorkOnRootViaSchedulerTask (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_058-ah~._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_compiled_0rpq4pf._.js:2647:64)
+    at CalendarPage (src\app\calendar\page.tsx:6:5)
+  4 | export default function CalendarPage() {
+  5 |   return (
+> 6 |     <DashboardLayout>
+    |     ^
+  7 |       <div className="flex flex-col items-center py-10 px-6 w-full">
+  8 |         <div className="w-full max-w-3xl">
+  9 |           <h1 className="text-primario-zen font-serif text-3xl mb-8 uppercase tracking-wide...
+✓ Compiled in 296ms
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m     );
+  [90m24 |[0m   }
+  [90m25 |[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+ GET /calendar 500 in 181ms (next.js: 96ms, application-code: 85ms)
+[browser] Uncaught Error: ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 |   }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/DashboardLayout.tsx:22:12)
+    at <unknown> (Error: (./src/components/layout/DashboardLayout.tsx:22:12)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m     );
+  [90m24 |[0m }
+  [90m25 |[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+ GET /calendar 500 in 61ms (next.js: 28ms, application-code: 32ms)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] Uncaught Error: ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/DashboardLayout.tsx:22:12)
+    at <unknown> (Error: (./src/components/layout/DashboardLayout.tsx:22:12)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}## [33mError[0m [33mType[0m
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m [33mConsole[0m [33mAuthApiError[0m
+  [90m24 |[0m
+  [90m25 |[0m ## [33mError[0m [33mMessage[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}## [33mError[0m [33mType[0m
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m [33mConsole[0m [33mAuthApiError[0m
+  [90m24 |[0m
+  [90m25 |[0m ## [33mError[0m [33mMessage[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+ GET /calendar 500 in 277ms (next.js: 212ms, application-code: 65ms)
+[browser] Uncaught Error: ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}## Error Type
+     |            ^
+  23 | Console AuthApiError
+  24 |
+  25 | ## Error Message
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/DashboardLayout.tsx:22:12)
+    at <unknown> (Error: (./src/components/layout/DashboardLayout.tsx:22:12)
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m     );
+  [90m24 |[0m }
+  [90m25 |[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m     );
+  [90m24 |[0m }
+  [90m25 |[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+ GET /calendar 500 in 64ms (next.js: 27ms, application-code: 37ms)
+[browser] Uncaught Error: ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/DashboardLayout.tsx:22:12)
+    at <unknown> (Error: (./src/components/layout/DashboardLayout.tsx:22:12)
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m     );
+  [90m24 |[0m }
+  [90m25 |[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+ GET /calendar 500 in 62ms (next.js: 35ms, application-code: 27ms)
+[browser] Uncaught Error: ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/DashboardLayout.tsx:22:12)
+    at <unknown> (Error: (./src/components/layout/DashboardLayout.tsx:22:12)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m     );
+  [90m24 |[0m }
+  [90m25 |[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+ GET /calendar 500 in 53ms (next.js: 30ms, application-code: 23ms)
+[browser] Uncaught Error: ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/DashboardLayout.tsx:22:12)
+    at <unknown> (Error: (./src/components/layout/DashboardLayout.tsx:22:12)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+⨯ ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  [90m20 |[0m       <div className=[32m"flex min-h-screen bg-fondo-zen items-center justify-center"[0m>
+  [90m21 |[0m         <[33mLoader2[0m className=[32m"w-8 h-8 text-primario-zen/50 animate-spin"[0m />
+[31m[1m>[0m [90m22 |[0m       </div}
+  [90m   |[0m            [31m[1m^[0m
+  [90m23 |[0m     );
+  [90m24 |[0m }
+  [90m25 |[0m
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+ GET /calendar 500 in 55ms (next.js: 25ms, application-code: 30ms)
+[browser] Uncaught Error: ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/DashboardLayout.tsx:22:12)
+    at <unknown> (Error: (./src/components/layout/DashboardLayout.tsx:22:12)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+ GET / 500 in 75ms (next.js: 39ms, application-code: 35ms)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] Uncaught Error: ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx
+
+
+    at <unknown> (Error: ./src/components/layout/DashboardLayout.tsx:22:12)
+    at <unknown> (Error: (./src/components/layout/DashboardLayout.tsx:22:12)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+[browser] ./src/components/layout/DashboardLayout.tsx:22:12
+Expected '>', got '}'
+  20 |       <div className="flex min-h-screen bg-fondo-zen items-center justify-center">
+  21 |         <Loader2 className="w-8 h-8 text-primario-zen/50 animate-spin" />
+> 22 |       </div}
+     |            ^
+  23 |     );
+  24 | }
+  25 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Server Component:
+    ./src/components/layout/DashboardLayout.tsx
+    ./src/app/calendar/page.tsx 
+    at handleErrors (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+    at processMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2835:28)
+    at <unknown> (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2680:13)
+    at WebSocket.handleMessage (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) (file://C:/Users/USER END/Desktop/web_local/.next/dev/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2774:21)
+"wmic" no se reconoce como un comando interno o externo,
+programa o archivo por lotes ejecutable.
+
+Could not open DashboardLayout.tsx in the editor.
+
+When running on Windows, file names are checked against an access list to protect against remote code execution attacks. File names may consist only of alphanumeric characters (all languages), periods, dashes, slashes, and underscores.
+
+"wmic" no se reconoce como un comando interno o externo,
+programa o archivo por lotes ejecutable.
+
+Could not open DashboardLayout.tsx in the editor.
+
+When running on Windows, file names are checked against an access list to protect against remote code execution attacks. File names may consist only of alphanumeric characters (all languages), periods, dashes, slashes, and underscores.
+
+✓ Compiled in 4.2s
+ GET / 200 in 12.0s (next.js: 5.8s, application-code: 6.2s)
+ GET / 200 in 1239ms (next.js: 384ms, application-code: 855ms)
+ GET / 200 in 679ms (next.js: 96ms, application-code: 583ms)
+ GET / 200 in 607ms (next.js: 14ms, application-code: 593ms)
+ GET / 200 in 334ms (next.js: 13ms, application-code: 321ms)
+ GET / 200 in 335ms (next.js: 56ms, application-code: 279ms)
+ GET / 200 in 335ms (next.js: 113ms, application-code: 222ms)
+ GET / 200 in 335ms (next.js: 169ms, application-code: 166ms)
+ GET / 200 in 111ms (next.js: 12ms, application-code: 100ms)
+ GET / 200 in 318ms (next.js: 9ms, application-code: 309ms)
+Persisting failed: Unable to write SST file 00000854.sst
+
+Caused by:
+    El sistema no puede encontrar la ruta especificada. (os error 3)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\USER END\Desktop\web_local\.next\dev\server\app\page\build-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\USER END\\Desktop\\web_local\\.next\\dev\\server\\app\\page\\build-manifest.json'
+}
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\USER END\Desktop\web_local\.next\dev\server\pages\_app\build-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\USER END\\Desktop\\web_local\\.next\\dev\\server\\pages\\_app\\build-manifest.json'
+}
+Error: ENOENT: no such file or directory, open 'C:\Users\USER END\Desktop\web_local\.next\dev\server\app\page\build-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\USER END\\Desktop\\web_local\\.next\\dev\\server\\app\\page\\build-manifest.json'
+}
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\USER END\Desktop\web_local\.next\dev\server\pages\_app\build-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\USER END\\Desktop\\web_local\\.next\\dev\\server\\pages\\_app\\build-manifest.json'
+}
+Error: ENOENT: no such file or directory, open 'C:\Users\USER END\Desktop\web_local\.next\dev\server\pages\_app\build-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\USER END\\Desktop\\web_local\\.next\\dev\\server\\pages\\_app\\build-manifest.json'
+}
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\USER END\Desktop\web_local\.next\dev\server\app\page\build-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\USER END\\Desktop\\web_local\\.next\\dev\\server\\app\\page\\build-manifest.json'
+}
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\USER END\Desktop\web_local\.next\dev\server\pages\_app\build-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\USER END\\Desktop\\web_local\\.next\\dev\\server\\pages\\_app\\build-manifest.json'
+}
+Error: ENOENT: no such file or directory, open 'C:\Users\USER END\Desktop\web_local\.next\dev\server\app\page\build-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\USER END\\Desktop\\web_local\\.next\\dev\\server\\app\\page\\build-manifest.json'
+}
+⨯ Error: ENOENT: no such file or directory, open 'C:\Users\USER END\Desktop\web_local\.next\dev\server\pages\_app\build-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\USER END\\Desktop\\web_local\\.next\\dev\\server\\pages\\_app\\build-manifest.json'
+}
+Error: ENOENT: no such file or directory, open 'C:\Users\USER END\Desktop\web_local\.next\dev\server\pages\_app\build-manifest.json'
+    at ignore-listed frames {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\USER END\\Desktop\\web_local\\.next\\dev\\server\\pages\\_app\\build-manifest.json'
+}
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+
+thread 'tokio-runtime-worker' (12396) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:197:17:
+Failed to restore task data (corrupted database or bug): Data for TaskId 157086)
+
+Caused by:
+    0: Looking up task storage for TaskId 157086 from database failed
+    1: Unable to open static sorted file referenced from 00000706.meta
+    2: Unable to open static sorted file 00000702.sst
+    3: Failed to open SST file C:\Users\USER END\Desktop\web_local\.next\dev\cache/turbopack\ee6e79b1\00000702.sst
+    4: El sistema no puede encontrar la ruta especificada. (os error 3)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'tokio-runtime-worker' (11408) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:225:17:
+Failed to restore task data (corrupted database or bug): Data for batch of 5 tasks
+
+Caused by:
+    0: Looking up typed data for 5 tasks from database failed
+    1: Unable to open static sorted file referenced from 00000706.meta
+    2: Unable to open static sorted file 00000702.sst
+    3: Failed to open SST file C:\Users\USER END\Desktop\web_local\.next\dev\cache/turbopack\ee6e79b1\00000702.sst
+    4: El sistema no puede encontrar la ruta especificada. (os error 3)
+
+thread 'tokio-runtime-worker' (9912) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:225:17:
+Failed to restore task data (corrupted database or bug): Data for batch of 3 tasks
+
+Caused by:
+    0: Looking up typed data for 3 tasks from database failed
+    1: Unable to open static sorted file referenced from 00000706.meta
+    2: Unable to open static sorted file 00000702.sst
+    3: Failed to open SST file C:\Users\USER END\Desktop\web_local\.next\dev\cache/turbopack\ee6e79b1\00000702.sst
+    4: El sistema no puede encontrar la ruta especificada. (os error 3)
+
+thread 'tokio-runtime-worker' (11400) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:197:17:
+Failed to restore task data (corrupted database or bug): Data for TaskId 162502)
+
+Caused by:
+    0: Looking up task storage for TaskId 162502 from database failed
+    1: Unable to open static sorted file referenced from 00000706.meta
+    2: Unable to open static sorted file 00000702.sst
+    3: Failed to open SST file C:\Users\USER END\Desktop\web_local\.next\dev\cache/turbopack\ee6e79b1\00000702.sst
+    4: El sistema no puede encontrar la ruta especificada. (os error 3)
+
+thread 'tokio-runtime-worker' (12396) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:225:17:
+Failed to restore task data (corrupted database or bug): Data for batch of 5 tasks
+
+Caused by:
+    0: Looking up typed data for 5 tasks from database failed
+    1: Unable to open static sorted file referenced from 00000706.meta
+    2: Unable to open static sorted file 00000702.sst
+    3: Failed to open SST file C:\Users\USER END\Desktop\web_local\.next\dev\cache/turbopack\ee6e79b1\00000702.sst
+    4: El sistema no puede encontrar la ruta especificada. (os error 3)
+
+thread 'tokio-runtime-worker' (11400) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:225:17:
+Failed to restore task data (corrupted database or bug): Data for batch of 5 tasks
+
+Caused by:
+    0: Looking up typed data for 5 tasks from database failed
+    1: Unable to open static sorted file referenced from 00000706.meta
+    2: Unable to open static sorted file 00000702.sst
+    3: Failed to open SST file C:\Users\USER END\Desktop\web_local\.next\dev\cache/turbopack\ee6e79b1\00000702.sst
+    4: El sistema no puede encontrar la ruta especificada. (os error 3)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Persisting failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)
+Compaction failed: Another write batch or compaction is already active (Only a single write operations is allowed at a time)

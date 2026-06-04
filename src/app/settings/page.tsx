@@ -1,6 +1,7 @@
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { EmployeeList } from '@/components/settings/EmployeeList';
 import { ProjectList } from '@/components/settings/ProjectList';
+import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
 
 export default function AjustesPage() {
   return (
@@ -12,7 +13,7 @@ export default function AjustesPage() {
               Ajustes
             </h1>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 flex flex-col gap-2">
               <h3 className="font-serif text-primario-zen text-xl">General</h3>
@@ -25,9 +26,10 @@ export default function AjustesPage() {
               <div className="pt-6 border-t border-secundario-zen/50">
                 <EmployeeList />
               </div>
+              <AppearanceSettings />
             </div>
           </div>
-          
+
         </div>
       </div>
     </DashboardLayout>

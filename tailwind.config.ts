@@ -10,12 +10,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'fondo-zen': '#F7F5F0',
-        'primario-zen': '#4A533E',
-        'secundario-zen': '#E8E2D6',
-        'fondo-zen-night': '#1A1C18',
-        'primario-zen-night': '#A3B18A',
-        'secundario-zen-night': '#343A2E',
+        'fondo-zen': 'var(--fondo-zen)',
+        'primario-zen': 'var(--primario-zen)',
+        'secundario-zen': 'var(--secundario-zen)',
       },
       fontFamily: {
         // Calgary como fuente principal, serif como fallback como se solicitó

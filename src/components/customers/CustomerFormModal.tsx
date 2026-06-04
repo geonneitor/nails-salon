@@ -69,6 +69,18 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
       return;
     }
 
+    // Validación básica de Email
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError('El formato del correo electrónico no es válido.');
+      return;
+    }
+
+    // Validación básica de Teléfono (debe contener al menos un número)
+    if (phone.trim() && !/\d/.test(phone.trim())) {
+      setError('El teléfono debe contener al menos un dígito.');
+      return;
+    }
+
     setSubmitting(true);
     const payload = {
       ...(initialData ? { id: initialData.id } : {}),
@@ -92,7 +104,7 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center md:items-center">
           <motion.div
             key="cb-backdrop"
             initial={{ opacity: 0 }}

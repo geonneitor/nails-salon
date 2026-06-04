@@ -31,26 +31,7 @@ interface UseAppointmentsReturn {
   refetch: () => Promise<void>;
 }
 
-// ----- Helper: detección de colisiones de horario -----
 
-/**
- * Verifica si el slot propuesto colisiona con alguna cita existente del mismo empleado.
- * Dos rangos se intersectan si: newStart < existEnd && newEnd > existStart.
- */
-function hasScheduleCollision(
-  existing: Pick<Appointment, 'employee_id' | 'start_time' | 'end_time'>[],
-  incoming: Pick<CreateAppointmentPayload, 'employee_id' | 'start_time' | 'end_time'>
-): boolean {
-  const newStart = new Date(incoming.start_time).getTime();
-  const newEnd = new Date(incoming.end_time).getTime();
-
-  return existing.some((appt) => {
-    if (appt.employee_id !== incoming.employee_id) return false;
-    const existStart = new Date(appt.start_time).getTime();
-    const existEnd = new Date(appt.end_time).getTime();
-    return newStart < existEnd && newEnd > existStart;
-  });
-}
 
 // ----- Hook principal -----
 
@@ -160,8 +141,41 @@ export function useAppointments({
         return null;
       }
 
-      if (hasScheduleCollision(appointments, payload)) {
-        setError(`El empleado ya tiene una cita en el rango seleccionado.`);
+      // 1. Verificar traslape de citas en Supabase (toda la BD)
+      const { data: overlappingAppts, error: apptError } = await supabase
+        .from('appointments')
+        .select('id')
+        .eq('employee_id', payload.employee_id)
+        .lt('start_time', payload.end_time)
+        .gt('end_time', payload.start_time)
+        .limit(1);
+
+      if (apptError) {
+        setError(apptError.message);
+        return null;
+      }
+
+      if (overlappingAppts && overlappingAppts.length > 0) {
+        setError('La empleada ya tiene una cita agendada en ese horario.');
+        return null;
+      }
+
+      // 2. Verificar traslape de bloqueos de tiempo en Supabase (toda la BD)
+      const { data: overlappingBlocks, error: blockError } = await supabase
+        .from('time_blocks')
+        .select('id')
+        .eq('employee_id', payload.employee_id)
+        .lt('start_time', payload.end_time)
+        .gt('end_time', payload.start_time)
+        .limit(1);
+
+      if (blockError) {
+        setError(blockError.message);
+        return null;
+      }
+
+      if (overlappingBlocks && overlappingBlocks.length > 0) {
+        setError('La empleada tiene un bloqueo de horario en ese rango.');
         return null;
       }
 

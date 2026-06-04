@@ -10,13 +10,17 @@ import { CustomerDetailModal } from './CustomerDetailModal';
 import { CustomerFormModal } from './CustomerFormModal';
 import { useCustomers } from '@/hooks/useCustomers';
 import type { Customer } from '@/types/supabase';
+import { useApp } from '@/context/AppContext';
 
 export function CustomerList() {
+  const { preferences } = useApp();
   const { customers, isLoading, error, createCustomer, updateCustomer, deleteCustomer } = useCustomers();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+
+  const isCompact = preferences?.density === 'compact';
 
   const filteredCustomers = customers.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -76,7 +80,7 @@ export function CustomerList() {
           <Loader2 className="w-8 h-8 animate-spin text-primario-zen/50" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${isCompact ? 'gap-2' : 'gap-4'}`}>
           {filteredCustomers.length > 0 ? (
             filteredCustomers.map(customer => (
               <CustomerCard
@@ -86,7 +90,7 @@ export function CustomerList() {
               />
             ))
           ) : (
-             <div className="col-span-full text-center py-10 bg-secundario-zen/20 rounded-2xl border border-dashed border-secundario-zen/60">
+            <div className="col-span-full text-center py-10 bg-secundario-zen/20 rounded-2xl border border-dashed border-secundario-zen/60">
               <p className="text-primario-zen/60 text-sm italic">
                 {searchTerm ? 'No se encontraron clientas con esa búsqueda.' : 'No hay clientas registradas aún.'}
               </p>

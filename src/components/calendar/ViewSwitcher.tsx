@@ -34,6 +34,8 @@ export function ViewSwitcher({ value, onChange }: ViewSwitcherProps) {
             aria-selected={isActive}
             onClick={() => onChange(opt.value)}
             className={`relative z-10 px-4 py-1.5 rounded-full transition-colors ${
+              opt.value === 'week' ? 'hidden md:inline-flex' : 'inline-flex'
+            } ${
               isActive ? 'text-fondo-zen' : 'text-primario-zen/60 hover:text-primario-zen'
             }`}
           >

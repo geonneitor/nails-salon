@@ -36,7 +36,7 @@ export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelet
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center md:items-center">
+        <div className="fixed inset-0 z-[100] flex items-end justify-center md:items-center">
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}

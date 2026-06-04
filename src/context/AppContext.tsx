@@ -16,7 +16,7 @@ import {
 } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
-import type { AppRole, Project } from '@/types/supabase';
+import type { AppRole, Project, UserPreferences } from '@/types/supabase';
 
 // ----- Tipos del contexto -----
 
@@ -29,14 +29,16 @@ interface AppContextValue {
   activeProject: Project | null;
   /** Lista de proyectos a los que tiene acceso el usuario autenticado. */
   projects: Project[];
+  /** Preferencias personalizadas del usuario. */
+  preferences: UserPreferences | null;
   /** Indica si el contexto todavía está resolviendo la sesión inicial. */
   isLoading: boolean;
   /** Cambia el proyecto activo. */
   setActiveProject: (project: Project) => void;
-  /** Inicia una sesión de demo sin requerir credenciales. */
-  loginDemo: () => void;
   /** Crea un nuevo proyecto (salón). */
   createProject: (name: string) => Promise<Project | null>;
+  /** Actualiza una preferencia específica del usuario. */
+  updatePreference: (updates: Partial<Omit<UserPreferences, 'id' | 'user_id' | 'updated_at'>>) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -48,6 +50,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<AppRole | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProject, setActiveProject] = useState<Project | null>(null);
+  const [preferences, setPreferences] = useState<UserPreferences | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   /** Carga el rol y los proyectos disponibles para el usuario dado. */
@@ -74,29 +77,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (projectList.length > 0) {
       setActiveProject((prev) => prev ?? projectList[0]);
     }
-  }, []);
 
-  const loginDemo = useCallback(() => {
-    const mockUser = {
-      id: 'demo-user-id',
-      email: 'demo@zen.com',
-    } as User;
-
-    setUser(mockUser);
-    setRole('admin');
-
-    // Cargar proyectos y asignar el primero
-    supabase
-      .from('projects')
+    // 3. Obtener preferencias del usuario
+    const { data: prefData, error: prefError } = await supabase
+      .from('user_preferences')
       .select('*')
-      .order('created_at', { ascending: true })
-      .then(({ data }) => {
-        const projectList: Project[] = data ?? [];
-        setProjects(projectList);
-        if (projectList.length > 0) {
-          setActiveProject(projectList[0]);
-        }
-      });
+      .eq('user_id', authUser.id)
+      .single();
+
+    if (prefError && prefError.code !== 'PGRST116') {
+      console.error('Error loading preferences:', prefError);
+    } else if (prefData) {
+      setPreferences(prefData as UserPreferences);
+    } else {
+      // Crear preferencias por defecto si no existen
+      const { data: defaultPref } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: authUser.id,
+          theme: 'zen-light',
+          density: 'comfortable',
+          sidebar_collapsed: false,
+          default_view: 'day'
+        })
+        .select()
+        .single();
+      setPreferences(defaultPref as UserPreferences);
+    }
   }, []);
 
   const createProject = useCallback(async (name: string): Promise<Project | null> => {
@@ -116,19 +123,44 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return newProject;
   }, []);
 
-
   useEffect(() => {
     // Resolver la sesión inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session }, error }) => {
+      if (error) {
+        console.warn('Session recovery error:', error.message);
+
+        // Si el error es específicamente de Refresh Token, forzamos el cierre de sesión
+        // para limpiar el almacenamiento local y evitar bucles de error.
+        if (error.message.includes('Refresh Token Not Found')) {
+          await supabase.auth.signOut();
+        }
+
+        setUser(null);
+        setRole(null);
+        setProjects([]);
+        setActiveProject(null);
+        setPreferences(null);
+        setIsLoading(false);
+        return;
+      }
+
       const authUser = session?.user ?? null;
       setUser(authUser);
       if (authUser) {
         loadUserData(authUser).finally(() => setIsLoading(false));
       } else {
-        // Sin sesión: caer en modo demo usando NEXT_PUBLIC_PROJECT_ID.
-        // Esto permite probar la UI sin haber pasado por Supabase Auth.
-        bootDemoFromEnv().finally(() => setIsLoading(false));
+        setRole(null);
+        setProjects([]);
+        setActiveProject(null);
+        setPreferences(null);
+        setIsLoading(false);
       }
+    }).catch(async err => {
+      console.error('Critical auth error:', err);
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {}
+      setIsLoading(false);
     });
 
     // Suscripción reactiva a cambios de sesión (login / logout)
@@ -139,8 +171,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (authUser) {
           loadUserData(authUser);
         } else {
-          // Si el usuario cierra sesión, mantenemos el modo demo con env.
-          bootDemoFromEnv();
+          setRole(null);
+          setProjects([]);
+          setActiveProject(null);
+          setPreferences(null);
         }
       }
     );
@@ -148,52 +182,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [loadUserData]);
 
-  /**
-   * Carga el proyecto indicado en `NEXT_PUBLIC_PROJECT_ID` y lo marca
-   * como `activeProject`. Si no existe, intenta caer al primer proyecto
-   * disponible. Solo se usa en modo demo (sin auth).
-   */
-  const bootDemoFromEnv = useCallback(async () => {
-    const envProjectId = process.env.NEXT_PUBLIC_PROJECT_ID;
-    if (!envProjectId) {
-      // Sin env var: intentar al menos cargar la lista de proyectos
-      const { data } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: true });
-      const list: Project[] = data ?? [];
-      setProjects(list);
-      setActiveProject((prev) => prev ?? list[0] ?? null);
-      return;
-    }
+  // ----- Nuevas Funciones de Preferencias -----
 
-    // Verificar que el proyecto del env existe
-    const { data: project, error } = await supabase
-      .from('projects')
-      .select('*')
-      .eq('id', envProjectId)
-      .single();
+  const updatePreference = useCallback(async (updates: Partial<Omit<UserPreferences, 'id' | 'user_id' | 'updated_at'>>) => {
+    if (!user) return;
 
-    if (!error && project) {
-      setProjects([project as Project]);
-      setActiveProject((prev) => prev ?? (project as Project));
-      setRole('admin'); // demo: permisos de admin
-    } else {
-      // Env var inválida: fallback al primer proyecto
-      const { data } = await supabase
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: true });
-      const list: Project[] = data ?? [];
-      setProjects(list);
-      setActiveProject((prev) => prev ?? list[0] ?? null);
+    setPreferences((prev) => (prev ? { ...prev, ...updates } : null));
+
+    const { error } = await supabase
+      .from('user_preferences')
+      .update(updates)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error updating preference:', error);
     }
-  }, []);
+  }, [user]);
 
   const value = useMemo<AppContextValue>(
-    () => ({ user, role, activeProject, projects, isLoading, setActiveProject, loginDemo, createProject }),
-    [user, role, activeProject, projects, isLoading, loginDemo, createProject]
-
+    () => ({ user, role, activeProject, projects, preferences, isLoading, setActiveProject, createProject, updatePreference }),
+    [user, role, activeProject, projects, preferences, isLoading, createProject, updatePreference]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

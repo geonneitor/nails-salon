@@ -11,6 +11,10 @@ export type AppointmentStatus = 'pending_advance' | 'confirmed_advance' | 'free'
 
 export type AppRole = 'admin' | 'employee';
 
+export type ThemeType = 'zen-light' | 'zen-dark' | 'high-contrast';
+export type DensityType = 'comfortable' | 'compact';
+export type CalendarViewType = 'day' | 'week' | 'month';
+
 // ----- TABLES -----
 
 export interface Project {
@@ -104,6 +108,16 @@ export interface UserRole {
   id: string; // Refs auth.users(id)
   role: AppRole;
   created_at: string;
+}
+
+export interface UserPreferences {
+  id: string;
+  user_id: string;
+  theme: ThemeType;
+  density: DensityType;
+  sidebar_collapsed: boolean;
+  default_view: CalendarViewType;
+  updated_at: string;
 }
 
 // ----- RELACIONES ENRIQUECIDAS (para queries con JOIN) -----

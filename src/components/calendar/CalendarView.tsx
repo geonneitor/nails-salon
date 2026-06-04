@@ -6,7 +6,7 @@
 // Conectada a Supabase via useAppointments + useTimeBlocks.
 // ============================================================
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { addDays, addMonths, addWeeks, format, isSameDay, startOfWeek, subDays, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -21,6 +21,7 @@ import { MonthView } from './views/MonthView';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useTimeBlocks } from '@/hooks/useTimeBlocks';
 import { useCalendarView } from '@/hooks/useCalendarView';
+import { useApp } from '@/context/AppContext';
 import { useProject } from '@/context/AppContext';
 import { GRID_END_HOUR, GRID_HOURS, GRID_START_HOUR, startOfLocalDay } from '@/lib/calendarGrid';
 import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supabase';
@@ -28,7 +29,9 @@ import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supaba
 const PROJECT_ID = process.env.NEXT_PUBLIC_PROJECT_ID ?? '';
 
 export function CalendarView() {
+  //  ¡Esto es lo correcto! Cada cosa de su respectivo Hook
   const { activeProject } = useProject();
+  const { preferences } = useApp(); // <- Aquí es donde realmente vive 'preferences'
   const projectId = activeProject?.id ?? null;
 
   const [anchorDate, setAnchorDate] = useState(new Date());
@@ -38,6 +41,25 @@ export function CalendarView() {
   const [prefilledDate, setPrefilledDate] = useState<Date>(new Date());
 
   const { view, setView, zoom, setZoom, hourHeight, currentTime } = useCalendarView();
+
+  // Sincronizar vista inicial con preferencias del usuario
+  useEffect(() => {
+    if (preferences?.default_view) {
+      setView(preferences.default_view);
+    }
+  }, [preferences?.default_view, setView]);
+
+  // Redirigir a vista 'day' si se encuentra en 'week' en pantallas móviles
+  useEffect(() => {
+    const checkMobileView = () => {
+      if (window.innerWidth < 768 && view === 'week') {
+        setView('day');
+      }
+    };
+    checkMobileView();
+    window.addEventListener('resize', checkMobileView);
+    return () => window.removeEventListener('resize', checkMobileView);
+  }, [view, setView]);
 
   // Rango visible ampliado para intersectar citas que cruzan límites.
   const dateRange = useMemo(() => {

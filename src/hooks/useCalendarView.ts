@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useApp } from '@/context/AppContext';
 
 export type CalendarViewMode = 'day' | 'week' | 'month';
 
@@ -57,19 +58,20 @@ interface UseCalendarViewReturn {
  * con `setInterval(60s)` y se limpia al desmontar.
  */
 export function useCalendarView(): UseCalendarViewReturn {
+  const { preferences } = useApp();
   const [view, setViewState] = useState<CalendarViewMode>(DEFAULT_VIEW);
   const [zoom, setZoomState] = useState<ZoomLevel>(DEFAULT_ZOOM);
   const [currentTime, setCurrentTime] = useState<Date>(() => new Date());
 
   // Hidratar desde localStorage tras el mount (evita mismatch SSR).
   useEffect(() => {
-    setViewState(
-      readStored<CalendarViewMode>(STORAGE_KEY_VIEW, DEFAULT_VIEW, ['day', 'week', 'month'])
-    );
-    setZoomState(
-      readStored<ZoomLevel>(STORAGE_KEY_ZOOM, DEFAULT_ZOOM, ['compact', 'comfortable', 'airy'])
-    );
-  }, []);
+    const storedView = readStored<CalendarViewMode>(STORAGE_KEY_VIEW, DEFAULT_VIEW, ['day', 'week', 'month']);
+    const storedZoom = readStored<ZoomLevel>(STORAGE_KEY_ZOOM, DEFAULT_ZOOM, ['compact', 'comfortable', 'airy']);
+
+    // Priorizar preferencias de usuario si existen
+    setViewState(preferences?.default_view ?? storedView);
+    setZoomState((preferences?.density as ZoomLevel) ?? storedZoom);
+  }, [preferences]);
 
   // Reloj: actualiza la hora actual cada 60s.
   useEffect(() => {

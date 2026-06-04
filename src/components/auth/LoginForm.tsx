@@ -31,7 +31,6 @@ export function LoginForm() {
       setLoading(false);
     } else {
       router.push('/dashboard');
-      router.refresh();
     }
   };
 

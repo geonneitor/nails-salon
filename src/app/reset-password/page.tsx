@@ -43,7 +43,6 @@ export default function ResetPasswordPage() {
       setSuccess('Tu contraseña ha sido restablecida exitosamente. Redirigiendo...');
       setTimeout(() => {
         router.push('/');
-        router.refresh();
       }, 3000);
     }
   };

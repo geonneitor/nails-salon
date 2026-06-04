@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useApp } from '@/context/AppContext';
 
 export type CalendarViewMode = 'day' | 'week' | 'month';
@@ -85,15 +85,15 @@ export function useCalendarView(): UseCalendarViewReturn {
     return () => window.clearInterval(id);
   }, []);
 
-  const setView = (v: CalendarViewMode) => {
+  const setView = useCallback((v: CalendarViewMode) => {
     setViewState(v);
     persist(STORAGE_KEY_VIEW, v);
-  };
+  }, []);
 
-  const setZoom = (z: ZoomLevel) => {
+  const setZoom = useCallback((z: ZoomLevel) => {
     setZoomState(z);
     persist(STORAGE_KEY_ZOOM, z);
-  };
+  }, []);
 
   return {
     view,

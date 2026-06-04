@@ -45,13 +45,6 @@ export function CalendarView() {
   const { employees, isLoading: loadingE } = useEmployees(); // <- Added employees
   const [hiddenStatuses, setHiddenStatuses] = useState<AppointmentStatus[]>([]);
 
-  // Sincronizar vista inicial con preferencias del usuario
-  useEffect(() => {
-    if (preferences?.default_view) {
-      setView(preferences.default_view);
-    }
-  }, [preferences?.default_view, setView]);
-
   // Redirigir a vista 'day' si se encuentra en 'week' en pantallas móviles
   useEffect(() => {
     const checkMobileView = () => {

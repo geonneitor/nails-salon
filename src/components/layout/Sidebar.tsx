@@ -30,14 +30,11 @@ export function Sidebar() {
         {/* Brand Logo: Integrated organically without a "box" */}
         <div className="flex flex-col items-center mb-6 group relative px-2">
           <div className={`relative transition-all duration-500 ${isCollapsed ? 'w-10' : 'w-36'} group-hover:scale-110 transition-transform`}>
-            <Image
-              src="/zen.png"
+            <img
+              src="/zen-logo.svg"
               alt="Zen Logo"
-              width={144}
-              height={72}
               className="w-full h-auto object-contain drop-shadow-md"
               style={{ height: 'auto' }}
-              priority
             />
           </div>
           {!isCollapsed && (

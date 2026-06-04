@@ -59,14 +59,11 @@ export function LoginForm() {
         <div className="flex justify-center mb-4 group cursor-pointer">
           <div className="relative w-32 transition-transform duration-500 group-hover:scale-110">
             <div className="absolute inset-0 bg-accent-gold/20 blur-2xl rounded-full opacity-60 group-hover:opacity-100 transition-opacity" />
-            <Image
-              src="/zen.png"
+            <img
+              src="/zen-logo.svg"
               alt="Zen Logo"
-              width={128}
-              height={64}
               className="relative w-full h-auto object-contain drop-shadow-sm"
               style={{ height: 'auto' }}
-              priority
             />
           </div>
         </div>

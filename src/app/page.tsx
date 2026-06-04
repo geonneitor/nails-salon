@@ -26,14 +26,11 @@ export default function HomePage() {
             {/* Soft glow behind logo that intensifies on hover */}
             <div className="absolute inset-0 bg-accent-gold/20 blur-3xl rounded-full transition-opacity duration-500 group-hover:opacity-100 opacity-40" />
 
-            <Image
-              src="/zen.png"
+            <img
+              src="/zen-logo.svg"
               alt="Zen Logo"
-              width={320}
-              height={160}
               className="relative z-30 w-full h-auto object-contain drop-shadow-2xl"
               style={{ height: 'auto' }}
-              priority
             />
           </div>
 

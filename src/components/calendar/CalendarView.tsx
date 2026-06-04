@@ -193,6 +193,7 @@ export function CalendarView() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.2 }}
+            style={{ willChange: 'transform, opacity' }}
           >
             {view === 'day' && (
               <DayView

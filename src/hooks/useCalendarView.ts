@@ -68,10 +68,16 @@ export function useCalendarView(): UseCalendarViewReturn {
     const storedView = readStored<CalendarViewMode>(STORAGE_KEY_VIEW, DEFAULT_VIEW, ['day', 'week', 'month']);
     const storedZoom = readStored<ZoomLevel>(STORAGE_KEY_ZOOM, DEFAULT_ZOOM, ['compact', 'comfortable', 'airy']);
 
-    // Priorizar preferencias de usuario si existen
-    setViewState(preferences?.default_view ?? storedView);
-    setZoomState((preferences?.density as ZoomLevel) ?? storedZoom);
-  }, [preferences]);
+    const targetView = preferences?.default_view ?? storedView;
+    const targetZoom = (preferences?.density as ZoomLevel) ?? storedZoom;
+
+    if (view !== targetView) {
+      setViewState(targetView);
+    }
+    if (zoom !== targetZoom) {
+      setZoomState(targetZoom);
+    }
+  }, [preferences, view, zoom]);
 
   // Reloj: actualiza la hora actual cada 60s.
   useEffect(() => {

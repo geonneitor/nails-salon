@@ -7,18 +7,30 @@
   --fondo-zen: #F7F5F0;
   --primario-zen: #4A533E;
   --secundario-zen: #E8E2D6;
+  --accent-gold: #D4AF37;
+  --accent-sage: #B2BCA3;
+  --deep-botanical: #2D3326;
+  --pearl-white: #FCFAf7;
 }
 
 [data-theme='zen-dark'] {
   --fondo-zen: #1A1C18;
   --primario-zen: #A3B18A;
   --secundario-zen: #343A2E;
+  --accent-gold: #C5A059;
+  --accent-sage: #6B7A5F;
+  --deep-botanical: #0D0F0B;
+  --pearl-white: #E8E8E8;
 }
 
 [data-theme='high-contrast'] {
   --fondo-zen: #FFFFFF;
   --primario-zen: #000000;
   --secundario-zen: #DDDDDD;
+  --accent-gold: #FFD700;
+  --accent-sage: #808080;
+  --deep-botanical: #000000;
+  --pearl-white: #FFFFFF;
 }
 
 body {
@@ -27,6 +39,31 @@ body {
   font-family: var(--font-calgary), serif;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Luxury Glow Utilities */
+.zen-glow-hover {
+  transition: all 0.3s ease;
+}
+
+.zen-glow-hover:hover {
+  box-shadow: 0 0 20px var(--accent-gold), 0 0 40px var(--accent-sage);
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.zen-glow-touch {
+  transition: all 0.2s ease;
+}
+
+.zen-glow-touch:active {
+  box-shadow: 0 0 15px var(--accent-gold);
+  transform: scale(0.98);
+}
+
+/* Atmospheric Radial Gradient for Hero */
+.hero-gradient {
+  background: radial-gradient(circle at center, var(--secundario-zen) 0%, var(--fondo-zen) 70%);
 }
 
 /* Curtain Effect Animation */

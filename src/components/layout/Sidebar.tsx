@@ -27,22 +27,22 @@ export function Sidebar() {
     <aside className={`h-screen bg-fondo-zen border-r border-secundario-zen/50 flex flex-col justify-between py-8 px-6 hidden md:flex sticky top-0 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
 
       <div className="flex flex-col gap-8">
-        {/* Brand Logo */}
-        <div className="flex flex-col items-center mb-4">
-          <div className={`relative transition-all duration-300 ${isCollapsed ? 'w-10' : 'w-32'}`}>
+        {/* Brand Logo: Integrated organically without a "box" */}
+        <div className="flex flex-col items-center mb-6 group relative px-2">
+          <div className={`relative transition-all duration-500 ${isCollapsed ? 'w-10' : 'w-36'} group-hover:scale-110 transition-transform`}>
             <Image
               src="/zen.png"
               alt="Zen Logo"
-              width={128}
-              height={64}
-              className="w-full h-auto object-contain"
+              width={144}
+              height={72}
+              className="w-full h-auto object-contain drop-shadow-md"
               priority
             />
           </div>
           {!isCollapsed && (
-            <div className="flex gap-1.5 mt-2">
+            <div className="flex gap-1.5 mt-3">
               {Array.from({ length: 7 }).map((_, i) => (
-                <span key={i} className="w-1 h-1 rounded-full bg-primario-zen/80"></span>
+                <span key={i} className="w-1 h-1 rounded-full bg-primario-zen/60 shadow-[0_0_3px_var(--accent-gold)]" />
               ))}
             </div>
           )}
@@ -109,9 +109,9 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 ${
+                className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 zen-glow-hover zen-glow-touch ${
                   isActive
-                    ? 'bg-primario-zen text-fondo-zen shadow-sm'
+                    ? 'bg-primario-zen text-fondo-zen shadow-lg'
                     : 'text-primario-zen/60 hover:bg-secundario-zen/30 hover:text-primario-zen'
                 } ${isCollapsed ? 'justify-center px-0' : ''}`}
               >

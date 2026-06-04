@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
-
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -56,21 +55,22 @@ export function LoginForm() {
   };
 
   return (
-    <div className="w-full max-w-sm bg-[#FDFBEE] p-8 rounded-3xl shadow-2xl border border-secundario-zen/50">
+    <div className="w-full max-w-sm bg-white/40 backdrop-blur-xl p-8 rounded-[3rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-white/50 transition-all duration-500 hover:shadow-[0_20px_60px_rgba(74,83,62,0.15)]">
       <div className="text-center mb-8">
-        <div className="flex justify-center mb-4">
-          <div className="relative w-32">
+        <div className="flex justify-center mb-4 group cursor-pointer">
+          <div className="relative w-32 transition-transform duration-500 group-hover:scale-110">
+            <div className="absolute inset-0 bg-accent-gold/20 blur-2xl rounded-full opacity-60 group-hover:opacity-100 transition-opacity" />
             <Image
               src="/zen.png"
               alt="Zen Logo"
               width={128}
               height={64}
-              className="w-full h-auto object-contain"
+              className="relative w-full h-auto object-contain drop-shadow-sm"
               priority
             />
           </div>
         </div>
-        <p className="text-sm tracking-widest uppercase text-primario-zen/60 font-medium font-sans">
+        <p className="text-sm tracking-[0.2em] uppercase text-primario-zen/60 font-medium font-sans">
           {isRecovery ? 'Recuperar Acceso' : 'Acceso Exclusivo'}
         </p>
       </div>
@@ -85,20 +85,20 @@ export function LoginForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-secundario-zen/20 border border-secundario-zen/60 text-primario-zen text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all placeholder:text-primario-zen/30"
+              className="w-full bg-fondo-zen/50 border border-secundario-zen/60 text-primario-zen text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-gold/30 transition-all placeholder:text-primario-zen/30"
               placeholder="tu@correo.com"
               required
             />
           </div>
 
           {error && (
-            <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-center font-sans">
+            <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-center font-sans">
               {error}
             </p>
           )}
 
           {successMessage && (
-            <p className="text-primario-zen text-xs bg-primario-zen/10 border border-primario-zen/30 rounded-xl px-4 py-3 text-center font-sans font-medium">
+            <p className="text-primario-zen text-xs bg-primario-zen/10 border border-primario-zen/30 rounded-2xl px-4 py-3 text-center font-sans font-medium">
               {successMessage}
             </p>
           )}
@@ -106,7 +106,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 font-sans"
+            className="w-full mt-2 bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 font-sans zen-glow-hover zen-glow-touch"
           >
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
@@ -137,7 +137,7 @@ export function LoginForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-secundario-zen/20 border border-secundario-zen/60 text-primario-zen text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all placeholder:text-primario-zen/30"
+              className="w-full bg-fondo-zen/50 border border-secundario-zen/60 text-primario-zen text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-gold/30 transition-all placeholder:text-primario-zen/30"
               placeholder="tu@correo.com"
               required
             />
@@ -152,7 +152,7 @@ export function LoginForm() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-secundario-zen/20 border border-secundario-zen/60 text-primario-zen text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all placeholder:text-primario-zen/30"
+                className="w-full bg-fondo-zen/50 border border-secundario-zen/60 text-primario-zen text-sm rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-accent-gold/30 transition-all placeholder:text-primario-zen/30"
                 placeholder="••••••••"
                 required
               />
@@ -167,7 +167,7 @@ export function LoginForm() {
           </div>
 
           {error && (
-            <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-center font-sans">
+            <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-center font-sans">
               {error}
             </p>
           )}
@@ -175,7 +175,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 font-sans"
+            className="w-full mt-2 bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 font-sans zen-glow-hover zen-glow-touch"
           >
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Entrando...</>

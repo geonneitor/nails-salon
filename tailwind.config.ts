@@ -13,6 +13,10 @@ const config: Config = {
         'fondo-zen': 'var(--fondo-zen)',
         'primario-zen': 'var(--primario-zen)',
         'secundario-zen': 'var(--secundario-zen)',
+        'accent-gold': 'var(--accent-gold)',
+        'accent-sage': 'var(--accent-sage)',
+        'deep-botanical': 'var(--deep-botanical)',
+        'pearl-white': 'var(--pearl-white)',
       },
       fontFamily: {
         // Calgary como fuente principal, serif como fallback como se solicitó

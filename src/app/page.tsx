@@ -1,40 +1,66 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen w-full bg-fondo-zen flex flex-col items-center justify-center p-6">
-      
-      {/* Logo inspirado en el Brand Board (ZEN con puntos) */}
-      <div className="flex flex-col items-center mb-16">
-        <div className="relative w-64 md:w-80">
-          <Image
-            src="/zen.png"
-            alt="Zen Logo"
-            width={320}
-            height={160}
-            className="w-full h-auto object-contain"
-            priority
-          />
-        </div>
-        <div className="flex gap-3 mt-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-primario-zen"></span>
-          <span className="w-1.5 h-1.5 rounded-full bg-primario-zen"></span>
-          <span className="w-1.5 h-1.5 rounded-full bg-primario-zen"></span>
-          <span className="w-1.5 h-1.5 rounded-full bg-primario-zen"></span>
-          <span className="w-1.5 h-1.5 rounded-full bg-primario-zen"></span>
-          <span className="w-1.5 h-1.5 rounded-full bg-primario-zen"></span>
-          <span className="w-1.5 h-1.5 rounded-full bg-primario-zen"></span>
-        </div>
-      </div>
+    <main className="min-h-screen w-full bg-fondo-zen flex flex-col items-center justify-center p-6 relative overflow-hidden">
 
-      {/* Botón de Ingreso (Estilo "Pebble" / Minimalista) */}
-      <Link href="/calendar">
-        <button className="bg-primario-zen text-fondo-zen px-10 py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm">
-          Ingresar
-        </button>
-      </Link>
+      {/* Atmospheric Background Effect */}
+      <div className="absolute inset-0 hero-gradient pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-accent-sage/20 blur-[120px] animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-accent-gold/10 blur-[120px] animate-pulse" />
 
+      {/* Content Wrapper */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
+        className="relative z-10 flex flex-col items-center"
+      >
+        {/* Logo Section: No box, pure atmospheric integration */}
+        <div className="flex flex-col items-center mb-16 group cursor-pointer">
+          <div className="relative w-64 md:w-80 transition-transform duration-700 group-hover:scale-105">
+            {/* Soft glow behind logo that intensifies on hover */}
+            <div className="absolute inset-0 bg-accent-gold/20 blur-3xl rounded-full transition-opacity duration-500 group-hover:opacity-100 opacity-40" />
+
+            <Image
+              src="/zen.png"
+              alt="Zen Logo"
+              width={320}
+              height={160}
+              className="relative w-full h-auto object-contain drop-shadow-2xl"
+              priority
+            />
+          </div>
+
+          {/* Zen Dots: Now as elegant separators with a subtle glow */}
+          <div className="flex gap-3 mt-6">
+            {Array.from({ length: 7 }).map((_, i) => (
+              <motion.span
+                key={i}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: i * 0.1 }}
+                className="w-1.5 h-1.5 rounded-full bg-primario-zen shadow-[0_0_5px_var(--accent-gold)]"
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Entry Button: "Zen Pebble" with glow and tactile feel */}
+        <Link href="/calendar">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="zen-glow-hover zen-glow-touch bg-primario-zen text-fondo-zen px-12 py-4 rounded-full uppercase tracking-[0.2em] text-xs font-semibold shadow-xl relative overflow-hidden group"
+          >
+            <span className="relative z-10">Ingresar</span>
+            {/* Shine effect across the button */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pearl-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+          </motion.button>
+        </Link>
+      </motion.div>
     </main>
   );
 }

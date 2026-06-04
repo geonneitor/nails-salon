@@ -71,13 +71,13 @@ export function useCalendarView(): UseCalendarViewReturn {
     const targetView = preferences?.default_view ?? storedView;
     const targetZoom = (preferences?.density as ZoomLevel) ?? storedZoom;
 
-    if (view !== targetView) {
+    if (targetView !== DEFAULT_VIEW) {
       setViewState(targetView);
     }
-    if (zoom !== targetZoom) {
+    if (targetZoom !== DEFAULT_ZOOM) {
       setZoomState(targetZoom);
     }
-  }, [preferences]); // Solo re-hidratar si cambian las preferencias globales
+  }, []); // Ejecutar SOLO una vez al montar el componente
 
   // Reloj: actualiza la hora actual cada 60s.
   useEffect(() => {

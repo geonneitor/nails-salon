@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, User, Scissors, CreditCard, CheckCircle2, AlertCircle, Edit3 } from 'lucide-react';
+import { X, Clock, User, Scissors, CreditCard, CheckCircle2, AlertCircle, Edit3, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supabase';

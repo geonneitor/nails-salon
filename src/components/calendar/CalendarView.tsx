@@ -43,8 +43,6 @@ export function CalendarView() {
 
   const { view, setView, zoom, setZoom, hourHeight, currentTime } = useCalendarView();
   const { employees, isLoading: loadingE } = useEmployees(); // <- Added employees
-  const [showActiveOnly, setShowActiveOnly] = useState(false);
-  const [showShiftOnly, setShowShiftOnly] = useState(false);
   const [hiddenStatuses, setHiddenStatuses] = useState<AppointmentStatus[]>([]);
 
   // Sincronizar vista inicial con preferencias del usuario
@@ -90,15 +88,11 @@ export function CalendarView() {
 
   const filteredAppointments = useMemo(() => {
     return appointments.filter((appt) => {
-      // 1. Filtro de empleadas activas
-      if (showActiveOnly && !appt.employee?.isActive) return false;
-      // 2. Filtro de turno
-      if (showShiftOnly && !appt.employee?.isOnShift) return false;
-      // 3. Filtro de colores (status)
+      // 1. Filtro de colores (status)
       if (hiddenStatuses.includes(appt.status)) return false;
       return true;
     });
-  }, [appointments, showActiveOnly, showShiftOnly, hiddenStatuses]);
+  }, [appointments, hiddenStatuses]);
 
   // Navegación
   const handlePrev = () => {
@@ -169,10 +163,17 @@ export function CalendarView() {
             </div>
 
             <div className="flex items-center gap-2">
-              <ViewSwitcher value={view} onChange={setView} />
-              {view !== 'month' && <ZoomControls value={zoom} onChange={setZoom} />}
+              <ViewSwitcher value={view} onChange={(v) => {
+                console.log('Changing view to:', v);
+                setView(v);
+              }} />
+              {view !== 'month' && <ZoomControls value={zoom} onChange={(z) => {
+                console.log('Changing zoom to:', z);
+                setZoom(z);
+              }} />}
               <button
                 onClick={() => {
+                  console.log('Opening new appointment modal');
                   setPrefilledDate(selectedDate);
                   setIsNewModalOpen(true);
                 }}
@@ -192,30 +193,6 @@ export function CalendarView() {
               <Filter className="w-3 h-3" />
               <span className="text-[10px] uppercase tracking-widest font-bold">Filtros</span>
             </div>
-
-            <button
-              onClick={() => setShowActiveOnly(!showActiveOnly)}
-              className={`px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-semibold transition-all flex items-center gap-1.5 ${
-                showActiveOnly
-                  ? 'bg-primario-zen text-fondo-zen shadow-sm'
-                  : 'bg-secundario-zen/30 text-primario-zen/60 hover:text-primario-zen'
-              }`}
-            >
-              <Users className="w-3 h-3" />
-              Activas
-            </button>
-
-            <button
-              onClick={() => setShowShiftOnly(!showShiftOnly)}
-              className={`px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-semibold transition-all flex items-center gap-1.5 ${
-                showShiftOnly
-                  ? 'bg-primario-zen text-fondo-zen shadow-sm'
-                  : 'bg-secundario-zen/30 text-primario-zen/60 hover:text-primario-zen'
-              }`}
-            >
-              <Clock className="w-3 h-3" />
-              En Turno
-            </button>
           </div>
 
           <div className="flex items-center gap-2">

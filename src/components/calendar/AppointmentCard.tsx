@@ -17,12 +17,14 @@ interface AppointmentCardProps {
 const STATUS_INDICATOR: Record<AppointmentStatus, string> = {
   confirmed_advance: 'bg-primario-zen', // Olivo sólido = confirmado con anticipo
   pending_advance: 'bg-secundario-zen border border-primario-zen/40', // Beige-arena con borde = pendiente
+  completed: 'bg-slate-200 border border-slate-300', // Gris neutro = finalizado
   free: 'bg-transparent border border-dashed border-primario-zen/60', // Borde punteado = gratis
 };
 
 const STATUS_LABEL: Record<AppointmentStatus, string> = {
   confirmed_advance: 'Confirmado',
   pending_advance: 'Pendiente',
+  completed: 'Finalizado',
   free: 'Gratis',
 };
 

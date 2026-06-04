@@ -32,6 +32,11 @@ const STATUS_CONFIG: Record<AppointmentStatus, { label: string; color: string; b
     color: 'text-amber-700',
     bg: 'bg-amber-50 border-amber-200',
   },
+  completed: {
+    label: 'Finalizado',
+    color: 'text-slate-500',
+    bg: 'bg-slate-100 border-slate-200',
+  },
   free: {
     label: 'Sin anticipo',
     color: 'text-primario-zen/60',

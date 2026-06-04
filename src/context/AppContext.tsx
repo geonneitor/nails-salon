@@ -83,26 +83,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .from('user_preferences')
       .select('*')
       .eq('user_id', authUser.id)
-      .single();
+      .limit(1);
 
-    if (prefError && prefError.code !== 'PGRST116') {
+    if (prefError) {
       console.error('Error loading preferences:', prefError);
-    } else if (prefData) {
-      setPreferences(prefData as UserPreferences);
     } else {
-      // Crear preferencias por defecto si no existen
-      const { data: defaultPref } = await supabase
-        .from('user_preferences')
-        .upsert({
-          user_id: authUser.id,
-          theme: 'zen-light',
-          density: 'comfortable',
-          sidebar_collapsed: false,
-          default_view: 'day'
-        })
-        .select()
-        .single();
-      setPreferences(defaultPref as UserPreferences);
+      const currentPref = prefData?.[0] as UserPreferences | null;
+      if (currentPref) {
+        setPreferences(currentPref);
+      } else {
+        // Crear preferencias por defecto si no existen
+        const { data: defaultPref, error: upsertError } = await supabase
+          .from('user_preferences')
+          .upsert({
+            user_id: authUser.id,
+            theme: 'zen-light',
+            density: 'comfortable',
+            sidebar_collapsed: false,
+            default_view: 'day'
+          })
+          .select()
+          .limit(1);
+
+        if (upsertError) {
+          console.error('Error creating default preferences:', upsertError);
+        } else {
+          setPreferences((defaultPref?.[0] as UserPreferences) ?? null);
+        }
+      }
     }
   }, []);
 

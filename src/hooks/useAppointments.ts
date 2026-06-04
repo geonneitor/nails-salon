@@ -31,10 +31,6 @@ interface UseAppointmentsReturn {
   refetch: () => Promise<void>;
 }
 
-
-
-// ----- Hook principal -----
-
 export function useAppointments({
   projectId,
   dateRange,
@@ -45,7 +41,8 @@ export function useAppointments({
 
   /**
    * Construye el query base con sus JOINs y filtro de intersección de rango.
-   * Sin proyectoId, retorna null y el caller debe manejar el estado vacío.
+   * Dependemos de los valores primitivos de dateRange para evitar bucles infinitos
+   * si el objeto dateRange se recrea en el componente padre.
    */
   const buildQuery = useCallback(() => {
     if (!projectId) return null;
@@ -61,7 +58,7 @@ export function useAppointments({
       .eq('project_id', projectId)
       .order('start_time', { ascending: true });
 
-    if (dateRange) {
+    if (dateRange?.from && dateRange?.to) {
       // Intersección: trae citas cuyo rango [start, end] solapa con [from, to].
       // Lógica: cita.inicio <= rango.fin  AND  cita.fin >= rango.inicio
       query = query
@@ -70,7 +67,7 @@ export function useAppointments({
     }
 
     return query;
-  }, [dateRange, projectId]);
+  }, [dateRange?.from, dateRange?.to, projectId]);
 
   const fetchAppointments = useCallback(async () => {
     if (!projectId) {
@@ -192,7 +189,7 @@ export function useAppointments({
 
       return data as Appointment;
     },
-    [appointments, projectId]
+    [projectId]
   );
 
   const updateAppointment = useCallback(
@@ -209,7 +206,7 @@ export function useAppointments({
 
       return true;
     },
-    []
+    [projectId]
   );
 
   return {

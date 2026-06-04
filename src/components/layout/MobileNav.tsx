@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calendar, Users, Scissors, Settings, Home } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Scissors, Settings, Home } from 'lucide-react';
 
 const NAV_ITEMS = [
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Calendario', href: '/calendar', icon: Calendar },
   { label: 'Clientas', href: '/customers', icon: Users },
   { label: 'Servicios', href: '/services', icon: Scissors },

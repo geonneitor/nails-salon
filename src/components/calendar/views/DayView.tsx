@@ -128,6 +128,7 @@ export function DayView({
                     key={appt.id}
                     appointment={appt}
                     hourHeight={hourHeight}
+                    currentTime={currentTime}
                     columnIndex={0} // Ahora es 0 porque cada empleada tiene su propia columna
                     columnCount={1}
                     onClick={() => onAppointmentClick(appt)}

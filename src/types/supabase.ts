@@ -7,7 +7,7 @@
 
 export type EmployeeRole = 'TOTAL' | 'ONLY_BOOK';
 
-export type AppointmentStatus = 'pending_advance' | 'confirmed_advance' | 'free';
+export type AppointmentStatus = 'pending_advance' | 'confirmed_advance' | 'completed' | 'free';
 
 export type AppRole = 'admin' | 'employee';
 
@@ -123,7 +123,7 @@ export interface UserPreferences {
 // ----- RELACIONES ENRIQUECIDAS (para queries con JOIN) -----
 
 export type AppointmentWithRelations = Appointment & {
-  customer: Pick<Customer, 'id' | 'name' | 'phone'>;
+  customer: Pick<Customer, 'id' | 'name' | 'phone' | 'service_notes'>;
   employee: Pick<Employee, 'id' | 'name'>;
   service: Pick<Service, 'id' | 'name' | 'duration_minutes' | 'price'> | null;
 };

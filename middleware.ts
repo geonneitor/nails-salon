@@ -46,8 +46,26 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session if expired.
-  await supabase.auth.getUser();
+  // Refresh session and check authentication
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const isRootPage = request.nextUrl.pathname === '/';
+
+    // 1. If authenticated and visiting root, go to dashboard
+    if (user && isRootPage) {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+
+    // 2. If NOT authenticated and visiting a protected page (anything other than root/login), go to login
+    if (!user && !isRootPage) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  } catch (error) {
+    console.error('Auth error in middleware:', error);
+    // Critical token errors should force a redirect to login to clear state
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
 
   return response;
 }

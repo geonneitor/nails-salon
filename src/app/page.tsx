@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function HomePage() {
   return (
@@ -6,9 +7,16 @@ export default function HomePage() {
       
       {/* Logo inspirado en el Brand Board (ZEN con puntos) */}
       <div className="flex flex-col items-center mb-16">
-        <h1 className="text-primario-zen font-serif text-6xl md:text-7xl tracking-[0.2em] ml-[0.2em]">
-          ZEN
-        </h1>
+        <div className="relative w-64 md:w-80">
+          <Image
+            src="/zen.png"
+            alt="Zen Logo"
+            width={320}
+            height={160}
+            className="w-full h-auto object-contain"
+            priority
+          />
+        </div>
         <div className="flex gap-3 mt-4">
           <span className="w-1.5 h-1.5 rounded-full bg-primario-zen"></span>
           <span className="w-1.5 h-1.5 rounded-full bg-primario-zen"></span>
@@ -19,11 +27,6 @@ export default function HomePage() {
           <span className="w-1.5 h-1.5 rounded-full bg-primario-zen"></span>
         </div>
       </div>
-
-      {/* Llamado a la acción principal */}
-      <h2 className="text-primario-zen font-serif text-xl md:text-2xl text-center mb-10">
-        Reserva tu cita aquí
-      </h2>
 
       {/* Botón de Ingreso (Estilo "Pebble" / Minimalista) */}
       <Link href="/calendar">

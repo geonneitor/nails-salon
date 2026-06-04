@@ -32,13 +32,13 @@ export function TimeIndicatorLine({ now, hourHeight, visible }: TimeIndicatorLin
       initial={false}
       animate={{ top }}
       transition={{ type: 'spring', stiffness: 200, damping: 30 }}
-      className="pointer-events-none absolute left-0 right-0 z-20"
+      className="pointer-events-none absolute left-0 right-0 z-30"
       style={{ top }}
     >
-      {/* Punto a la izquierda */}
-      <div className="absolute -left-1 -top-1 w-2 h-2 rounded-full bg-primario-zen" />
-      {/* Línea horizontal */}
-      <div className="h-px w-full bg-primario-zen/60" />
+      {/* Punto a la izquierda: Más grande y con sombra para resaltar */}
+      <div className="absolute -left-1 -top-1 w-3 h-3 rounded-full bg-primario-zen shadow-[0_0_8px_rgba(var(--color-primario-zen),0.8)]" />
+      {/* Línea horizontal: Más gruesa y con color más intenso */}
+      <div className="h-0.5 w-full bg-primario-zen opacity-80 shadow-sm" />
     </motion.div>
   );
 }

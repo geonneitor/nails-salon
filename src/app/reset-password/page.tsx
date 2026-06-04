@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -51,11 +52,17 @@ export default function ResetPasswordPage() {
     <main className="min-h-screen w-full bg-fondo-zen flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm bg-[#FDFBEE] p-8 rounded-3xl shadow-2xl border border-secundario-zen/50">
         <div className="text-center mb-8">
-          <h1 className="font-serif tracking-[0.2em] text-3xl text-primario-zen mb-2">ZEN</h1>
-          <div className="flex justify-center gap-1.5 opacity-50 mb-4">
-            {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-              <div key={i} className="w-1 h-1 rounded-full bg-primario-zen" />
-            ))}
+          <div className="flex justify-center mb-4">
+            <div className="relative w-32">
+              <Image
+                src="/zen.png"
+                alt="Zen Logo"
+                width={128}
+                height={64}
+                className="w-full h-auto object-contain"
+                priority
+              />
+            </div>
           </div>
           <p className="text-sm tracking-widest uppercase text-primario-zen/60 font-medium font-sans">
             Restablecer Contraseña

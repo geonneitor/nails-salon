@@ -1,14 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Calendar, Users, Scissors, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Scissors, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NAV_ITEMS = [
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Calendario', href: '/calendar', icon: Calendar },
   { label: 'Clientas', href: '/customers', icon: Users },
   { label: 'Servicios', href: '/services', icon: Scissors },
@@ -27,13 +29,16 @@ export function Sidebar() {
       <div className="flex flex-col gap-8">
         {/* Brand Logo */}
         <div className="flex flex-col items-center mb-4">
-          {isCollapsed ? (
-            <h1 className="text-primario-zen font-serif text-2xl tracking-tighter">Z</h1>
-          ) : (
-            <h1 className="text-primario-zen font-serif text-4xl tracking-[0.2em] ml-[0.2em]">
-              ZEN
-            </h1>
-          )}
+          <div className={`relative transition-all duration-300 ${isCollapsed ? 'w-10' : 'w-32'}`}>
+            <Image
+              src="/zen.png"
+              alt="Zen Logo"
+              width={128}
+              height={64}
+              className="w-full h-auto object-contain"
+              priority
+            />
+          </div>
           {!isCollapsed && (
             <div className="flex gap-1.5 mt-2">
               {Array.from({ length: 7 }).map((_, i) => (

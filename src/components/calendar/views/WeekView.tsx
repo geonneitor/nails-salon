@@ -145,6 +145,7 @@ export function WeekView({
                     key={appointment.id}
                     appointment={appointment}
                     hourHeight={hourHeight}
+                    currentTime={currentTime}
                     columnIndex={columnIndex}
                     columnCount={columnCount}
                     onClick={() => onAppointmentClick(appointment)}

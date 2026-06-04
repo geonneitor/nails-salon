@@ -26,12 +26,21 @@ export default function HomePage() {
             {/* Soft glow behind logo that intensifies on hover */}
             <div className="absolute inset-0 bg-accent-gold/20 blur-3xl rounded-full transition-opacity duration-500 group-hover:opacity-100 opacity-40" />
 
-            <img
-              src="/zen-logo.svg"
-              alt="Zen Logo"
-              className="relative z-30 w-full h-auto object-contain drop-shadow-2xl"
-              style={{ height: 'auto' }}
-            />
+            <div className="relative z-30 w-full h-auto drop-shadow-2xl">
+              <svg width="300" height="150" viewBox="0 0 300 150" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
+                <circle cx="150" cy="75" r="60" fill="url(#zen-gradient)" fillOpacity="0.2" />
+                <circle cx="150" cy="75" r="45" stroke="#D4AF37" strokeWidth="1.5" strokeDasharray="10 5" opacity="0.6" />
+                <circle cx="150" cy="75" r="42" stroke="#D4AF37" strokeWidth="0.5" />
+                <text x="150" y="82" textAnchor="middle" fontFamily="Georgia, serif" fontSize="32" fontWeight="300" fill="#4A533E" letterSpacing="0.2em">ZEN</text>
+                <circle cx="150" cy="95" r="2" fill="#D4AF37" />
+                <defs>
+                  <linearGradient id="zen-gradient" x1="150" y1="15" x2="150" y2="135" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#D4AF37" />
+                    <stop offset="1" stopColor="#D4AF37" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
           </div>
 
           {/* Zen Dots: Now as elegant separators with a subtle glow */}

@@ -65,6 +65,7 @@ export function LoginForm() {
               width={128}
               height={64}
               className="relative w-full h-auto object-contain drop-shadow-sm"
+              style={{ height: 'auto' }}
               priority
             />
           </div>

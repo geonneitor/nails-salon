@@ -32,6 +32,7 @@ export default function HomePage() {
               width={320}
               height={160}
               className="relative z-30 w-full h-auto object-contain drop-shadow-2xl"
+              style={{ height: 'auto' }}
               priority
             />
           </div>

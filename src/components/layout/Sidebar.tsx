@@ -36,6 +36,7 @@ export function Sidebar() {
               width={144}
               height={72}
               className="w-full h-auto object-contain drop-shadow-md"
+              style={{ height: 'auto' }}
               priority
             />
           </div>

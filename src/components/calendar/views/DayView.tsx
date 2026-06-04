@@ -1,6 +1,6 @@
 'use client';
 
-import { format, addDays, isSameDay } from 'date-fns';
+import { format, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMemo } from 'react';
 import { AppointmentBlock } from '../AppointmentBlock';
@@ -12,29 +12,22 @@ import {
   isSameLocalDay,
   startOfLocalDay,
 } from '@/lib/calendarGrid';
-import { layoutAppointments } from '@/lib/appointmentLayout';
-import type { AppointmentWithRelations, TimeBlockWithEmployee } from '@/types/supabase';
+import type { AppointmentWithRelations, Employee } from '@/types/supabase';
 
 interface DayViewProps {
   date: Date;
   appointments: AppointmentWithRelations[];
-  timeBlocks?: TimeBlockWithEmployee[];
+  employees: Employee[]; // Added employees
   hourHeight: number;
   currentTime: Date;
   onAppointmentClick: (a: AppointmentWithRelations) => void;
-  /** Click en un slot vacío → nueva cita con hora pre-llenada. */
   onSlotClick?: (date: Date, hour: number, minute: number) => void;
 }
 
-/**
- * Vista Día: columna única con grid horario (6:00–22:00).
- * - Citas posicionadas absolutamente por start_time/end_time.
- * - TimeIndicatorLine moviéndose con la hora actual.
- * - Click en slot vacío abre NewAppointmentModal con hora pre-llenada.
- */
 export function DayView({
   date,
   appointments,
+  employees,
   hourHeight,
   currentTime,
   onAppointmentClick,
@@ -42,20 +35,27 @@ export function DayView({
 }: DayViewProps) {
   const hourSlots = useMemo(() => buildHourSlots('es'), []);
 
+  // Filtramos citas del día y aseguramos que tengan start_time válido para evitar crashes
   const dayAppointments = useMemo(
-    () => appointments.filter((a) => isSameLocalDay(new Date(a.start_time), date)),
+    () => appointments.filter((a) => a.start_time && isSameLocalDay(new Date(a.start_time), date)),
     [appointments, date]
   );
 
-  const layout = useMemo(() => layoutAppointments(dayAppointments), [dayAppointments]);
-
   const isToday = isSameDay(date, new Date());
   const showTimeLine = isToday;
-
   const totalHeight = GRID_HOURS * hourHeight;
 
+  // Mapeamos citas a sus respectivos empleados
+  const appointmentsByEmployee = useMemo(() => {
+    const map: Record<string, AppointmentWithRelations[]> = {};
+    employees.forEach(emp => {
+      map[emp.id] = dayAppointments.filter(a => a.employee_id === emp.id);
+    });
+    return map;
+  }, [employees, dayAppointments]);
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 overflow-hidden">
       {/* Encabezado del día */}
       <div className="flex items-baseline justify-between px-1">
         <h3 className="font-serif text-primario-zen text-xl capitalize">
@@ -68,11 +68,11 @@ export function DayView({
         </span>
       </div>
 
-      {/* Grid: etiquetas de hora + columna del día */}
-      <div className="relative flex bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm overflow-hidden">
-        {/* Columna de horas (sticky labels) */}
+      {/* Grid: Etiquetas de hora + Columnas de Empleadas */}
+      <div className="relative flex bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm overflow-x-auto overflow-y-hidden">
+        {/* Columna de horas (Sticky) */}
         <div
-          className="flex-shrink-0 w-14 border-r border-secundario-zen/50"
+          className="flex-shrink-0 w-14 border-r border-secundario-zen/50 bg-fondo-zen z-20 sticky left-0"
           style={{ height: totalHeight }}
         >
           {hourSlots.map((slot) => (
@@ -86,36 +86,58 @@ export function DayView({
           ))}
         </div>
 
-        {/* Columna principal con slots clickeables */}
-        <div
-          className="relative flex-1"
-          style={{ height: totalHeight }}
-        >
-          {/* Filas horizontales + slots clickeables */}
-          {hourSlots.map((slot) => (
-            <button
-              key={slot.hour}
-              type="button"
-              onClick={() => onSlotClick?.(startOfLocalDay(date), slot.hour, 0)}
-              aria-label={`Agendar cita a las ${slot.label}`}
-              className="absolute left-0 right-0 border-b border-secundario-zen/30 hover:bg-secundario-zen/20 transition-colors"
-              style={{ top: (slot.hour - GRID_START_HOUR) * hourHeight, height: hourHeight }}
-            />
-          ))}
+        {/* Contenedor de columnas de empleadas */}
+        <div className="relative flex-1 flex">
+          {employees.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center text-primario-zen/30 font-serif italic py-20">
+              No hay empleadas configuradas
+            </div>
+          ) : (
+            employees.map((emp) => (
+              <div
+                key={emp.id}
+                className="flex-1 min-w-[160px] border-r last:border-r-0 border-secundario-zen/30 relative group"
+                style={{ height: totalHeight }}
+              >
+                {/* Nombre de la empleada (Header) */}
+                <div className="sticky top-0 z-10 bg-fondo-zen/90 backdrop-blur-sm border-b border-secundario-zen/40 px-2 py-2 text-center">
+                  <span className="text-[11px] uppercase tracking-widest font-bold text-primario-zen/70">
+                    {emp.name}
+                  </span>
+                </div>
 
-          {/* Citas posicionadas */}
-          {layout.map(({ appointment, columnIndex, columnCount }) => (
-            <AppointmentBlock
-              key={appointment.id}
-              appointment={appointment}
-              hourHeight={hourHeight}
-              columnIndex={columnIndex}
-              columnCount={columnCount}
-              onClick={() => onAppointmentClick(appointment)}
-            />
-          ))}
+                {/* Slots clickeables para agendar */}
+                {hourSlots.map((slot) => (
+                  <button
+                    key={slot.hour}
+                    type="button"
+                    onClick={() => onSlotClick?.(startOfLocalDay(date), slot.hour, 0)}
+                    aria-label={`Agendar con ${emp.name} a las ${slot.label}`}
+                    className="absolute left-0 right-0 border-b border-secundario-zen/20 hover:bg-secundario-zen/20 transition-colors"
+                    style={{
+                      top: (slot.hour - GRID_START_HOUR) * hourHeight,
+                      height: hourHeight,
+                      width: '100%'
+                    }}
+                  />
+                ))}
 
-          {/* Línea de hora actual */}
+                {/* Citas de esta empleada */}
+                {(appointmentsByEmployee[emp.id] || []).map((appt) => (
+                  <AppointmentBlock
+                    key={appt.id}
+                    appointment={appt}
+                    hourHeight={hourHeight}
+                    columnIndex={0} // Ahora es 0 porque cada empleada tiene su propia columna
+                    columnCount={1}
+                    onClick={() => onAppointmentClick(appt)}
+                  />
+                ))}
+              </div>
+            ))
+          )}
+
+          {/* Línea de hora actual (Cruza todas las columnas) */}
           <TimeIndicatorLine now={currentTime} hourHeight={hourHeight} visible={showTimeLine} />
         </div>
       </div>

@@ -77,7 +77,7 @@ export function useCalendarView(): UseCalendarViewReturn {
     if (zoom !== targetZoom) {
       setZoomState(targetZoom);
     }
-  }, [preferences, view, zoom]);
+  }, [preferences]); // Solo re-hidratar si cambian las preferencias globales
 
   // Reloj: actualiza la hora actual cada 60s.
   useEffect(() => {

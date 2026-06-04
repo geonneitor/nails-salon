@@ -76,12 +76,33 @@ export function AppointmentDetailModal({
   const { updateAppointment, error: updateError } = useAppointments();
   const { employees, isLoading: employeesLoading } = useEmployees();
 
-  if (!appointment) return null;
+  // Importante: El modal debe manejar el estado de apertura independientemente
+  // de si el objeto appointment ha llegado ya o no para evitar saltos visuales.
+  if (!isOpen) return null;
+  if (!appointment) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-end justify-center md:items-center">
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          onClick={onClose} className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
+        />
+        <div className="relative w-full md:max-w-md bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl p-8 shadow-2xl border border-secundario-zen/50">
+          <div className="flex flex-col items-center justify-center py-12 gap-4">
+            <Loader2 className="w-8 h-8 text-primario-zen animate-spin" />
+            <p className="text-primario-zen/60 text-sm font-medium">Cargando detalles...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-  const status = STATUS_CONFIG[appointment.status];
+  const status = STATUS_CONFIG[appointment.status] || STATUS_CONFIG.pending_advance;
   const startDate = new Date(appointment.start_time);
   const endDate = new Date(appointment.end_time);
   const duration = Math.round((endDate.getTime() - startDate.getTime()) / 60000);
+
+  // ... resto del código se mantiene igual ...
+
 
   // Obtener nombre del servicio o resumen del ticket
   let serviceName = appointment.service?.name;

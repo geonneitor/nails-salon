@@ -25,10 +25,10 @@ export default function HomePage() {
         Reserva tu cita aquí
       </h2>
 
-      {/* Botón de Reserva (Estilo "Pebble" / Minimalista) */}
+      {/* Botón de Ingreso (Estilo "Pebble" / Minimalista) */}
       <Link href="/calendar">
         <button className="bg-primario-zen text-fondo-zen px-10 py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm">
-          Book Appointment
+          Ingresar
         </button>
       </Link>
 

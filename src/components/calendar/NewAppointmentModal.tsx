@@ -7,13 +7,14 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2, UserPlus } from 'lucide-react';
+import { X, Loader2, UserPlus, Search } from 'lucide-react';
 import { format, addMinutes, setHours, setMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useServices } from '@/hooks/useServices';
 import { useEmployees } from '@/hooks/useEmployees';
 import { NailMenuCalculator } from '@/components/booking/NailMenuCalculator';
+import { CustomerFormModal } from '@/components/customers/CustomerFormModal';
 import type { CreateAppointmentPayload, TicketDetails } from '@/types/supabase';
 
 interface NewAppointmentModalProps {
@@ -54,11 +55,13 @@ export function NewAppointmentModal({
   defaultDate,
   onSubmit,
 }: NewAppointmentModalProps) {
-  const { customers, isLoading: loadingC } = useCustomers();
+  const { customers, isLoading: loadingC, createCustomer } = useCustomers();
   const { services, isLoading: loadingS } = useServices();
   const { employees, isLoading: loadingE } = useEmployees();
 
   const [customerId, setCustomerId] = useState('');
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [isAddingCustomer, setIsAddingCustomer] = useState(false);
   const [employeeId, setEmployeeId] = useState('');
   const [ticketDetails, setTicketDetails] = useState<TicketDetails | null>(null);
   const [totalPrice, setTotalPrice] = useState(0);
@@ -165,24 +168,59 @@ export function NewAppointmentModal({
 
                 {/* Cliente */}
                 <Field label="Cliente">
-                  <select
-                    id="new-appt-customer"
-                    value={customerId}
-                    onChange={(e) => setCustomerId(e.target.value)}
-                    className={SELECT_CLASS}
-                    required
-                  >
-                    <option value="">Selecciona una clienta…</option>
-                    {customers.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
-                  {customers.length === 0 && (
-                    <p className="text-xs text-primario-zen/50 flex items-center gap-1.5 mt-0.5">
-                      <UserPlus className="w-3 h-3" />
-                      Primero agrega clientes en la sección Customers.
-                    </p>
-                  )}
+                  <div className="relative flex flex-col gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primario-zen/40" />
+                      <input
+                        type="text"
+                        value={customerSearch}
+                        onChange={(e) => setCustomerSearch(e.target.value)}
+                        className={SELECT_CLASS}
+                        placeholder="Buscar clienta..."
+                      />
+                    </div>
+
+                    <div className="max-h-48 overflow-y-auto rounded-xl border border-secundario-zen/50 bg-white/50 backdrop-blur-sm">
+                      {customers
+                        .filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()))
+                        .map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => {
+                              setCustomerId(c.id);
+                              setCustomerSearch(c.name);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors font-sans ${
+                              customerId === c.id
+                                ? 'bg-primario-zen text-fondo-zen font-semibold'
+                                : 'text-primario-zen hover:bg-secundario-zen/30'
+                            }`}
+                          >
+                            {c.name}
+                          </button>
+                        ))
+                      }
+
+                      {customerSearch &&
+                        customers.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase())).length === 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingCustomer(true)}
+                          className="w-full text-left px-4 py-3 text-xs text-primario-zen/60 hover:text-primario-zen flex items-center gap-2 font-sans italic"
+                        >
+                          <UserPlus className="w-3 h-3" />
+                          No encontrada. Agregar nueva clienta...
+                        </button>
+                      )}
+
+                      {!customerSearch && customers.length > 0 && (
+                        <p className="px-4 py-2 text-[10px] text-primario-zen/40 uppercase tracking-widest font-semibold">
+                          Selecciona una clienta de la lista
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </Field>
 
                 {/* Empleado */}
@@ -272,6 +310,18 @@ export function NewAppointmentModal({
               </form>
             )}
           </motion.div>
+          <CustomerFormModal
+            isOpen={isAddingCustomer}
+            onClose={() => setIsAddingCustomer(false)}
+            onSubmit={async (payload) => {
+              const newCustomer = await createCustomer(payload);
+              if (newCustomer) {
+                setCustomerId(newCustomer.id);
+                setCustomerSearch(newCustomer.name);
+              }
+              return newCustomer;
+            }}
+          />
         </div>
       )}
     </AnimatePresence>

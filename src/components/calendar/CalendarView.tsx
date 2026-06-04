@@ -10,7 +10,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { addDays, addMonths, addWeeks, format, isSameDay, startOfWeek, subDays, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Plus, RefreshCw, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, RefreshCw, Loader2, Filter, Users, Circle, Clock } from 'lucide-react';
 import { AppointmentDetailModal } from './AppointmentDetailModal';
 import { NewAppointmentModal } from './NewAppointmentModal';
 import { ViewSwitcher } from './ViewSwitcher';
@@ -20,6 +20,7 @@ import { WeekView } from './views/WeekView';
 import { MonthView } from './views/MonthView';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useTimeBlocks } from '@/hooks/useTimeBlocks';
+import { useEmployees } from '@/hooks/useEmployees';
 import { useCalendarView } from '@/hooks/useCalendarView';
 import { useApp } from '@/context/AppContext';
 import { useProject } from '@/context/AppContext';
@@ -41,6 +42,10 @@ export function CalendarView() {
   const [prefilledDate, setPrefilledDate] = useState<Date>(new Date());
 
   const { view, setView, zoom, setZoom, hourHeight, currentTime } = useCalendarView();
+  const { employees, isLoading: loadingE } = useEmployees(); // <- Added employees
+  const [showActiveOnly, setShowActiveOnly] = useState(false);
+  const [showShiftOnly, setShowShiftOnly] = useState(false);
+  const [hiddenStatuses, setHiddenStatuses] = useState<AppointmentStatus[]>([]);
 
   // Sincronizar vista inicial con preferencias del usuario
   useEffect(() => {
@@ -82,6 +87,18 @@ export function CalendarView() {
   const { appointments, isLoading, error, createAppointment, updateAppointment, refetch } =
     useAppointments({ projectId, dateRange });
   const { timeBlocks } = useTimeBlocks({ projectId, dateRange });
+
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter((appt) => {
+      // 1. Filtro de empleadas activas
+      if (showActiveOnly && !appt.employee?.isActive) return false;
+      // 2. Filtro de turno
+      if (showShiftOnly && !appt.employee?.isOnShift) return false;
+      // 3. Filtro de colores (status)
+      if (hiddenStatuses.includes(appt.status)) return false;
+      return true;
+    });
+  }, [appointments, showActiveOnly, showShiftOnly, hiddenStatuses]);
 
   // Navegación
   const handlePrev = () => {
@@ -168,6 +185,65 @@ export function CalendarView() {
           </div>
         </div>
 
+        {/* Filter Bar */}
+        <div className="bg-fondo-zen rounded-3xl p-3 shadow-sm border border-secundario-zen/50 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-secundario-zen/30 border border-secundario-zen/60 text-primario-zen/50 transition-all">
+              <Filter className="w-3 h-3" />
+              <span className="text-[10px] uppercase tracking-widest font-bold">Filtros</span>
+            </div>
+
+            <button
+              onClick={() => setShowActiveOnly(!showActiveOnly)}
+              className={`px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-semibold transition-all flex items-center gap-1.5 ${
+                showActiveOnly
+                  ? 'bg-primario-zen text-fondo-zen shadow-sm'
+                  : 'bg-secundario-zen/30 text-primario-zen/60 hover:text-primario-zen'
+              }`}
+            >
+              <Users className="w-3 h-3" />
+              Activas
+            </button>
+
+            <button
+              onClick={() => setShowShiftOnly(!showShiftOnly)}
+              className={`px-3 py-1.5 rounded-full text-[10px] uppercase tracking-widest font-semibold transition-all flex items-center gap-1.5 ${
+                showShiftOnly
+                  ? 'bg-primario-zen text-fondo-zen shadow-sm'
+                  : 'bg-secundario-zen/30 text-primario-zen/60 hover:text-primario-zen'
+              }`}
+            >
+              <Clock className="w-3 h-3" />
+              En Turno
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {['pending_advance', 'confirmed', 'completed', 'cancelled'].map((status) => (
+              <button
+                key={status}
+                onClick={() => {
+                  setHiddenStatuses(prev =>
+                    prev.includes(status as AppointmentStatus)
+                      ? prev.filter(s => s !== status)
+                      : [...prev, status as AppointmentStatus]
+                  );
+                }}
+                className={`w-3 h-3 rounded-full transition-all ${
+                  hiddenStatuses.includes(status as AppointmentStatus)
+                    ? 'opacity-20 scale-75'
+                    : 'opacity-100 scale-100'
+                } ${
+                  status === 'pending_advance' ? 'bg-yellow-400' :
+                  status === 'confirmed' ? 'bg-green-400' :
+                  status === 'completed' ? 'bg-purple-400' : 'bg-red-400'
+                }`}
+                title={status}
+              />
+            ))}
+          </div>
+        </div>
+
         {/* Error / estados vacíos globales */}
         {error && !activeProject && (
           <div className="text-center py-8 bg-amber-50 rounded-2xl border border-amber-200">
@@ -198,7 +274,8 @@ export function CalendarView() {
             {view === 'day' && (
               <DayView
                 date={anchorDate}
-                appointments={appointments}
+                appointments={filteredAppointments}
+                employees={employees} // <- Passed employees
                 hourHeight={hourHeight}
                 currentTime={currentTime}
                 onAppointmentClick={setSelectedAppointment}
@@ -208,7 +285,7 @@ export function CalendarView() {
             {view === 'week' && (
               <WeekView
                 date={anchorDate}
-                appointments={appointments}
+                appointments={filteredAppointments}
                 hourHeight={hourHeight}
                 currentTime={currentTime}
                 onAppointmentClick={setSelectedAppointment}
@@ -218,7 +295,7 @@ export function CalendarView() {
             {view === 'month' && (
               <MonthView
                 date={anchorDate}
-                appointments={appointments}
+                appointments={filteredAppointments}
                 onDayClick={(d) => {
                   setSelectedDate(d);
                   setAnchorDate(d);

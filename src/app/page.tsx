@@ -18,7 +18,7 @@ export default function HomePage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.2, ease: "easeOut" }}
-        className="relative z-10 flex flex-col items-center"
+        className="relative z-20 flex flex-col items-center"
       >
         {/* Logo Section: No box, pure atmospheric integration */}
         <div className="flex flex-col items-center mb-16 group cursor-pointer">
@@ -31,13 +31,13 @@ export default function HomePage() {
               alt="Zen Logo"
               width={320}
               height={160}
-              className="relative w-full h-auto object-contain drop-shadow-2xl"
+              className="relative z-30 w-full h-auto object-contain drop-shadow-2xl"
               priority
             />
           </div>
 
           {/* Zen Dots: Now as elegant separators with a subtle glow */}
-          <div className="flex gap-3 mt-6">
+          <div className="flex gap-3 mt-6 relative z-30">
             {Array.from({ length: 7 }).map((_, i) => (
               <motion.span
                 key={i}

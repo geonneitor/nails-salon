@@ -129,7 +129,7 @@ export function LoginForm() {
         </form>
       ) : (
         <form onSubmit={handleLogin} className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5 font-sans">
+          <div className="flex flex--col gap-1.5 font-sans">
             <label className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/50">
               Correo Electrónico
             </label>

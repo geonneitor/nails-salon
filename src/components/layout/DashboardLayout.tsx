@@ -33,9 +33,9 @@ if (!user) {
 }
 
 return (
-  <div className="flex min-h-screen bg-fondo-zen relative">
+  <div className="flex min-h-screen bg-fondo-zen relative overflow-hidden">
     <Sidebar />
-    <main className="flex-1 flex flex-col h-screen overflow-y-auto pb-20 md:pb-0">
+    <main className="flex-1 flex flex-col h-screen overflow-y-auto pb-24 md:pb-0">
       {children}
     </main>
     <MobileNav />

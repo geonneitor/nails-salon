@@ -2,6 +2,21 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const hostname = request.headers.get('host');
+
+  // 1. Subdomain / Routing Logic
+  const appHostname = 'app.tusalondeunas.com';
+  const isAppDomain = hostname === appHostname || hostname?.includes('localhost');
+
+  if (isAppDomain) {
+    // Rewrite root to dashboard for App domain
+    if (pathname === '/' || pathname === '/home') {
+      return NextResponse.rewrite(new URL('/dashboard', request.url));
+    }
+  }
+
+  // 2. Auth Session Management (Supabase)
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -46,25 +61,30 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session and check authentication
   try {
     const { data: { user } } = await supabase.auth.getUser();
 
-    const isRootPage = request.nextUrl.pathname === '/';
+    const isRootPage = pathname === '/';
+    const isLoginPage = pathname.startsWith('/login');
+    const isAuthPage = isLoginPage || pathname.startsWith('/forgot-password') || pathname.startsWith('/reset-password');
 
-    // 1. If authenticated and visiting root, go to dashboard
-    if (user && isRootPage) {
+    // A. If authenticated and visiting root, go to dashboard (only on App domain or if user wants)
+    if (user && isRootPage && isAppDomain) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    // 2. If NOT authenticated and visiting a protected page (anything other than root/login), go to login
-    if (!user && !isRootPage) {
+    // B. If NOT authenticated and visiting a protected page, go to login
+    // Protected pages are anything that isn't root or an auth page
+    if (!user && !isRootPage && !isAuthPage) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
   } catch (error) {
     console.error('Auth error in middleware:', error);
-    // Critical token errors should force a redirect to login to clear state
-    return NextResponse.redirect(new URL('/login', request.url));
+    // Avoid redirecting to login if we are already on an auth page to prevent loops
+    const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/forgot-password') || pathname.startsWith('/reset-password');
+    if (!isAuthPage) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
   }
 
   return response;
@@ -78,8 +98,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - login (login page - we don't want to refresh session on login page)
+     * - manifest.json
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|login).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|manifest.json).*)',
   ],
 };

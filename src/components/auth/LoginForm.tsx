@@ -184,9 +184,7 @@ export function LoginForm() {
           <button
             type="button"
             onClick={() => {
-              setIsRecovery(true);
-              setError(null);
-              setSuccessMessage(null);
+              router.push('/forgot-password');
             }}
             className="w-full text-primario-zen/60 py-2 rounded-full uppercase tracking-widest text-[10px] font-semibold hover:text-primario-zen transition-all font-sans"
           >

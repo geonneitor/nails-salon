@@ -29,7 +29,13 @@ import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supaba
 
 const PROJECT_ID = process.env.NEXT_PUBLIC_PROJECT_ID ?? '';
 
-export function CalendarView() {
+export function CalendarView({
+  readOnly = false,
+  customerFilterId = null,
+}: {
+  readOnly?: boolean;
+  customerFilterId?: string | null;
+}) {
   //  ¡Esto es lo correcto! Cada cosa de su respectivo Hook
   const { activeProject } = useProject();
   const { preferences } = useApp(); // <- Aquí es donde realmente vive 'preferences'
@@ -76,7 +82,7 @@ export function CalendarView() {
   }, [anchorDate, view]);
 
   const { appointments, isLoading, error, createAppointment, updateAppointment, refetch } =
-    useAppointments({ projectId, dateRange });
+    useAppointments({ projectId, dateRange, customerId: customerFilterId });
   const { timeBlocks } = useTimeBlocks({ projectId, dateRange });
 
   const filteredAppointments = useMemo(() => {
@@ -107,12 +113,14 @@ export function CalendarView() {
   const monthLabel = format(anchorDate, 'MMMM yyyy', { locale: es });
 
   const handleStatusChange = async (id: string, status: AppointmentStatus) => {
+    if (readOnly) return;
     await updateAppointment(id, { status });
     setSelectedAppointment(null);
     refetch();
   };
 
   const handleSlotClick = (date: Date, hour: number, minute: number) => {
+    if (readOnly) return;
     const d = new Date(date);
     d.setHours(hour, minute, 0, 0);
     setPrefilledDate(d);
@@ -164,17 +172,19 @@ export function CalendarView() {
                 console.log('Changing zoom to:', z);
                 setZoom(z);
               }} />}
-              <button
-                onClick={() => {
-                  console.log('Opening new appointment modal');
-                  setPrefilledDate(selectedDate);
-                  setIsNewModalOpen(true);
-                }}
-                aria-label="Nueva cita"
-                className="flex items-center justify-center w-9 h-9 rounded-full bg-primario-zen text-fondo-zen hover:bg-opacity-90 transition-all shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
+              {!readOnly && (
+                <button
+                  onClick={() => {
+                    console.log('Opening new appointment modal');
+                    setPrefilledDate(selectedDate);
+                    setIsNewModalOpen(true);
+                  }}
+                  aria-label="Nueva cita"
+                  className="flex items-center justify-center w-9 h-9 rounded-full bg-primario-zen text-fondo-zen hover:bg-opacity-90 transition-all shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
         </div>

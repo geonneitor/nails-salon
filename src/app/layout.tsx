@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 export const metadata: Metadata = {
   title: 'Salón de Uñas - Gestión de Citas',
   description: 'Sistema premium de gestión de citas para salón de uñas.',
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({

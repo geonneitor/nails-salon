@@ -20,6 +20,10 @@ interface UseAppointmentsOptions {
    * ambas vistas (ej. viernes 23:00 → sábado 01:00).
    */
   dateRange?: { from: string; to: string };
+  /**
+   * Filtra citas para un cliente específico.
+   */
+  customerId?: string | null;
 }
 
 interface UseAppointmentsReturn {
@@ -28,12 +32,14 @@ interface UseAppointmentsReturn {
   error: string | null;
   createAppointment: (payload: CreateAppointmentPayload) => Promise<Appointment | null>;
   updateAppointment: (id: string, payload: UpdateAppointmentPayload) => Promise<boolean>;
+  checkEmployeeAvailability: (employeeId: string, start: Date, end: Date) => Promise<{ available: boolean; reason?: string }>;
   refetch: () => Promise<void>;
 }
 
 export function useAppointments({
   projectId,
   dateRange,
+  customerId,
 }: UseAppointmentsOptions = { projectId: null }): UseAppointmentsReturn {
   const [appointments, setAppointments] = useState<AppointmentWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,6 +64,10 @@ export function useAppointments({
       .eq('project_id', projectId)
       .order('start_time', { ascending: true });
 
+    if (customerId) {
+      query = query.eq('customer_id', customerId);
+    }
+
     if (dateRange?.from && dateRange?.to) {
       // Intersección: trae citas cuyo rango [start, end] solapa con [from, to].
       // Lógica: cita.inicio <= rango.fin  AND  cita.fin >= rango.inicio
@@ -67,7 +77,7 @@ export function useAppointments({
     }
 
     return query;
-  }, [dateRange?.from, dateRange?.to, projectId]);
+  }, [dateRange?.from, dateRange?.to, projectId, customerId]);
 
   const fetchAppointments = useCallback(async () => {
     if (!projectId) {
@@ -126,6 +136,44 @@ export function useAppointments({
   }, [fetchAppointments, projectId]);
 
   // ----- Mutaciones -----
+
+  const checkEmployeeAvailability = useCallback(
+    async (employeeId: string, start: Date, end: Date): Promise<{ available: boolean; reason?: string }> => {
+      const startTime = start.toISOString();
+      const endTime = end.toISOString();
+
+      // 1. Check for overlapping appointments
+      const { data: overlappingAppts, error: apptError } = await supabase
+        .from('appointments')
+        .select('id')
+        .eq('employee_id', employeeId)
+        .lt('start_time', endTime)
+        .gt('end_time', startTime)
+        .limit(1);
+
+      if (apptError) return { available: false, reason: apptError.message };
+      if (overlappingAppts && overlappingAppts.length > 0) {
+        return { available: false, reason: 'La empleada ya tiene una cita agendada.' };
+      }
+
+      // 2. Check for overlapping time blocks
+      const { data: overlappingBlocks, error: blockError } = await supabase
+        .from('time_blocks')
+        .select('id')
+        .eq('employee_id', employeeId)
+        .lt('start_time', endTime)
+        .gt('end_time', startTime)
+        .limit(1);
+
+      if (blockError) return { available: false, reason: blockError.message };
+      if (overlappingBlocks && overlappingBlocks.length > 0) {
+        return { available: false, reason: 'La empleada tiene un bloqueo de horario.' };
+      }
+
+      return { available: true };
+    },
+    [projectId]
+  );
 
   const createAppointment = useCallback(
     async (payload: CreateAppointmentPayload): Promise<Appointment | null> => {
@@ -215,6 +263,7 @@ export function useAppointments({
     error,
     createAppointment,
     updateAppointment,
+    checkEmployeeAvailability,
     refetch: fetchAppointments,
   };
 }

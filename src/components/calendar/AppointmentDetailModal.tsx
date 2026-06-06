@@ -137,6 +137,22 @@ export function AppointmentDetailModal({
     }
   };
 
+  const handleSendWhatsApp = () => {
+    if (!appointment.customer.phone) {
+      alert('El cliente no tiene un teléfono registrado.');
+      return;
+    }
+
+    const phone = appointment.customer.phone.replace(/\D/g, '');
+    const dateStr = format(startDate, "EEEE d 'de' MMMM", { locale: es });
+    const timeStr = format(startDate, 'h:mm a');
+
+    const message = `Hola ${appointment.customer.name}! ✨ Te recordamos tu cita en Zen Nail Salon el día ${dateStr} a las ${timeStr}. ¡Te esperamos! 💅`;
+    const encodedMessage = encodeURIComponent(message);
+
+    window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+  };
+
   const renderTicketDetailsBreakdown = () => {
     const details = appointment.ticket_details;
     if (!details || !details.activeServices) return null;
@@ -325,15 +341,23 @@ export function AppointmentDetailModal({
             )}
 
             {/* Action Buttons */}
-            {onStatusChange && appointment.status !== 'confirmed_advance' && (
+            <div className="flex flex-col gap-3 mt-6">
               <button
-                id={`confirm-appointment-${appointment.id}`}
-                onClick={() => onStatusChange(appointment.id, 'confirmed_advance')}
-                className="w-full bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm mt-6 font-sans"
+                onClick={handleSendWhatsApp}
+                className="w-full bg-white text-primario-zen border border-primario-zen/30 py-3 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-primario-zen/5 transition-all shadow-sm flex items-center justify-center gap-2 font-sans"
               >
-                Confirmar Anticipo
+                Recordatorio WhatsApp
               </button>
-            )}
+              {onStatusChange && appointment.status !== 'confirmed_advance' && (
+                <button
+                  id={`confirm-appointment-${appointment.id}`}
+                  onClick={() => onStatusChange(appointment.id, 'confirmed_advance')}
+                  className="w-full bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm font-sans"
+                >
+                  Confirmar Anticipo
+                </button>
+              )}
+            </div>
           </motion.div>
         </div>
       )}

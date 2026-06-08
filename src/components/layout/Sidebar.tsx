@@ -30,9 +30,9 @@ export function Sidebar() {
         <div className="flex flex-col items-center mb-6 group relative px-2">
           <div className={`relative transition-all duration-500 ${isCollapsed ? 'w-10' : 'w-36'} group-hover:scale-110 transition-transform`}>
             <img
-              src="/zen-logo.png"
+              src="/zen-logo.svg"
               alt="Zen Logo"
-              className="w-full h-auto object-contain drop-shadow-md"
+              className="h-10 w-auto object-contain"
               style={{ height: 'auto' }}
             />
           </div>

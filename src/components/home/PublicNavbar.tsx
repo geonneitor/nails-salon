@@ -12,7 +12,7 @@ export default function PublicNavbar() {
     >
       <div className="flex items-center">
         <Link href="/">
-          <img src="/zen-logo.png" alt="Zen Nail Salon" className="h-8 w-auto object-contain" />
+          <img src="/zen-logo.svg" alt="Zen Nail Salon" className="h-12 w-auto object-contain" />
         </Link>
       </div>
 

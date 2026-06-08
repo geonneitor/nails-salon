@@ -51,7 +51,7 @@ export default function ResetPasswordPage() {
           <div className="flex justify-center mb-4">
             <div className="relative w-32">
               <img
-                src="/zen-logo.png"
+                src="/zen-logo.svg"
                 alt="Zen Logo"
                 className="w-full h-auto object-contain"
                 style={{ height: 'auto' }}

@@ -43,7 +43,7 @@ export default function LandingPage() {
       {/* ── Footer ── */}
       <footer className="py-12 px-6 bg-surface-container-lowest border-t border-surface-container">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <img src="/zen-logo.png" alt="Zen Nail Salon" className="h-8 w-auto object-contain opacity-60 grayscale" />
+          <img src="/zen-logo.svg" alt="Zen Nail Salon" className="h-12 w-auto object-contain opacity-60 grayscale" />
           <p className="font-sans text-xs text-primary/60 text-center">
             © {new Date().getFullYear()} Zen Nail Salon. Rituales de Calma.
           </p>

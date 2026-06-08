@@ -48,7 +48,39 @@ export function AppearanceSettings() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* (Tema Visual eliminado porque la app ahora usa un diseño único premium) */}
+          {/* Tema Visual */}
+          <div className="flex flex-col gap-3">
+            <label className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/40">
+              Tema de Color
+            </label>
+            <div className="flex gap-3">
+              {[
+                { id: 'zen-light', label: 'Boutique (Claro)', color: '#F7F5F0' },
+                { id: 'zen-dark', label: 'Nocturno (Oscuro)', color: '#1A1C18' },
+              ].map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => updatePreference?.({ theme: t.id as any })}
+                  className={`group relative w-10 h-10 rounded-full transition-all duration-300 ${
+                    safePreferences.theme === t.id
+                      ? 'ring-2 ring-primario-zen ring-offset-2'
+                      : 'hover:scale-110 shadow-sm'
+                  }`}
+                  title={t.label}
+                >
+                  <div
+                    className="w-full h-full rounded-full border border-secundario-zen/50 shadow-inner"
+                    style={{ backgroundColor: t.color }}
+                  />
+                  {safePreferences.theme === t.id && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-2 h-2 bg-primario-zen rounded-full shadow-sm" />
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Densidad de Información */}
           <div className="flex flex-col gap-3">

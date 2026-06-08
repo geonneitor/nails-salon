@@ -124,11 +124,23 @@ body {
   font-family: var(--font-manrope), sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: max(884px, 100dvh);
+  /* Añadimos un ruido muy sutil o textura si se requiere, pero por ahora mantenemos limpio con profundidad en componentes */
 }
 
-/* Utilities */
+/* Utilities para hacer el diseño "menos plano" */
 .soft-shadow {
-  box-shadow: 0 10px 40px -10px rgba(75, 94, 56, 0.05);
+  box-shadow: 0 10px 40px -10px rgba(75, 94, 56, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
+}
+
+.card-depth {
+  background: linear-gradient(145deg, var(--surface-container-lowest), var(--surface-container));
+  box-shadow: 8px 8px 24px rgba(0,0,0,0.03), -8px -8px 24px rgba(255,255,255,0.8);
+  border: 1px solid var(--surface-container-highest);
+}
+
+[data-theme='zen-dark'] .card-depth {
+  background: linear-gradient(145deg, var(--surface-container-low), var(--surface-container-high));
+  box-shadow: 8px 8px 24px rgba(0,0,0,0.2), -8px -8px 24px rgba(255,255,255,0.02);
 }
 
 /* Scrollbar hide for horizontal filters if needed */

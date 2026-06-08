@@ -88,8 +88,9 @@ export function useTimeBlocks({
 
     if (!projectId) return;
 
+    const channelId = `time_blocks_${projectId}_${Math.random().toString(36).substring(7)}`;
     const channel = supabase
-      .channel(`time_blocks:project:${projectId}`)
+      .channel(channelId)
       .on(
         'postgres_changes',
         {

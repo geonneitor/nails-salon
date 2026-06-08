@@ -2,90 +2,146 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Modifica esta línea en tu globals.css para que acepte tanto el root como el ID 'zen-light' */
 :root, [data-theme='zen-light'] {
-  --fondo-zen: #F7F5F0;
-  --primario-zen: #4A533E;
-  --secundario-zen: #E8E2D6;
-  --accent-gold: #D4AF37;
-  --accent-sage: #B2BCA3;
-  --deep-botanical: #2D3326;
-  --pearl-white: #FCFAf7;
+  --surface: #FAF8F5;
+  --surface-dim: #EFECE5;
+  --surface-bright: #FAF8F5;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #F6F4F0;
+  --surface-container: #F1EFEA;
+  --surface-container-high: #ECEAE4;
+  --surface-container-highest: #E7E4DE;
+  --on-surface: #2C3326;
+  --on-surface-variant: #4A5144;
+  --inverse-surface: #2C3326;
+  --inverse-on-surface: #edf3e0;
+  --outline: #75786e;
+  --outline-variant: #c5c8bb;
+  --surface-tint: #51643e;
+  --primary: #344623;
+  --on-primary: #ffffff;
+  --primary-container: #4b5e38;
+  --on-primary-container: #c0d6a7;
+  --inverse-primary: #b8ce9f;
+  --secondary: #635e55;
+  --on-secondary: #ffffff;
+  --secondary-container: #e6dfd4;
+  --on-secondary-container: #676259;
+  --tertiary: #414239;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #59594f;
+  --on-tertiary-container: #d1d0c3;
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  --primary-fixed: #d3eab9;
+  --primary-fixed-dim: #b8ce9f;
+  --on-primary-fixed: #102002;
+  --on-primary-fixed-variant: #3a4c28;
+  --secondary-fixed: #e9e1d7;
+  --secondary-fixed-dim: #cdc5bb;
+  --on-secondary-fixed: #1e1b15;
+  --on-secondary-fixed-variant: #4b463e;
+  --tertiary-fixed: #e5e3d6;
+  --tertiary-fixed-dim: #c8c7bb;
+  --on-tertiary-fixed: #1b1c15;
+  --on-tertiary-fixed-variant: #47473e;
+  --background: #FAF8F5;
+  --on-background: #2C3326;
+  --surface-variant: #E7E4DE;
+
+  /* Premium Gold & Botanical Palette */
+  --accent-gold-primary: #D4AF37;
+  --accent-gold-light: #f0d060;
+  --accent-gold-dark: #b8960c;
+  --deep-botanical-1: #1A1F14;
+  --deep-botanical-2: #2D3326;
+  --deep-botanical-3: #3d4432;
+  --pearl-white: #F7F5F0;
+
+  /* Luxury Accents */
+  --accent-lavender: #B4A0C8;
+  --accent-lavender-light: #E2D6E8;
+  --accent-lavender-dark: #967AA8;
 }
 
 [data-theme='zen-dark'] {
-  --fondo-zen: #1A1C18;
-  --primario-zen: #A3B18A;
-  --secundario-zen: #343A2E;
-  --accent-gold: #C5A059;
-  --accent-sage: #6B7A5F;
-  --deep-botanical: #0D0F0B;
-  --pearl-white: #E8E8E8;
+  --surface: #1A1F14;
+  --surface-dim: #13170E;
+  --surface-bright: #24291D;
+  --surface-container-lowest: #0F120B;
+  --surface-container-low: #151A0F;
+  --surface-container: #1A1F14;
+  --surface-container-high: #21261A;
+  --surface-container-highest: #282D21;
+  --on-surface: #E3E3DC;
+  --on-surface-variant: #C4C8BB;
+  --inverse-surface: #E3E3DC;
+  --inverse-on-surface: #1A1F14;
+  --outline: #8E9285;
+  --outline-variant: #44483F;
+  --surface-tint: #B8CE9F;
+  --primary: #B8CE9F;
+  --on-primary: #223510;
+  --primary-container: #394D25;
+  --on-primary-container: #D3EAB9;
+  --inverse-primary: #4B6137;
+  --secondary: #CDC5BB;
+  --on-secondary: #343027;
+  --secondary-container: #4B463D;
+  --on-secondary-container: #EAE1D7;
+  --tertiary: #C8C7BA;
+  --on-tertiary: #303126;
+  --tertiary-container: #47473C;
+  --on-tertiary-container: #E4E3D5;
+  --background: #11140D;
+  --on-background: #E3E3DC;
+  --surface-variant: #44483F;
+
+  /* Premium Gold & Botanical Palette */
+  --accent-gold-primary: #E5C354;
+  --accent-gold-light: #FCE17A;
+  --accent-gold-dark: #B8960C;
+  --deep-botanical-1: #11140D;
+  --deep-botanical-2: #1A1F14;
+  --deep-botanical-3: #24291D;
+  --pearl-white: #EAE8E2;
 }
 
-[data-theme='high-contrast'] {
-  --fondo-zen: #FFFFFF;
-  --primario-zen: #000000;
-  --secundario-zen: #DDDDDD;
-  --accent-gold: #FFD700;
-  --accent-sage: #808080;
-  --deep-botanical: #000000;
-  --pearl-white: #FFFFFF;
+
+.shadow-gold-glow {
+  box-shadow: 0 0 12px var(--accent-gold-primary);
+}
+.shadow-gold-glow-sm {
+  box-shadow: 0 0 10px var(--accent-gold-primary);
 }
 
+/* Base Body Styles */
 body {
-  background-color: var(--fondo-zen);
-  color: var(--primario-zen);
-  font-family: var(--font-calgary), serif;
+  background-color: var(--background);
+  color: var(--on-background);
+  font-family: var(--font-manrope), sans-serif;
   -webkit-font-smoothing: antialiased;
-  transition: background-color 0.5s ease, color 0.5s ease;
+  min-height: max(884px, 100dvh);
 }
 
-/* Luxury Glow Utilities */
-.zen-glow-hover {
-  transition: all 0.3s ease;
+/* Utilities */
+.soft-shadow {
+  box-shadow: 0 10px 40px -10px rgba(75, 94, 56, 0.05);
 }
 
-.zen-glow-hover:hover {
-  box-shadow: 0 0 20px var(--accent-gold), 0 0 40px var(--accent-sage);
-  filter: brightness(1.1);
-  transform: translateY(-2px);
+/* Scrollbar hide for horizontal filters if needed */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
-.zen-glow-touch {
-  transition: all 0.2s ease;
-}
-
-.zen-glow-touch:active {
-  box-shadow: 0 0 15px var(--accent-gold);
-  transform: scale(0.98);
-}
-
-/* Atmospheric Radial Gradient for Hero */
+/* Hero Gradient */
 .hero-gradient {
-  background: radial-gradient(circle at center, var(--secundario-zen) 0%, var(--fondo-zen) 70%);
+  background: radial-gradient(circle at center top, var(--surface-container-low) 0%, var(--background) 80%);
 }
 
-/* Curtain Effect Animation */
-.theme-transition {
-  transition: opacity 0.8s ease-in-out;
-}
-
-.curtain-closing {
-  animation: curtain-fade 0.8s ease-in-out forwards;
-}
-
-@keyframes curtain-fade {
-  0% {
-    filter: brightness(1);
-    opacity: 1;
-  }
-  50% {
-    filter: brightness(0.5);
-    opacity: 0.7;
-  }
-  100% {
-    filter: brightness(1);
-    opacity: 1;
-  }
-}

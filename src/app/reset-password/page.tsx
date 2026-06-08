@@ -2,30 +2,27 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export default function ResetPasswordPage() {
+  const toast = useToast();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const router = useRouter();
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
 
     if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres.');
+      toast.error('Contraseña insuficiente', 'La contraseña debe tener al menos 6 caracteres.');
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden.');
+      toast.error('Error de coincidencia', 'Las contraseñas no coinciden.');
       return;
     }
 
@@ -38,18 +35,18 @@ export default function ResetPasswordPage() {
     setLoading(false);
 
     if (resetError) {
-      setError(resetError.message);
+      toast.error('Error de actualización', 'No fue posible actualizar la contraseña. El enlace puede haber expirado.');
     } else {
-      setSuccess('Tu contraseña ha sido restablecida exitosamente. Redirigiendo...');
+      toast.success('Éxito', 'Tu contraseña ha sido restablecida. Redirigiendo al inicio de sesión...');
       setTimeout(() => {
-        router.push('/');
+        router.push('/login');
       }, 3000);
     }
   };
 
   return (
     <main className="min-h-screen w-full bg-fondo-zen flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm bg-[#FDFBEE] p-8 rounded-3xl shadow-2xl border border-secundario-zen/50">
+      <div className="w-full max-w-sm bg-surface-container-lowest p-8 rounded-3xl shadow-2xl border border-secundario-zen/50">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="relative w-32">
@@ -94,18 +91,6 @@ export default function ResetPasswordPage() {
               required
             />
           </div>
-
-          {error && (
-            <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-center font-sans">
-              {error}
-            </p>
-          )}
-
-          {success && (
-            <p className="text-primario-zen text-xs bg-primario-zen/10 border border-primario-zen/30 rounded-xl px-4 py-3 text-center font-sans font-medium">
-              {success}
-            </p>
-          )}
 
           <button
             type="submit"

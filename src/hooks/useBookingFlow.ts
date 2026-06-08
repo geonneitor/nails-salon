@@ -6,10 +6,8 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useApp } from '@/context/AppContext';
-import { createClient } from '@/utils/supabase/client'; // Adjust based on actual project path
-import { format, startOfDay } from 'date-fns';
-
-const supabase = createClient();
+import { supabase } from '@/lib/supabaseClient';
+import { format } from 'date-fns';
 
 export function useBookingFlow() {
   const { services, isLoading: loadingServices } = useServices();
@@ -25,11 +23,12 @@ export function useBookingFlow() {
     async function fetchSettings() {
       if (!activeProject?.id) return;
       try {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('business_settings')
           .select('*')
           .eq('project_id', activeProject.id)
-          .single();
+          .maybeSingle();
+        if (error && error.code !== 'PGRST116') throw error;
         if (data) setBusinessSettings(data);
       } catch (e) {
         console.error('Error fetching settings:', e);
@@ -61,7 +60,7 @@ export function useBookingFlow() {
   };
 
   const submitBooking = async (formData: any) => {
-    if (!formData.name || !formData.contact || !formData.serviceId || !activeProject?.id) {
+    if (!formData.name || !formData.contact || !formData.ticketDetails || !activeProject?.id) {
       throw new Error('Por favor completa todos los campos.');
     }
 
@@ -84,11 +83,16 @@ export function useBookingFlow() {
       customerId = existingCustomer.id;
     } else {
       const isEmail = formData.contact.includes('@') && formData.contact.includes('.');
+      
+      // CORRECCIÓN 1: Se añaden las propiedades obligatorias exigidas por el tipo
       const newCustomer = await createCustomer({
         name: formData.name,
         email: isEmail ? formData.contact : null,
         phone: !isEmail ? formData.contact : null,
-        project_id: activeProject.id
+        birthday: null,
+        service_notes: null,
+        allergies: null,
+        color_formulas: null,
       });
       if (!newCustomer) throw new Error('No se pudo crear el registro de clienta');
       customerId = newCustomer.id;
@@ -97,8 +101,7 @@ export function useBookingFlow() {
     // 3. Timing
     const start = new Date(formData.date);
     start.setHours(formData.timeSlot.h, formData.timeSlot.m, 0, 0);
-    const service = services.find(s => s.id === formData.serviceId);
-    const duration = service ? service.duration_minutes : 60;
+    const duration = formData.ticketDetails.totalDuration || 60;
     const end = new Date(start);
     end.setMinutes(end.getMinutes() + duration);
 
@@ -114,15 +117,17 @@ export function useBookingFlow() {
     if (!employeeId) throw new Error('No hay empleadas disponibles en este horario.');
 
     // 5. Create appointment
+    // CORRECCIÓN 2 y 3: Se asocia correctamente 'employeeId' y se añade 'ticket_details'
     const result = await createAppointment({
       project_id: activeProject.id,
       customer_id: customerId,
-      service_id: formData.serviceId,
-      employee_id,
+      service_id: null,
+      employee_id: employeeId,
       start_time: start.toISOString(),
       end_time: end.toISOString(),
       status: 'pending_advance',
-      total_price: service ? service.price : 0,
+      ticket_details: formData.ticketDetails,
+      total_price: formData.ticketDetails.totalPrice || 0,
       total_duration: duration
     });
 

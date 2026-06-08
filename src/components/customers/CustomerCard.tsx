@@ -1,4 +1,4 @@
-import { User, Phone, Calendar } from 'lucide-react';
+import { Phone, Calendar } from 'lucide-react';
 import type { Customer } from '@/types/supabase';
 import { format } from 'date-fns';
 import { useApp } from '@/context/AppContext';
@@ -14,8 +14,17 @@ export function CustomerCard({ customer, onClick }: CustomerCardProps) {
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className={`group relative flex flex-col rounded-2xl bg-fondo-zen cursor-pointer transition-all duration-300 shadow-sm border border-secundario-zen/40 hover:shadow-md hover:border-secundario-zen ${
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      aria-label={`Ver perfil de ${customer.name}`}
+      className={`group relative flex flex-col rounded-2xl bg-fondo-zen cursor-pointer transition-all duration-300 shadow-sm border border-secundario-zen/40 hover:shadow-md hover:border-secundario-zen hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primario-zen/40 ${
         isCompact ? 'gap-2 p-3' : 'gap-3 p-5'
       }`}
     >

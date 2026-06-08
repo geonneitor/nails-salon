@@ -5,8 +5,10 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useApp } from '@/context/AppContext';
 import { format, startOfDay, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export default function MiniCalendarPreview() {
+  const toast = useToast();
   const { activeProject } = useApp();
   const projectId = activeProject?.id ?? '';
   const [dateRange, setDateRange] = useState<{ from: string; to: string } | null>(null);
@@ -36,8 +38,9 @@ export default function MiniCalendarPreview() {
     // Let's just use the hook and then filter.
   }, [dateRange, projectId]);
 
-  // Simpler: use useAppointments hook without arguments (it may use projectId from context)
-  const { data: appts, isLoading, error } = useAppointments({ projectId });
+  // Cambia la línea del error por esta:
+const { appointments: appts, isLoading, error } = useAppointments();
+
 
   useEffect(() => {
     if (isLoading) {
@@ -129,7 +132,7 @@ export default function MiniCalendarPreview() {
             onClick={() => {
               // Navigate to full calendar
               // We'll use router push; but we can just alert for now
-              alert('Para ver el calendario completo, visita la sección de Calendario.');
+              toast.info('Calendario', 'Para ver el calendario completo, visita la sección de Calendario.');
             }}
             className="text-primario-zen/60 hover:text-primario-zen text-sm"
           >

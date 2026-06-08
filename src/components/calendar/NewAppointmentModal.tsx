@@ -47,7 +47,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const SELECT_CLASS =
   'w-full bg-secundario-zen/20 border border-secundario-zen/60 text-primario-zen text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all appearance-none cursor-pointer font-sans';
 
-const PROJECT_ID = process.env.NEXT_PUBLIC_PROJECT_ID ?? '';
+
 
 export function NewAppointmentModal({
   isOpen,
@@ -89,7 +89,7 @@ export function NewAppointmentModal({
 
     setSubmitting(true);
     const result = await onSubmit({
-      project_id: PROJECT_ID,
+      project_id: '',  // CalendarView inyecta el projectId real desde el contexto
       customer_id: customerId,
       service_id: null,
       employee_id: employeeId,
@@ -138,7 +138,7 @@ export function NewAppointmentModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="relative w-full md:max-w-xl bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-6 md:p-8 max-h-[95vh] overflow-y-auto"
+            className="relative w-full md:max-w-xl bg-surface-container-lowest rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-6 md:p-8 max-h-[95vh] overflow-y-auto"
           >
             {/* Header */}
             <div className="flex justify-between items-start mb-6">

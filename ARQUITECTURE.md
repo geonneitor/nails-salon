@@ -4,9 +4,9 @@
 *   **Frontend:** React / Next.js (App Router) + TypeScript.
 *   **Estilos & UI:** Tailwind CSS + Radix UI / Shadcn UI (Para modales y componentes accesibles).
 *   **Animaciones:** Motion (Framer Motion) para la fluidez de la línea de tiempo y transiciones de vistas.
-*   **Tipografía Requerida:** Calgary (Configurada como fuente principal en Tailwind).
-*   **Base de Datos & Auth:** Supabase (PostgreSQL) o Firebase. *Recomendado Supabase por su manejo nativo de Row Level Security (RLS) para los accesos de empleados vía QR y persistencia relacional perfecta para citas.*
-*   **Despliegue:** Vercel (Edge-ready, serverless).
+*   **Tipografía:** Libre Caslon Text (serif/display) + Manrope (sans/body). Configuradas como CSS variables en Tailwind.
+*   **Base de Datos & Auth:** Supabase (PostgreSQL) con Row Level Security (RLS) para accesos de empleados vía QR y persistencia relacional.
+*   **Despliegue:** Netlify (con adapter de Next.js).
 
 ## 2. Nomenclatura del Modelo de Datos (Single Source of Truth)
 Para evitar que el agente invente términos, nos referiremos a las entidades de la siguiente manera:

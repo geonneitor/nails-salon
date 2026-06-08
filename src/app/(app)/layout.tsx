@@ -1,7 +1,6 @@
 'use client';
 
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { useApp } from '@/context/AppContext';
 
 export default function AppLayout({
   children,

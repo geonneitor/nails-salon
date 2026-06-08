@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -46,7 +45,7 @@ export function LoginForm() {
 
     setLoading(false);
     if (recoveryError) {
-      setError(recoveryError.message);
+      setError('No fue posible enviar el enlace. Intenta de nuevo más tarde.');
     } else {
       setSuccessMessage('Se ha enviado un correo con instrucciones para restablecer tu contraseña.');
       setEmail('');
@@ -103,7 +102,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 font-sans zen-glow-hover zen-glow-touch"
+            className="w-full mt-2 bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 font-sans"
           >
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
@@ -126,7 +125,8 @@ export function LoginForm() {
         </form>
       ) : (
         <form onSubmit={handleLogin} className="flex flex-col gap-5">
-          <div className="flex flex--col gap-1.5 font-sans">
+          {/* FIXED: era flex--col (typo), ahora flex-col */}
+          <div className="flex flex-col gap-1.5 font-sans">
             <label className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/50">
               Correo Electrónico
             </label>
@@ -172,7 +172,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 font-sans zen-glow-hover zen-glow-touch"
+            className="w-full mt-2 bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2 font-sans"
           >
             {loading ? (
               <><Loader2 className="w-4 h-4 animate-spin" /> Entrando...</>

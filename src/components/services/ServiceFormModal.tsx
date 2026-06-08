@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import type { Service } from '@/types/supabase';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface ServiceFormModalProps {
   isOpen: boolean;
@@ -35,7 +36,7 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, initialData }: Ser
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('60');
   const [price, setPrice] = useState('');
-
+  const toast = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,13 +73,20 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, initialData }: Ser
     };
 
     const result = await onSubmit(payload);
-    setSubmitting(false);
-
-    if (result) {
-      onClose();
-    } else {
-      setError(initialData ? 'Hubo un problema al actualizar el servicio.' : 'Hubo un problema al registrar el servicio.');
-    }
+   setSubmitting(false);
+   if (result) {
+     toast.success(
+       initialData ? 'Servicio actualizado' : 'Servicio creado',
+       initialData ? 'Los cambios fueron guardados.' : 'El servicio fue agregado correctamente.'
+     );
+     onClose();
+   } else {
+     const msg = initialData
+       ? 'Hubo un problema al actualizar el servicio.'
+       : 'Hubo un problema al crear el servicio.';
+     setError(msg);
+     toast.error('Error al guardar', msg);
+   }  
   };
 
   return (
@@ -100,7 +108,7 @@ export function ServiceFormModal({ isOpen, onClose, onSubmit, initialData }: Ser
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="relative w-full md:max-w-md bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-8 max-h-[90vh] overflow-y-auto"
+            className="relative w-full md:max-w-md bg-surface-container-lowest rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-8 max-h-[90vh] overflow-y-auto"
           >
             <div className="flex justify-between items-start mb-6">
               <div>

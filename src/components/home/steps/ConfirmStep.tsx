@@ -3,17 +3,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
-import { useServices } from '@/hooks/useServices';
 
 export default function ConfirmStep({ data, onConfirm, onBack, isSubmitting, error }: {
   data: any,
   onConfirm: () => void,
   onBack: () => void,
   isSubmitting: boolean,
-  error: string | null
+  error?: string | null
 }) {
-  const { services } = useServices();
-  const service = services.find(s => s.id === data.serviceId);
+  const { ticketDetails } = data;
+  const serviceNames = ticketDetails?.activeServices?.join(' + ') || 'Servicio Dinámico';
 
   return (
     <div className="flex flex-col items-center">
@@ -34,7 +33,12 @@ export default function ConfirmStep({ data, onConfirm, onBack, isSubmitting, err
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between py-3 border-b border-white/20">
             <span className="text-[10px] uppercase tracking-widest font-bold text-primario-zen/40">Ritual</span>
-            <span className="text-primario-zen font-serif text-lg">{service?.name || '---'}</span>
+            <div className="text-right">
+              <p className="font-medium text-primario-zen text-sm">{serviceNames}</p>
+              <p className="text-xs text-primario-zen/60">
+                ~{ticketDetails?.totalDuration || 0} Minutos • ${ticketDetails?.totalPrice || 0} MXN
+              </p>
+            </div>
           </div>
           <div className="flex items-center justify-between py-3 border-b border-white/20">
             <span className="text-[10px] uppercase tracking-widest font-bold text-primario-zen/40">Fecha y Hora</span>
@@ -42,13 +46,9 @@ export default function ConfirmStep({ data, onConfirm, onBack, isSubmitting, err
               {format(data.date, 'dd MMM yyyy')} - {data.timeSlot.label}
             </span>
           </div>
-          <div className="flex items-center justify-between py-3 border-b border-white/20">
+          <div className="flex items-center justify-between py-3">
             <span className="text-[10px] uppercase tracking-widest font-bold text-primario-zen/40">Santuario</span>
             <span className="text-primario-zen font-serif text-lg">{data.name}</span>
-          </div>
-          <div className="flex items-center justify-between py-3">
-            <span className="text-[10px] uppercase tracking-widest font-bold text-primario-zen/40">Inversión</span>
-            <span className="text-primario-zen font-serif text-lg">${service?.price || '0'}</span>
           </div>
         </div>
 

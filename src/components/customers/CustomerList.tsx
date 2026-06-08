@@ -4,11 +4,13 @@
 // Lista de clientas con búsqueda, edición y eliminación.
 // ============================================================
 import { useState } from 'react';
-import { Search, Loader2 } from 'lucide-react';
+import { Search, Users } from 'lucide-react';
 import { CustomerCard } from './CustomerCard';
 import { CustomerDetailModal } from './CustomerDetailModal';
 import { CustomerFormModal } from './CustomerFormModal';
 import { useCustomers } from '@/hooks/useCustomers';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { SkeletonCard } from '@/components/ui/Skeleton';
 import type { Customer } from '@/types/supabase';
 import { useApp } from '@/context/AppContext';
 
@@ -58,45 +60,54 @@ export function CustomerList() {
             placeholder="Buscar por nombre, teléfono o correo..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-11 pr-4 py-3 bg-[#FDFBEE] border border-secundario-zen/50 rounded-2xl text-primario-zen text-sm focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all shadow-sm"
+            className="w-full pl-11 pr-4 py-3 bg-surface-container-lowest border border-secundario-zen/50 rounded-2xl text-primario-zen text-sm focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all shadow-sm"
           />
         </div>
+        {/* FIXED: copy unificado → "+ Nueva Clienta" */}
         <button
           onClick={handleOpenCreateForm}
           className="bg-primario-zen text-fondo-zen px-6 py-3 rounded-2xl uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm whitespace-nowrap"
         >
-          + Nueva
+          + Nueva Clienta
         </button>
       </div>
 
       {error && (
         <div className="text-center py-8 bg-red-50 rounded-2xl border border-red-200">
-          <p className="text-red-700 text-sm">{error}</p>
+          <p className="text-red-700 text-sm">Ocurrió un error al cargar las clientas. Intenta de nuevo.</p>
         </div>
       )}
 
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="w-8 h-8 animate-spin text-primario-zen/50" />
+        /* Skeleton en lugar de spinner Loader2 */
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${isCompact ? 'gap-2' : 'gap-4'}`}>
+          {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+      ) : filteredCustomers.length > 0 ? (
+        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${isCompact ? 'gap-2' : 'gap-4'}`}>
+          {filteredCustomers.map(customer => (
+            <CustomerCard
+              key={customer.id}
+              customer={customer}
+              onClick={() => setSelectedCustomer(customer)}
+            />
+          ))}
+        </div>
+      ) : searchTerm ? (
+        /* Sin resultados de búsqueda */
+        <div className="text-center py-10 bg-secundario-zen/20 rounded-2xl border border-dashed border-secundario-zen/60">
+          <p className="text-primario-zen/60 text-sm italic">
+            No se encontraron clientas con esa búsqueda.
+          </p>
         </div>
       ) : (
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${isCompact ? 'gap-2' : 'gap-4'}`}>
-          {filteredCustomers.length > 0 ? (
-            filteredCustomers.map(customer => (
-              <CustomerCard
-                key={customer.id}
-                customer={customer}
-                onClick={() => setSelectedCustomer(customer)}
-              />
-            ))
-          ) : (
-            <div className="col-span-full text-center py-10 bg-secundario-zen/20 rounded-2xl border border-dashed border-secundario-zen/60">
-              <p className="text-primario-zen/60 text-sm italic">
-                {searchTerm ? 'No se encontraron clientas con esa búsqueda.' : 'No hay clientas registradas aún.'}
-              </p>
-            </div>
-          )}
-        </div>
+        /* Empty state de primer uso */
+        <EmptyState
+          icon={Users}
+          title="Agrega tu primera clienta"
+          description="Empieza registrando a tus clientas para gestionar sus citas y preferencias desde un solo lugar."
+          action={{ label: '+ Nueva Clienta', onClick: handleOpenCreateForm }}
+        />
       )}
 
       <CustomerDetailModal

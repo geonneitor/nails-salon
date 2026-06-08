@@ -7,7 +7,7 @@
 
 export type EmployeeRole = 'TOTAL' | 'ONLY_BOOK';
 
-export type AppointmentStatus = 'pending_advance' | 'confirmed_advance' | 'completed' | 'free';
+export type AppointmentStatus = 'pending_advance' | 'confirmed_advance' | 'completed' | 'cancelled' | 'no_show' | 'free';
 
 export type AppRole = 'admin' | 'employee';
 
@@ -31,6 +31,7 @@ export interface Employee {
   email: string | null;
   role: EmployeeRole;
   qr_code_token: string;
+  auth_user_id: string | null;
   created_at: string;
 }
 
@@ -42,7 +43,17 @@ export interface Customer {
   email: string | null;
   birthday: string | null; // DATE → 'YYYY-MM-DD'
   service_notes: string | null;
+  allergies: string | null;
+  color_formulas: string | null;
   visit_count: number;
+  created_at: string;
+}
+
+export interface CustomerGallery {
+  id: string;
+  customer_id: string;
+  image_url: string;
+  notes: string | null;
   created_at: string;
 }
 
@@ -52,6 +63,42 @@ export interface Service {
   name: string;
   duration_minutes: number;
   price: number;
+  created_at: string;
+}
+
+export type ServiceSelectionType = 'base' | 'composite' | 'add_on';
+export type ServiceModifierType = 'fixed' | 'per_unit' | 'scale_step';
+
+export interface ServiceCategory {
+  id: string;
+  project_id: string;
+  name: string;
+  selection_type: ServiceSelectionType;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+}
+
+export interface ServiceVariant {
+  id: string;
+  category_id: string;
+  name: string;
+  base_price: number;
+  base_duration_minutes: number;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+}
+
+export interface ServiceModifier {
+  id: string;
+  category_id: string;
+  name: string;
+  modifier_type: ServiceModifierType;
+  price_delta: number;
+  duration_delta: number;
+  is_active: boolean;
+  display_order: number;
   created_at: string;
 }
 
@@ -125,7 +172,6 @@ export interface UserPreferences {
 export type AppointmentWithRelations = Appointment & {
   customer: Pick<Customer, 'id' | 'name' | 'phone' | 'service_notes'>;
   employee: Pick<Employee, 'id' | 'name'>;
-  service: Pick<Service, 'id' | 'name' | 'duration_minutes' | 'price'> | null;
 };
 
 // ----- PAYLOADS DE MUTACIÓN -----

@@ -1,14 +1,10 @@
 'use client';
 
-// ============================================================
-// src/components/customers/CustomerFormModal.tsx
-// Formulario premium para crear o editar una clienta.
-// ============================================================
-
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import type { Customer } from '@/types/supabase';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface CustomerFormModalProps {
   isOpen: boolean;
@@ -32,12 +28,14 @@ const INPUT_CLASS =
   'w-full bg-secundario-zen/20 border border-secundario-zen/60 text-primario-zen text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all placeholder:text-primario-zen/30';
 
 export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: CustomerFormModalProps) {
+  const toast = useToast();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [birthday, setBirthday] = useState('');
   const [serviceNotes, setServiceNotes] = useState('');
-
+  const [allergies, setAllergies] = useState('');
+  const [colorFormulas, setColorFormulas] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,12 +47,10 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
         setEmail(initialData.email || '');
         setBirthday(initialData.birthday || '');
         setServiceNotes(initialData.service_notes || '');
+        setAllergies(initialData.allergies || '');
+        setColorFormulas(initialData.color_formulas || '');
       } else {
-        setName('');
-        setPhone('');
-        setEmail('');
-        setBirthday('');
-        setServiceNotes('');
+        setName(''); setPhone(''); setEmail(''); setBirthday(''); setServiceNotes(''); setAllergies(''); setColorFormulas('');
       }
       setError(null);
     }
@@ -64,21 +60,12 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
     e.preventDefault();
     setError(null);
 
-    if (!name.trim()) {
-      setError('El nombre es obligatorio.');
-      return;
-    }
-
-    // Validación básica de Email
+    if (!name.trim()) { setError('El nombre es obligatorio.'); return; }
     if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError('El formato del correo electrónico no es válido.');
-      return;
+      setError('El formato del correo electrónico no es válido.'); return;
     }
-
-    // Validación básica de Teléfono (debe contener al menos un número)
     if (phone.trim() && !/\d/.test(phone.trim())) {
-      setError('El teléfono debe contener al menos un dígito.');
-      return;
+      setError('El teléfono debe contener al menos un dígito.'); return;
     }
 
     setSubmitting(true);
@@ -89,15 +76,27 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
       email: email.trim() || null,
       birthday: birthday || null,
       service_notes: serviceNotes.trim() || null,
+      allergies: allergies.trim() || null,
+      color_formulas: colorFormulas.trim() || null,
     };
 
     const result = await onSubmit(payload);
     setSubmitting(false);
 
     if (result) {
+      // ADDED: toast de éxito
+      toast.success(
+        initialData ? 'Clienta actualizada' : 'Clienta registrada',
+        initialData ? 'Los datos han sido guardados.' : 'La clienta fue agregada correctamente.'
+      );
       onClose();
     } else {
-      setError(initialData ? 'Hubo un problema al actualizar la clienta.' : 'Hubo un problema al registrar la clienta.');
+      // FIXED: también dispara toast de error además del mensaje inline
+      const msg = initialData
+        ? 'Hubo un problema al actualizar la clienta.'
+        : 'Hubo un problema al registrar la clienta.';
+      setError(msg);
+      toast.error('Error al guardar', msg);
     }
   };
 
@@ -107,13 +106,10 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
         <div className="fixed inset-0 z-[100] flex items-end justify-center md:items-center">
           <motion.div
             key="cb-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={onClose}
             className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
           />
-
           <motion.div
             key="cb-panel"
             initial={{ opacity: 0, y: 50, scale: 0.97 }}
@@ -131,63 +127,43 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
                   {initialData ? 'Editar Clienta' : 'Nueva Clienta'}
                 </h2>
               </div>
-              <button
-                onClick={onClose}
-                aria-label="Cerrar formulario"
-                className="p-2 rounded-full text-primario-zen/40 hover:text-primario-zen hover:bg-secundario-zen/40 transition-all"
-              >
+              <button onClick={onClose} aria-label="Cerrar formulario"
+                className="p-2 rounded-full text-primario-zen/40 hover:text-primario-zen hover:bg-secundario-zen/40 transition-all">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-5">
               <Field label="Nombre Completo *">
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={INPUT_CLASS}
-                  placeholder="Ej. Ana García"
-                  required
-                />
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+                  className={INPUT_CLASS} placeholder="Ej. Ana García" required />
               </Field>
-
               <Field label="Teléfono">
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className={INPUT_CLASS}
-                  placeholder="10 dígitos"
-                />
+                <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
+                  className={INPUT_CLASS} placeholder="10 dígitos" />
               </Field>
-
               <Field label="Correo Electrónico">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={INPUT_CLASS}
-                  placeholder="correo@ejemplo.com"
-                />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  className={INPUT_CLASS} placeholder="correo@ejemplo.com" />
               </Field>
-
               <Field label="Cumpleaños">
-                <input
-                  type="date"
-                  value={birthday}
-                  onChange={(e) => setBirthday(e.target.value)}
-                  className={INPUT_CLASS}
-                />
+                <input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)}
+                  className={INPUT_CLASS} />
               </Field>
-
-              <Field label="Notas o Preferencias">
-                <textarea
-                  value={serviceNotes}
-                  onChange={(e) => setServiceNotes(e.target.value)}
-                  className={`${INPUT_CLASS} min-h-[80px] resize-y`}
-                  placeholder="Alergias, preferencias de color, etc."
-                />
+              <Field label="Notas o Preferencias (Generales)">
+                <textarea value={serviceNotes} onChange={(e) => setServiceNotes(e.target.value)}
+                  className={`${INPUT_CLASS} min-h-[60px] resize-y`}
+                  placeholder="Preferencias generales..." />
+              </Field>
+              <Field label="Alergias o Sensibilidades">
+                <textarea value={allergies} onChange={(e) => setAllergies(e.target.value)}
+                  className={`${INPUT_CLASS} min-h-[60px] resize-y`}
+                  placeholder="Alergias conocidas a productos..." />
+              </Field>
+              <Field label="Fórmulas de Color">
+                <textarea value={colorFormulas} onChange={(e) => setColorFormulas(e.target.value)}
+                  className={`${INPUT_CLASS} min-h-[60px] resize-y`}
+                  placeholder="Ej. Tono rojo #45 + base builder rosa" />
               </Field>
 
               {error && (
@@ -196,11 +172,8 @@ export function CustomerFormModal({ isOpen, onClose, onSubmit, initialData }: Cu
                 </p>
               )}
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
-              >
+              <button type="submit" disabled={submitting}
+                className="w-full bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 mt-2">
                 {submitting ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> {initialData ? 'Actualizando...' : 'Registrando...'}</>
                 ) : (

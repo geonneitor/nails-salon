@@ -6,6 +6,10 @@ import { Plus, Check, Trash2, Loader2 } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { Project } from '@/types/supabase';
 import { supabase } from '@/lib/supabaseClient';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { useToast } from '@/components/ui/ToastProvider';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Briefcase } from 'lucide-react';
 
 function ProjectItem({
   project,
@@ -23,7 +27,7 @@ function ProjectItem({
       className={`group flex items-center justify-between p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
         isActive
           ? 'bg-primario-zen text-fondo-zen border-primario-zen shadow-md'
-          : 'bg-[#FDFBEE] text-primario-zen border-secundario-zen/50 hover:border-primario-zen/50'
+          : 'bg-surface-container-lowest text-primario-zen border-secundario-zen/50 hover:border-primario-zen/50'
       }`}
       onClick={() => onSelect(project)}
     >
@@ -31,7 +35,7 @@ function ProjectItem({
         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
           isActive ? 'border-fondo-zen bg-fondo-zen' : 'border-primario-zen/40'
         }`}>
-          {isActive && <Check className="w-3 h-3 text-fondo-zen" />}
+          {isActive && <Check className="w-3 h-3 text-primario-zen" />}
         </div>
         <span className={`text-sm font-medium ${isActive ? 'font-semibold' : ''}`}>
           {project.name}
@@ -43,7 +47,7 @@ function ProjectItem({
           e.stopPropagation();
           onDelete(project.id);
         }}
-        className="p-2 rounded-lg text-primario-zen/30 hover:text-red-600 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+        className="p-2 rounded-lg text-on-surface-variant/30 hover:text-error hover:bg-error/10 transition-all opacity-0 group-hover:opacity-100"
       >
         <Trash2 className="w-4 h-4" />
       </button>
@@ -52,7 +56,9 @@ function ProjectItem({
 }
 
 export function ProjectList() {
-  const { projects, activeProject, setActiveProject, createProject } = useApp();
+  const { projects, activeProject, setActiveProject, createProject, refreshProjects } = useApp();
+  const confirm = useConfirm();
+  const toast = useToast();
   const [isAdding, setIsAdding] = useState(false);
   const [projectName, setProjectName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -70,6 +76,7 @@ export function ProjectList() {
       setActiveProject(project);
       setProjectName('');
       setIsAdding(false);
+      toast.success('Proyecto creado', `"${project.name}" está listo para usar.`);
     } else {
       setError('No se pudo crear el proyecto.');
     }
@@ -77,16 +84,25 @@ export function ProjectList() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar este proyecto? Esta acción es irreversible.')) return;
+    // FIXED: useConfirm() en vez de confirm() nativo
+    const project = projects.find(p => p.id === id);
+    const ok = await confirm({
+      title: '¿Eliminar proyecto?',
+      message: `Esta acción eliminará "${project?.name ?? 'este proyecto'}" de forma permanente y no se puede deshacer.`,
+      confirmLabel: 'Sí, eliminar',
+      danger: true,
+    });
+    if (!ok) return;
 
     setIsLoading(true);
     const { error: e } = await supabase.from('projects').delete().eq('id', id);
     if (e) {
-      setError(e.message);
+      console.error('Error deleting project:', e);
+      toast.error('Error al eliminar', 'No fue posible eliminar el proyecto. Intenta de nuevo.');
     } else {
-      // Note: In a real app we'd want to refresh the projects list in context.
-      // For now we'll just alert or rely on the next refresh.
-      window.location.reload();
+      // refreshProjects() actualiza la lista desde Supabase sin recargar la página
+      await refreshProjects();
+      toast.success('Proyecto eliminado', 'El proyecto fue eliminado correctamente.');
     }
     setIsLoading(false);
   };
@@ -161,9 +177,12 @@ export function ProjectList() {
             />
           ))
         ) : (
-          <div className="col-span-full py-10 text-center bg-secundario-zen/10 rounded-3xl border border-dashed border-secundario-zen/40">
-            <p className="text-primario-zen/60 text-sm italic">No hay proyectos creados.</p>
-          </div>
+          <EmptyState
+            icon={Briefcase}
+            title="Sin proyectos"
+            description="Crea un proyecto para empezar a gestionar tu salón, clientas y servicios."
+            action={{ label: '+ Nuevo Proyecto', onClick: () => setIsAdding(true) }}
+          />
         )}
       </div>
     </div>

@@ -37,6 +37,8 @@ interface AppContextValue {
   setActiveProject: (project: Project) => void;
   /** Crea un nuevo proyecto (salón). */
   createProject: (name: string) => Promise<Project | null>;
+  /** Sincroniza y actualiza la lista de proyectos desde la base de datos. */
+  refreshProjects: () => Promise<void>;
   /** Actualiza una preferencia específica del usuario. */
   updatePreference: (updates: Partial<Omit<UserPreferences, 'id' | 'user_id' | 'updated_at'>>) => Promise<void>;
 }
@@ -53,18 +55,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [preferences, setPreferences] = useState<UserPreferences | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  /** Carga el rol y los proyectos disponibles para el usuario dado. */
-  const loadUserData = useCallback(async (authUser: User) => {
-    // 1. Obtener rol de la tabla user_roles
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('id', authUser.id)
-      .single();
-
-    setRole((roleData?.role as AppRole) ?? null);
-
-    // 2. Obtener proyectos accesibles (todos los autenticados pueden leer projects, según policy)
+  /** Función dedicada a refrescar la lista de proyectos en tiempo real */
+  const fetchProjects = useCallback(async () => {
     const { data: projectsData } = await supabase
       .from('projects')
       .select('*')
@@ -77,6 +69,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (projectList.length > 0) {
       setActiveProject((prev) => prev ?? projectList[0]);
     }
+  }, []);
+
+  /** Carga el rol y los proyectos disponibles para el usuario dado. */
+  const loadUserData = useCallback(async (authUser: User) => {
+    // 1. Obtener rol de la tabla user_roles
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('id', authUser.id)
+      .single();
+
+    setRole((roleData?.role as AppRole) ?? null);
+
+    // 2. Obtener proyectos accesibles mediante la función modularizada
+    await fetchProjects();
 
     // 3. Obtener preferencias del usuario
     const { data: prefData, error: prefError } = await supabase
@@ -112,7 +119,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       }
     }
-  }, []);
+  }, [fetchProjects]);
 
   const createProject = useCallback(async (name: string): Promise<Project | null> => {
     const { data, error: e } = await supabase
@@ -138,7 +145,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         console.warn('Session recovery error:', error.message);
 
         // Si el error es específicamente de Refresh Token, forzamos el cierre de sesión
-        // para limpiar el almacenamiento local y evitar bucles de error.
         if (error.message.includes('Refresh Token Not Found')) {
           await supabase.auth.signOut();
         }
@@ -167,7 +173,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       console.error('Critical auth error:', err);
       try {
         await supabase.auth.signOut();
-      } catch (e) {}
+      } catch (e) { }
       setIsLoading(false);
     });
 
@@ -190,7 +196,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [loadUserData]);
 
-  // ----- Nuevas Funciones de Preferencias -----
+  // ----- Funciones de Preferencias -----
 
   const updatePreference = useCallback(async (updates: Partial<Omit<UserPreferences, 'id' | 'user_id' | 'updated_at'>>) => {
     if (!user) return;
@@ -208,8 +214,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [user]);
 
   const value = useMemo<AppContextValue>(
-    () => ({ user, role, activeProject, projects, preferences, isLoading, setActiveProject, createProject, updatePreference }),
-    [user, role, activeProject, projects, preferences, isLoading, createProject, updatePreference]
+    () => ({
+      user,
+      role,
+      activeProject,
+      projects,
+      preferences,
+      isLoading,
+      setActiveProject,
+      createProject,
+      refreshProjects: fetchProjects,
+      updatePreference
+    }),
+    [user, role, activeProject, projects, preferences, isLoading, createProject, fetchProjects, updatePreference]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -217,10 +234,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
 // ----- Hooks de consumo -----
 
-/**
- * Hook principal para acceder al contexto global de la app.
- * @throws si se usa fuera de <AppProvider>.
- */
 export function useApp(): AppContextValue {
   const ctx = useContext(AppContext);
   if (!ctx) {
@@ -229,11 +242,6 @@ export function useApp(): AppContextValue {
   return ctx;
 }
 
-/**
- * Shim de compatibilidad: `useProject` ahora vive sobre `AppContext`.
- * Mantiene el contrato: { activeProject, projects, isLoading, setActiveProject, ... }.
- * Se conservará este nombre por legibilidad en los componentes de UI.
- */
 export function useProject() {
   const { activeProject, projects, isLoading, setActiveProject } = useApp();
   return { activeProject, projects, isLoading, setActiveProject };

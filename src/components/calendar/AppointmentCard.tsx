@@ -15,10 +15,12 @@ interface AppointmentCardProps {
 
 // Paleta cerrada: solo tonos del Brand Board Zen.
 const STATUS_INDICATOR: Record<AppointmentStatus, string> = {
-  confirmed_advance: 'bg-primario-zen', // Olivo sólido = confirmado con anticipo
-  pending_advance: 'bg-secundario-zen border border-primario-zen/40', // Beige-arena con borde = pendiente
-  completed: 'bg-slate-200 border border-slate-300', // Gris neutro = finalizado
-  free: 'bg-transparent border border-dashed border-primario-zen/60', // Borde punteado = gratis
+  confirmed_advance: 'bg-primario-zen',
+  pending_advance: 'bg-secundario-zen border border-primario-zen/40',
+  completed: 'bg-slate-200 border border-slate-300',
+  free: 'bg-transparent border border-dashed border-primario-zen/60',
+  cancelled: 'bg-red-100 border border-red-200',
+  no_show: 'bg-orange-100 border border-orange-200',
 };
 
 const STATUS_LABEL: Record<AppointmentStatus, string> = {
@@ -26,6 +28,8 @@ const STATUS_LABEL: Record<AppointmentStatus, string> = {
   pending_advance: 'Pendiente',
   completed: 'Finalizado',
   free: 'Gratis',
+  cancelled: 'Cancelado',
+  no_show: 'No Se Presentó',
 };
 
 export function AppointmentCard({ appointment, onClick }: AppointmentCardProps) {
@@ -35,7 +39,7 @@ export function AppointmentCard({ appointment, onClick }: AppointmentCardProps) 
   const statusLabel = STATUS_LABEL[appointment.status];
 
   // Obtener nombre del servicio o resumen del ticket
-  let serviceName = appointment.service?.name;
+  let serviceName = (appointment.ticket_details?.activeServices?.join(', ')) || 'Servicio Dinámico';
   if (!serviceName && appointment.ticket_details?.activeServices) {
     serviceName = appointment.ticket_details.activeServices
       .map((s) => {
@@ -52,7 +56,7 @@ export function AppointmentCard({ appointment, onClick }: AppointmentCardProps) 
   }
   if (!serviceName) serviceName = 'Servicio Personalizado';
 
-  const price = appointment.total_price ?? appointment.service?.price ?? 0;
+  const price = appointment.total_price ?? 0;
 
   return (
     <div
@@ -86,7 +90,7 @@ export function AppointmentCard({ appointment, onClick }: AppointmentCardProps) 
           )}
         </div>
         <p className="font-semibold text-primario-zen mt-1.5 text-xs">
-          ${price} MXN · {appointment.total_duration ?? appointment.service?.duration_minutes ?? 0} min
+          ${price} MXN · {appointment.total_duration ?? 0} min
         </p>
       </div>
 

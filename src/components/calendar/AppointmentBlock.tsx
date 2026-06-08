@@ -38,6 +38,20 @@ const STATUS_STYLES: Record<
     pill: 'bg-primario-zen/10 text-primario-zen',
     label: 'Gratis',
   },
+  cancelled: {
+    bg: 'bg-red-50',
+    border: 'border-red-200',
+    text: 'text-red-400',
+    pill: 'bg-red-100 text-red-500',
+    label: 'Cancelado',
+  },
+  no_show: {
+    bg: 'bg-orange-50',
+    border: 'border-orange-200',
+    text: 'text-orange-400',
+    pill: 'bg-orange-100 text-orange-500',
+    label: 'No Se Presentó',
+  },
 };
 
 interface AppointmentBlockProps {
@@ -81,10 +95,8 @@ export function AppointmentBlock({
     : style;
 
   const serviceName =
-    appointment.service?.name ??
-    (appointment.ticket_details?.activeServices?.length
-      ? appointment.ticket_details.activeServices.join(' + ')
-      : 'Servicio');
+    appointment.ticket_details?.activeServices?.join(', ') ??
+    'Servicio Dinámico';
 
   const widthPct = 100 / columnCount;
   const leftPct = columnIndex * widthPct;

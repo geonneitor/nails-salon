@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBookingFlow } from '@/hooks/useBookingFlow';
+import { useToast } from '@/components/ui/ToastProvider';
 import ServiceStep from './steps/ServiceStep';
 import TimeStep from './steps/TimeStep';
 import UserStep from './steps/UserStep';
@@ -11,20 +12,24 @@ import ConfirmStep from './steps/ConfirmStep';
 export type BookingStep = 'SERVICES' | 'TIME' | 'USER' | 'CONFIRM';
 
 interface JourneyState {
-  serviceId: string;
+  ticketDetails: {
+    activeServices: string[];
+    totalPrice: number;
+    totalDuration: number;
+  } | null;
   date: Date;
   timeSlot: { label: string; h: number; m: number };
   name: string;
   contact: string;
 }
 
-const cubicBezier = [0.4, 0, 0.2, 1];
-
+const cubicBezier = "cubic-bezier(0.4, 0, 0.2, 1)";
 export default function ZenBookingJourney() {
+  const toast = useToast();
   const { submitBooking } = useBookingFlow();
   const [currentStep, setCurrentStep] = useState<BookingStep>('SERVICES');
   const [formData, setFormData] = useState<JourneyState>({
-    serviceId: '',
+    ticketDetails: null,
     date: new Date(),
     timeSlot: { label: '10:00 a.m.', h: 10, m: 0 },
     name: '',
@@ -59,7 +64,7 @@ export default function ZenBookingJourney() {
     setSubmitError(null);
     try {
       await submitBooking(formData);
-      alert('¡Tu solicitud ha sido recibida! Pronto recibirás el link de pago.');
+      toast.success('Solicitud Recibida', '¡Tu solicitud ha sido recibida! Pronto recibirás el link de pago.');
     } catch (e: any) {
       setSubmitError(e.message);
     } finally {
@@ -88,10 +93,10 @@ export default function ZenBookingJourney() {
           initial={{ opacity: 0, x: 20, filter: 'blur(10px)' }}
           animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
           exit={{ opacity: 0, x: -20, filter: 'blur(10px)' }}
-          transition={{ duration: 0.6, ease: cubicBezier }}
+          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
           className="w-full"
         >
-          {currentStep === 'SERVICES' && <ServiceStep data={formData} onSelect={(id) => { updateData({ serviceId: id }); next(); }} />}
+          {currentStep === 'SERVICES' && <ServiceStep data={formData} onSelect={(ticketDetails: any) => { updateData({ ticketDetails }); next(); }} />}
           {currentStep === 'TIME' && <TimeStep data={formData} onSelect={(date, slot) => { updateData({ date, timeSlot: slot }); next(); }} onBack={prev} />}
           {currentStep === 'USER' && <UserStep data={formData} onSelect={(name, contact) => { updateData({ name, contact }); next(); }} onBack={prev} />}
           {currentStep === 'CONFIRM' && (

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -26,12 +25,12 @@ export default function ForgotPasswordPage() {
 
       setMessage({
         type: 'success',
-        text: 'Se ha enviado un enlace de recuperación a tu correo electrónico. Por favor, revisa tu bandeja de entrada.',
+        text: 'Se ha enviado un enlace de recuperación a tu correo. Por favor, revisa tu bandeja de entrada.',
       });
-    } catch (err: any) {
+    } catch {
       setMessage({
         type: 'error',
-        text: err.message || 'Hubo un error al solicitar el restablecimiento de contraseña.',
+        text: 'No fue posible enviar el enlace. Verifica el correo e intenta de nuevo.',
       });
     } finally {
       setLoading(false);
@@ -40,7 +39,9 @@ export default function ForgotPasswordPage() {
 
   return (
     <main className="min-h-screen w-full bg-fondo-zen flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-sm bg-[#FDFBEE] p-8 rounded-3xl shadow-2xl border border-secundario-zen/50">
+      {/* FIXED: bg-surface-container-lowest en vez de literal bg-[#FDFBEE] */}
+      {/* FIXED: JSX corregido — era </div} (error de sintaxis) */}
+      <div className="w-full max-w-sm bg-surface-container-lowest p-8 rounded-3xl shadow-2xl border border-secundario-zen/50">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="relative w-32">
@@ -51,7 +52,7 @@ export default function ForgotPasswordPage() {
                 style={{ height: 'auto' }}
               />
             </div>
-          </div}
+          </div>
           <p className="text-sm tracking-widest uppercase text-primario-zen/60 font-medium font-sans">
             Recuperar Acceso
           </p>

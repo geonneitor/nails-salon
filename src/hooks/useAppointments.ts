@@ -58,8 +58,7 @@ export function useAppointments({
       .select(`
         *,
         customer:customers ( id, name, phone ),
-        employee:employees ( id, name ),
-        service:services ( id, name, duration_minutes, price )
+        employee:employees ( id, name )
       `)
       .eq('project_id', projectId)
       .order('start_time', { ascending: true });
@@ -114,8 +113,9 @@ export function useAppointments({
 
     if (!projectId) return;
 
+    const channelId = `appointments_${projectId}_${Math.random().toString(36).substring(7)}`;
     const channel = supabase
-      .channel(`appointments:project:${projectId}`)
+      .channel(channelId)
       .on(
         'postgres_changes',
         {

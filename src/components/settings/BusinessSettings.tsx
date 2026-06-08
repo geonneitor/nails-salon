@@ -4,15 +4,17 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useProject } from '@/context/AppContext';
 import { Clock, Users, Calendar as CalIcon } from 'lucide-react';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export function BusinessSettings() {
   const { activeProject } = useProject();
+  const toast = useToast();
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState({
     max_employees: 1,
     opening_hour: '09:00',
     closing_hour: '20:00',
-    working_days: [1, 2, 3, 4, 5], // Lunes a Viernes
+    working_days: [1, 2, 3, 4, 5],
   });
   const [saving, setSaving] = useState(false);
 
@@ -24,11 +26,12 @@ export function BusinessSettings() {
           .from('business_settings')
           .select('*')
           .eq('project_id', activeProject.id)
-          .single();
+          .maybeSingle();
 
+        if (error && error.code !== 'PGRST116') throw error;
         if (data) setSettings(data);
       } catch (e) {
-        console.error('Error loading settings:', e);
+        console.error('Error loading business settings:', e);
       } finally {
         setLoading(false);
       }
@@ -48,9 +51,12 @@ export function BusinessSettings() {
         });
 
       if (error) throw error;
-      alert('Configuración actualizada correctamente');
+      // FIXED: toast.success en vez de alert()
+      toast.success('Configuración guardada', 'Los cambios han sido aplicados correctamente.');
     } catch (e: any) {
-      alert(`Error: ${e.message}`);
+      console.error('Error saving business settings:', e);
+      // FIXED: toast.error en vez de alert(`Error: ${e.message}`)
+      toast.error('Error al guardar', 'No fue posible guardar la configuración. Intenta de nuevo.');
     } finally {
       setSaving(false);
     }
@@ -75,7 +81,6 @@ export function BusinessSettings() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Capacidad de Empleadas */}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40 flex items-center gap-2">
             <Users className="w-3 h-3" />
@@ -90,7 +95,6 @@ export function BusinessSettings() {
           <p className="text-[10px] text-primario-zen/50 italic">Número máximo de citas que pueden coexistir en la misma hora.</p>
         </div>
 
-        {/* Horario de Apertura */}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40 flex items-center gap-2">
             <Clock className="w-3 h-3" />
@@ -104,7 +108,6 @@ export function BusinessSettings() {
           />
         </div>
 
-        {/* Horario de Cierre */}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40 flex items-center gap-2">
             <Clock className="w-3 h-3" />
@@ -118,7 +121,6 @@ export function BusinessSettings() {
           />
         </div>
 
-        {/* Días Laborales */}
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40">
             Días de Trabajo

@@ -7,7 +7,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import type { Customer } from '@/types/supabase';
+import type { Customer, CustomerGallery } from '@/types/supabase';
+import { v4 as uuidv4 } from 'uuid';
 import { useApp } from '@/context/AppContext';
 
 export type CreateCustomerInput = Omit<
@@ -32,6 +33,8 @@ interface UseCustomersReturn {
   updateCustomer: (id: string, payload: UpdateCustomerInput) => Promise<Customer | null>;
   deleteCustomer: (id: string) => Promise<boolean>;
   refetch: () => Promise<void>;
+  fetchGallery: (customerId: string) => Promise<CustomerGallery[]>;
+  uploadPhoto: (customerId: string, file: File, notes?: string) => Promise<CustomerGallery | null>;
 }
 
 export function useCustomers(options: UseCustomersOptions = {}): UseCustomersReturn {
@@ -71,8 +74,9 @@ export function useCustomers(options: UseCustomersOptions = {}): UseCustomersRet
 
     if (!projectId) return;
 
+    const channelId = `customers_${projectId}_${Math.random().toString(36).substring(7)}`;
     const channel = supabase
-      .channel(`customers:project:${projectId}`)
+      .channel(channelId)
       .on(
         'postgres_changes',
         {
@@ -160,5 +164,59 @@ export function useCustomers(options: UseCustomersOptions = {}): UseCustomersRet
     [projectId]
   );
 
-  return { customers, isLoading, error, createCustomer, updateCustomer, deleteCustomer, refetch: fetchCustomers };
+  const fetchGallery = useCallback(async (customerId: string): Promise<CustomerGallery[]> => {
+    const { data, error: e } = await supabase
+      .from('customer_gallery')
+      .select('*')
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false });
+
+    if (e) {
+      console.error('Error fetching gallery:', e.message);
+      return [];
+    }
+    return data as CustomerGallery[];
+  }, []);
+
+  const uploadPhoto = useCallback(async (customerId: string, file: File, notes?: string): Promise<CustomerGallery | null> => {
+    if (!projectId) return null;
+    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${customerId}/${uuidv4()}.${fileExt}`;
+    
+    // Upload file to bucket
+    const { error: uploadError } = await supabase.storage
+      .from('customer-gallery')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      setError(uploadError.message);
+      return null;
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('customer-gallery')
+      .getPublicUrl(fileName);
+
+    // Save to DB
+    const { data, error: dbError } = await supabase
+      .from('customer_gallery')
+      .insert({
+        customer_id: customerId,
+        image_url: publicUrl,
+        notes: notes || null
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      setError(dbError.message);
+      return null;
+    }
+
+    return data as CustomerGallery;
+  }, [projectId]);
+
+  return { customers, isLoading, error, createCustomer, updateCustomer, deleteCustomer, refetch: fetchCustomers, fetchGallery, uploadPhoto };
 }

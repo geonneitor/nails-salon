@@ -7,12 +7,15 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, User, Scissors, CreditCard, CheckCircle2, AlertCircle, Edit3, Loader2 } from 'lucide-react';
+import { X, Clock, User, Scissors, CreditCard, CheckCircle2, AlertCircle, Edit3 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supabase';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useEmployees } from '@/hooks/useEmployees';
+import { useToast } from '@/components/ui/ToastProvider';
+import { Skeleton, SkeletonText } from '@/components/ui/Skeleton';
+import { sendWhatsAppReminder } from '@/lib/whatsapp';
 
 interface AppointmentDetailModalProps {
   appointment: AppointmentWithRelations | null;
@@ -41,6 +44,16 @@ const STATUS_CONFIG: Record<AppointmentStatus, { label: string; color: string; b
     label: 'Sin anticipo',
     color: 'text-primario-zen/60',
     bg: 'bg-secundario-zen/30 border-secundario-zen',
+  },
+  cancelled: {
+    label: 'Cancelado',
+    color: 'text-red-700',
+    bg: 'bg-red-50 border-red-200',
+  },
+  no_show: {
+    label: 'No Show',
+    color: 'text-purple-700',
+    bg: 'bg-purple-50 border-purple-200',
   },
 };
 
@@ -77,24 +90,41 @@ export function AppointmentDetailModal({
   onClose,
   onStatusChange,
 }: AppointmentDetailModalProps) {
+  const toast = useToast();
   const [isEditingEmployee, setIsEditingEmployee] = useState(false);
   const { updateAppointment, error: updateError } = useAppointments();
   const { employees, isLoading: employeesLoading } = useEmployees();
 
-  // Importante: El modal debe manejar el estado de apertura independientemente
-  // de si el objeto appointment ha llegado ya o no para evitar saltos visuales.
   if (!isOpen) return null;
+
+  // FIXED: loading state con Skeleton en vez de Loader2 genérico
   if (!appointment) {
     return (
       <div className="fixed inset-0 z-[100] flex items-end justify-center md:items-center">
         <motion.div
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          onClick={onClose} className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
+          onClick={onClose}
+          className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
         />
-        <div className="relative w-full md:max-w-md bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl p-8 shadow-2xl border border-secundario-zen/50">
-          <div className="flex flex-col items-center justify-center py-12 gap-4">
-            <Loader2 className="w-8 h-8 text-primario-zen animate-spin" />
-            <p className="text-primario-zen/60 text-sm font-medium">Cargando detalles...</p>
+        {/* FIXED: bg-[#FDFBEE] → bg-surface-container-lowest */}
+        <div className="relative w-full md:max-w-md bg-surface-container-lowest rounded-t-3xl md:rounded-3xl p-8 shadow-2xl border border-secundario-zen/50">
+          <div className="flex flex-col gap-5">
+            <div className="flex justify-between items-start">
+              <div className="flex flex-col gap-2 flex-1">
+                <Skeleton className="h-3 w-1/3 rounded-full" />
+                <Skeleton className="h-6 w-2/3 rounded-full" />
+              </div>
+              <Skeleton className="w-9 h-9 rounded-full" />
+            </div>
+            <Skeleton className="h-7 w-28 rounded-full" />
+            <div className="flex flex-col gap-4 mt-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <Skeleton className="w-4 h-4 rounded-full mt-1" />
+                  <SkeletonText lines={2} className="flex-1" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -106,11 +136,7 @@ export function AppointmentDetailModal({
   const endDate = new Date(appointment.end_time);
   const duration = Math.round((endDate.getTime() - startDate.getTime()) / 60000);
 
-  // ... resto del código se mantiene igual ...
-
-
-  // Obtener nombre del servicio o resumen del ticket
-  let serviceName = appointment.service?.name;
+  let serviceName = (appointment.ticket_details?.activeServices?.join(', ')) || 'Servicio Dinámico';
   if (!serviceName && appointment.ticket_details?.activeServices) {
     serviceName = appointment.ticket_details.activeServices
       .map((s) => {
@@ -127,30 +153,22 @@ export function AppointmentDetailModal({
   }
   if (!serviceName) serviceName = 'Servicio Personalizado';
 
-  const price = appointment.total_price ?? appointment.service?.price ?? 0;
+  const price = appointment.total_price ?? 0;
 
   const handleEmployeeChange = async (employeeId: string) => {
     const success = await updateAppointment(appointment.id, { employee_id: employeeId });
     if (success) {
       setIsEditingEmployee(false);
-      onClose(); // Close to force refetch in parent
+      onClose();
     }
   };
 
-  const handleSendWhatsApp = () => {
+  const handleSendWhatsApp = async () => {
     if (!appointment.customer.phone) {
-      alert('El cliente no tiene un teléfono registrado.');
+      toast.warning('Sin teléfono registrado', 'La clienta no tiene un número de teléfono guardado.');
       return;
     }
-
-    const phone = appointment.customer.phone.replace(/\D/g, '');
-    const dateStr = format(startDate, "EEEE d 'de' MMMM", { locale: es });
-    const timeStr = format(startDate, 'h:mm a');
-
-    const message = `Hola ${appointment.customer.name}! ✨ Te recordamos tu cita en Zen Nail Salon el día ${dateStr} a las ${timeStr}. ¡Te esperamos! 💅`;
-    const encodedMessage = encodeURIComponent(message);
-
-    window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+    await sendWhatsAppReminder(appointment);
   };
 
   const renderTicketDetailsBreakdown = () => {
@@ -162,21 +180,15 @@ export function AppointmentDetailModal({
       lines.push(`Full Set: ${details.fs_sistema}, ${details.fs_forma || ''}, Largo ${details.fs_largo || ''} (Extra tonos: ${details.fs_tonos || 0})`);
     }
     if (details.activeServices.includes('disenos') && details.dis) {
-      Object.entries(details.dis).forEach(([key, val]) => {
-        if (val > 0) lines.push(`${key} ×${val} uñas`);
-      });
+      Object.entries(details.dis).forEach(([key, val]) => { if (val > 0) lines.push(`${key} ×${val} uñas`); });
       if (details.dis_tonos && details.dis_tonos > 0) lines.push(`Tonos extra diseños: ${details.dis_tonos}`);
     }
     if (details.activeServices.includes('deco') && details.deco) {
-      Object.entries(details.deco).forEach(([key, val]) => {
-        if (val > 0) lines.push(`${key} ×${val} uñas`);
-      });
+      Object.entries(details.deco).forEach(([key, val]) => { if (val > 0) lines.push(`${key} ×${val} uñas`); });
       if (details.deco_tonos && details.deco_tonos > 0) lines.push(`Tonos extra deco: ${details.deco_tonos}`);
     }
     if (details.activeServices.includes('repo') && details.repo) {
-      Object.entries(details.repo).forEach(([key, val]) => {
-        if (val > 0) lines.push(`Repo: ${key} ×${val}`);
-      });
+      Object.entries(details.repo).forEach(([key, val]) => { if (val > 0) lines.push(`Repo: ${key} ×${val}`); });
       if (details.repo_tonos && details.repo_tonos > 0) lines.push(`Tonos extra repo: ${details.repo_tonos}`);
     }
     if (details.activeServices.includes('gel') && details.gel) {
@@ -193,7 +205,9 @@ export function AppointmentDetailModal({
 
     return (
       <div className="mt-4 p-4 rounded-2xl bg-secundario-zen/20 border border-secundario-zen/50 text-xs text-primario-zen flex flex-col gap-1 font-sans">
-        <p className="font-bold border-b border-secundario-zen/30 pb-1.5 mb-1.5 uppercase tracking-wider text-[10px] text-primario-zen/50">Desglose de Cotización</p>
+        <p className="font-bold border-b border-secundario-zen/30 pb-1.5 mb-1.5 uppercase tracking-wider text-[10px] text-primario-zen/50">
+          Desglose de Cotización
+        </p>
         {lines.map((line, idx) => (
           <p key={idx} className="leading-tight">• {line}</p>
         ))}
@@ -205,7 +219,6 @@ export function AppointmentDetailModal({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center md:items-center">
-          {/* Backdrop */}
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }}
@@ -215,14 +228,14 @@ export function AppointmentDetailModal({
             className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
           />
 
-          {/* Panel */}
           <motion.div
             key="panel"
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="relative w-full md:max-w-md bg-[#FDFBEE] rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-8 max-h-[90vh] overflow-y-auto"
+            /* FIXED: bg-[#FDFBEE] → bg-surface-container-lowest */
+            className="relative w-full md:max-w-md bg-surface-container-lowest rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-8 max-h-[90vh] overflow-y-auto"
           >
             {/* Header */}
             <div className="flex justify-between items-start mb-6">
@@ -253,25 +266,13 @@ export function AppointmentDetailModal({
               {status.label}
             </div>
 
-            {/* Details Grid */}
+            {/* Details */}
             <div className="flex flex-col gap-5 font-sans">
-              <DetailRow
-                icon={<User className="w-4 h-4" />}
-                label="Cliente"
-                value={appointment.customer.name}
-              />
+              <DetailRow icon={<User className="w-4 h-4" />} label="Cliente" value={appointment.customer.name} />
               {appointment.customer.phone && (
-                <DetailRow
-                  icon={<span className="text-xs font-bold">📞</span>}
-                  label="Teléfono"
-                  value={appointment.customer.phone}
-                />
+                <DetailRow icon={<span className="text-xs font-bold">📞</span>} label="Teléfono" value={appointment.customer.phone} />
               )}
-              <DetailRow
-                icon={<Scissors className="w-4 h-4" />}
-                label="Servicio"
-                value={serviceName}
-              />
+              <DetailRow icon={<Scissors className="w-4 h-4" />} label="Servicio" value={serviceName} />
               <DetailRow
                 icon={<Clock className="w-4 h-4" />}
                 label="Horario"
@@ -297,7 +298,11 @@ export function AppointmentDetailModal({
                   <p className="text-[10px] uppercase tracking-widest text-primario-zen/50 font-bold mb-1">Cambiar Empleada</p>
                   <div className="flex flex-col gap-1">
                     {employeesLoading ? (
-                      <p className="text-xs italic text-primario-zen/60">Cargando empleadas...</p>
+                      <div className="flex flex-col gap-2 py-1">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                          <Skeleton key={i} className="h-8 w-full rounded-lg" />
+                        ))}
+                      </div>
                     ) : (
                       employees.map(emp => (
                         <button
@@ -305,8 +310,8 @@ export function AppointmentDetailModal({
                           onClick={() => handleEmployeeChange(emp.id)}
                           className={`text-left px-3 py-2 rounded-lg text-xs transition-all ${
                             emp.id === appointment.employee_id
-                            ? 'bg-primario-zen text-fondo-zen font-bold'
-                            : 'hover:bg-secundario-zen/50 text-primario-zen'
+                              ? 'bg-primario-zen text-fondo-zen font-bold'
+                              : 'hover:bg-secundario-zen/50 text-primario-zen'
                           }`}
                         >
                           {emp.name}
@@ -322,40 +327,51 @@ export function AppointmentDetailModal({
                   </button>
                 </div>
               )}
-
-              <DetailRow
-                icon={<CreditCard className="w-4 h-4" />}
-                label="Total"
-                value={`$${price} MXN`}
-              />
+              <DetailRow icon={<CreditCard className="w-4 h-4" />} label="Total" value={`$${price} MXN`} />
             </div>
 
-            {/* Render ticket breakdown if exists */}
             {renderTicketDetailsBreakdown()}
 
-            {/* Error de actualización */}
             {updateError && (
               <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-4 py-3 font-sans mt-4">
-                {updateError}
+                Ocurrió un error al actualizar. Intenta de nuevo.
               </p>
             )}
 
-            {/* Action Buttons */}
+            {/* Actions */}
             <div className="flex flex-col gap-3 mt-6">
               <button
                 onClick={handleSendWhatsApp}
-                className="w-full bg-white text-primario-zen border border-primario-zen/30 py-3 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-primario-zen/5 transition-all shadow-sm flex items-center justify-center gap-2 font-sans"
+                className="w-full bg-surface-container-high text-primario-zen border border-secundario-zen/50 py-3 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-secundario-zen/50 transition-all shadow-sm flex items-center justify-center gap-2 font-sans"
               >
                 Recordatorio WhatsApp
               </button>
-              {onStatusChange && appointment.status !== 'confirmed_advance' && (
+              
+              {onStatusChange && appointment.status !== 'confirmed_advance' && appointment.status !== 'completed' && appointment.status !== 'cancelled' && appointment.status !== 'no_show' && (
                 <button
-                  id={`confirm-appointment-${appointment.id}`}
                   onClick={() => onStatusChange(appointment.id, 'confirmed_advance')}
                   className="w-full bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm font-sans"
                 >
-                  Confirmar Anticipo
+                  Validar Anticipo
                 </button>
+              )}
+
+              {onStatusChange && appointment.status !== 'cancelled' && appointment.status !== 'no_show' && appointment.status !== 'completed' && (
+                <div className="flex gap-2 mt-2 pt-4 border-t border-secundario-zen/30">
+                  <button
+                    onClick={() => onStatusChange(appointment.id, 'cancelled')}
+                    className="flex-1 px-4 py-2 rounded-xl border border-red-200 text-red-600 uppercase tracking-widest text-[10px] font-bold hover:bg-red-50 transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={() => onStatusChange(appointment.id, 'no_show')}
+                    className="flex-1 px-4 py-2 rounded-xl border border-purple-200 text-purple-700 uppercase tracking-widest text-[10px] font-bold hover:bg-purple-50 transition-all"
+                    title="Retiene el anticipo por inasistencia"
+                  >
+                    No Show
+                  </button>
+                </div>
               )}
             </div>
           </motion.div>

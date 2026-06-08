@@ -1,9 +1,11 @@
+'use client';
 // ============================================================
 // src/components/services/ServiceCard.tsx
 // Tarjeta individual de servicio con acciones de edición y borrado.
 // ============================================================
 import { Clock, DollarSign, Pencil, Trash2 } from 'lucide-react';
 import type { Service } from '@/types/supabase';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 interface ServiceCardProps {
   service: Service;
@@ -12,8 +14,11 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ service, onEdit, onDelete }: ServiceCardProps) {
+  const confirm = useConfirm();
+
   return (
-    <div className="group flex flex-col gap-3 rounded-2xl bg-[#FDFBEE] p-5 shadow-sm border border-secundario-zen/40 hover:shadow-md hover:border-secundario-zen transition-all duration-300">
+    /* FIXED: bg-[#FDFBEE] → bg-surface-container-lowest */
+    <div className="group flex flex-col gap-3 rounded-2xl bg-surface-container-lowest p-5 shadow-sm border border-secundario-zen/40 hover:shadow-md hover:border-secundario-zen hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
       <div className="flex justify-between items-start">
         <h3 className="font-serif text-primario-zen text-lg tracking-wide">
           {service.name}
@@ -24,19 +29,23 @@ export function ServiceCard({ service, onEdit, onDelete }: ServiceCardProps) {
               e.stopPropagation();
               onEdit?.();
             }}
-            className="p-2 rounded-full bg-secundario-zen/40 text-primario-zen hover:bg-primario-zen hover:text-fondo-zen transition-colors"
+            className="p-2 rounded-full bg-surface-container text-primario-zen/60 hover:bg-primario-zen hover:text-fondo-zen transition-colors"
             title="Editar servicio"
           >
             <Pencil className="w-3.5 h-3.5" />
           </button>
           <button
-            onClick={(e) => {
+            onClick={async (e) => {
               e.stopPropagation();
-              if (confirm(`¿Estás seguro de que deseas eliminar el servicio "${service.name}"?`)) {
-                onDelete?.();
-              }
+              const ok = await confirm({
+                title: 'Eliminar servicio',
+                message: `¿Eliminar "${service.name}"? Esta acción no se puede deshacer.`,
+                confirmLabel: 'Sí, eliminar',
+                danger: true,
+              });
+              if (ok) onDelete?.();
             }}
-            className="p-2 rounded-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-colors"
+            className="p-2 rounded-full bg-surface-container text-on-surface-variant/50 hover:text-error hover:bg-error/10 transition-colors"
             title="Eliminar servicio"
           >
             <Trash2 className="w-3.5 h-3.5" />

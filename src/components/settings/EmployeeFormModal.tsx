@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface EmployeeFormModalProps {
   isOpen: boolean;
@@ -12,10 +12,11 @@ interface EmployeeFormModalProps {
 }
 
 export function EmployeeFormModal({ isOpen, onClose, onSubmit, initialData }: EmployeeFormModalProps) {
+  const toast = useToast();
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     email: initialData?.email || '',
-    role: initialData?.role || 'ESPECIALISTA',
+    role: initialData?.role || 'ONLY_BOOK',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -28,7 +29,9 @@ export function EmployeeFormModal({ isOpen, onClose, onSubmit, initialData }: Em
       await onSubmit(formData);
       onClose();
     } catch (error: any) {
-      alert(error.message);
+      console.error('Error saving employee:', error);
+      // FIXED: toast.error en vez de alert(error.message)
+      toast.error('Error al guardar', 'No fue posible registrar la empleada. Intenta de nuevo.');
     } finally {
       setIsSubmitting(false);
     }
@@ -84,7 +87,7 @@ export function EmployeeFormModal({ isOpen, onClose, onSubmit, initialData }: Em
               onChange={(e) => setFormData({ ...formData, role: e.target.value })}
               className="w-full bg-white/50 border border-secundario-zen/50 rounded-xl px-4 py-3 text-primario-zen text-sm focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all appearance-none cursor-pointer"
             >
-              <option value="ESPECIALISTA">Especialista (Acceso limitado)</option>
+              <option value="ONLY_BOOK">Especialista (Acceso limitado)</option>
               <option value="TOTAL">Admin (Acceso Total)</option>
             </select>
           </div>
@@ -98,5 +101,6 @@ export function EmployeeFormModal({ isOpen, onClose, onSubmit, initialData }: Em
           </button>
         </form>
       </div>
-    </div>);
+    </div>
+  );
 }

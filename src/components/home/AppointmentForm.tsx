@@ -6,8 +6,10 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useApp } from '@/context/AppContext';
+import { supabase } from '@/lib/supabaseClient';
 import { format, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { useToast } from '@/components/ui/ToastProvider';
 
 interface FormData {
   name: string;
@@ -18,6 +20,7 @@ interface FormData {
 }
 
 export default function AppointmentForm() {
+  const toast = useToast();
   const [formData, setFormData] = useState<FormData>({
     name: '',
     contact: '',
@@ -27,7 +30,7 @@ export default function AppointmentForm() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentPending, setPaymentPending] = useState(false);
@@ -56,8 +59,9 @@ export default function AppointmentForm() {
           .from('business_settings')
           .select('*')
           .eq('project_id', activeProject.id)
-          .single();
+          .maybeSingle();
 
+        if (error && error.code !== 'PGRST116') throw error;
         if (data) setBusinessSettings(data);
       } catch (e) {
         console.error('Error fetching settings:', e);
@@ -91,10 +95,6 @@ export default function AppointmentForm() {
     }
     return slots;
   }, [businessSettings]);
-
-  const checkAvailability = async () => {
-    // Not implemented in this component; could be added if needed
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,13 +137,16 @@ export default function AppointmentForm() {
         customerId = existingCustomer.id;
       } else {
         const isEmail = formData.contact.includes('@') && formData.contact.includes('.');
+        
+        // CORRECCIÓN AQUÍ: Se limpian propiedades no permitidas por 'CreateCustomerInput' (como birthday)
         const newCustomer = await createCustomer({
           name: formData.name,
-          email: isEmail ? formData.contact : null,
-          phone: !isEmail ? formData.contact : null,
+          email: isEmail ? formData.contact.trim() : null,
+          phone: !isEmail ? formData.contact.trim() : null,
           service_notes: null,
-          visit_count: 0,
-          project_id: activeProject.id
+          birthday: null,
+          allergies: null,
+          color_formulas: null,
         });
 
         if (newCustomer) {
@@ -163,16 +166,16 @@ export default function AppointmentForm() {
       end.setMinutes(end.getMinutes() + duration);
 
       // Step 2: Find an available employee
-      let employeeId = '';
+      let selectedEmployeeId = '';
       for (const emp of employees) {
         const { available } = await checkEmployeeAvailability(emp.id, start, end);
         if (available) {
-          employeeId = emp.id;
+          selectedEmployeeId = emp.id;
           break;
         }
       }
 
-      if (!employeeId) {
+      if (!selectedEmployeeId) {
         throw new Error('Lo sentimos, no hay empleadas disponibles en el horario seleccionado. Por favor, intenta con otra hora o fecha.');
       }
 
@@ -181,7 +184,7 @@ export default function AppointmentForm() {
         project_id: activeProject.id,
         customer_id: customerId,
         service_id: formData.serviceId,
-        employee_id,
+        employee_id: selectedEmployeeId,
         start_time: start.toISOString(),
         end_time: end.toISOString(),
         status: 'pending_advance' as const,
@@ -204,7 +207,7 @@ export default function AppointmentForm() {
           contact: '',
           serviceId: '',
           date: new Date(),
-          timeSlot: TIME_SLOTS[4] // 10:00 a.m. by default
+          timeSlot: TIME_SLOTS[4] || { label: '10:00 a.m.', h: 10, m: 0 }
         });
       } else {
         throw new Error('Error desconocido al crear la cita');
@@ -220,18 +223,17 @@ export default function AppointmentForm() {
   const handlePayment = async () => {
     setPaymentPending(true);
     setPaymentMessage('Procesando pago...');
-    // Simulate delay
     await new Promise(resolve => setTimeout(resolve, 1500));
-    // In a real app, integrate with Stripe or similar; here we just mock success
+
     if (appointmentIdToConfirm) {
       try {
-        await updateAppointment(appointmentIdToConfirm, { status: 'confirmed' });
+        await updateAppointment(appointmentIdToConfirm, { status: 'confirmed' as any });
         setPaymentMessage('¡Pago exitoso! Tu cita está confirmada.');
         setTimeout(() => {
           setShowPaymentModal(false);
           setPaymentPending(false);
           setAppointmentIdToConfirm(null);
-          refetch(); // Refresh appointments list if needed
+          refetch();
         }, 1500);
       } catch (err: any) {
         setPaymentMessage('Error al procesar el pago. Por favor intenta nuevamente.');
@@ -299,7 +301,7 @@ export default function AppointmentForm() {
                   <option value="">Selecciona un servicio...</option>
                   {services.map(service => (
                     <option key={service.id} value={service.id}>
-                      {service.name} ({service.duration_minutes} min - $${service.price})
+                      {service.name} ({service.duration_minutes} min - ${service.price})
                     </option>
                   ))}
                 </select>
@@ -328,7 +330,8 @@ export default function AppointmentForm() {
                 type="date"
                 value={format(formData.date, 'yyyy-MM-dd')}
                 onChange={(e) => {
-                  const date = new Date(e.target.value);
+                  if (!e.target.value) return;
+                  const date = new Date(e.target.value + 'T00:00:00');
                   setFormData(prev => ({ ...prev, date }));
                 }}
                 className="w-full bg-secundario-zen/20 border border-secundario-zen/60 text-primario-zen text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all"
@@ -347,11 +350,10 @@ export default function AppointmentForm() {
                     type="button"
                     key={slot.label}
                     onClick={() => setFormData(prev => ({ ...prev, timeSlot: slot }))}
-                    className={`py-2 rounded-xl text-xs font-medium transition-all border ${
-                      formData.timeSlot.label === slot.label
+                    className={`py-2 rounded-xl text-xs font-medium transition-all border ${formData.timeSlot.label === slot.label
                         ? 'bg-primario-zen text-fondo-zen border-primario-zen font-bold'
                         : 'border-secundario-zen/50 text-primario-zen/70 hover:bg-secundario-zen/30'
-                    }`}
+                      }`}
                   >
                     {slot.label}
                   </button>
@@ -359,13 +361,11 @@ export default function AppointmentForm() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
               <button
                 type="button"
-                onClick={() => {
-                  alert('Para ver disponibilidad detallada, visita nuestro calendario completo');
-                }}
-                className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/60 hover:text-primario-zen"
+                onClick={() => toast.info('Calendario', 'Para ver disponibilidad detallada, visita nuestro calendario completo')}
+                className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/60 hover:text-primario-zen sm:w-auto w-full text-center sm:text-left"
               >
                 Ver disponibilidad completa
               </button>
@@ -373,15 +373,9 @@ export default function AppointmentForm() {
               <button
                 type="submit"
                 disabled={isSubmitting || loadingServices || loadingEmployees || !services.length || !employees.length}
-                className="w-full bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                className="sm:w-auto w-full bg-primario-zen text-fondo-zen py-3.5 px-8 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center"
               >
-                {isSubmitting ? (
-                  <>
-                    <span className="mr-2">Agendando...</span>
-                  </>
-                ) : (
-                  'Solicitar Cita'
-                )}
+                {isSubmitting ? 'Agendando...' : 'Solicitar Cita'}
               </button>
             </div>
           </form>
@@ -400,7 +394,7 @@ export default function AppointmentForm() {
               El monto será descontado del pago final el día de tu cita.
             </p>
             <div className="mb-4 p-4 bg-accent-sage/20 rounded-xl border border-accent-sage/50">
-              <p className="text-primario-zen font-semibold">{paymentMessage}</p>
+              <p className="text-primario-zen font-semibold">{paymentMessage || 'Esperando el pago del anticipo...'}</p>
             </div>
             {appointmentIdToConfirm && (
               <button
@@ -408,13 +402,7 @@ export default function AppointmentForm() {
                 disabled={paymentPending}
                 className="w-full bg-primario-zen text-fondo-zen py-3 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center"
               >
-                {paymentPending ? (
-                  <>
-                    <span className="mr-2">Procesando...</span>
-                  </>
-                ) : (
-                  'Pagar Anticipo (50%)'
-                )}
+                {paymentPending ? 'Procesando...' : 'Pagar Anticipo (50%)'}
               </button>
             )}
             <button
@@ -422,7 +410,7 @@ export default function AppointmentForm() {
                 setShowPaymentModal(false);
                 setAppointmentIdToConfirm(null);
               }}
-              className="mt-4 w-full text-primario-zen/60 hover:text-primario-zen text-sm"
+              className="mt-4 w-full text-primario-zen/60 hover:text-primario-zen text-sm transition-all"
             >
               Cancelar
             </button>

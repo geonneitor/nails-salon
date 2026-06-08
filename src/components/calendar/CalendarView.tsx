@@ -53,7 +53,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('all');
 
   // Consultas de datos concurrentes vinculadas al proyecto pasando el string | null esperado
-  const { appointments, isLoading, refetch, createAppointment } = useAppointments({ projectId });
+  const { appointments, isLoading, refetch, createAppointment, updateAppointment } = useAppointments({ projectId });
   const { timeBlocks } = useTimeBlocks({ projectId });
 
   // Filtrado reactivo combinado: por Especialista y opcionalmente por Cliente (Agenda externa)
@@ -111,7 +111,11 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
 
   const handleStatusChange = async (id: string, newStatus: AppointmentStatus) => {
     if (readOnly) return; // Blindaje extra en modo lectura
-    setSelectedAppointment((prev) => (prev && prev.id === id ? { ...prev, status: newStatus } : prev));
+    const success = await updateAppointment(id, { status: newStatus });
+    if (success) {
+      setSelectedAppointment((prev) => (prev && prev.id === id ? { ...prev, status: newStatus } : prev));
+      refetch();
+    }
   };
 
   const handleOpenNewModal = (date?: Date) => {

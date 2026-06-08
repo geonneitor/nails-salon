@@ -18,7 +18,9 @@ export function useDynamicServices() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchServices = useCallback(async () => {
-    if (!activeProject) {
+    const projectId = activeProject?.id || process.env.NEXT_PUBLIC_PROJECT_ID;
+
+    if (!projectId) {
       setIsLoading(false);
       return;
     }
@@ -26,10 +28,7 @@ export function useDynamicServices() {
     
     try {
       const [catRes, varRes, modRes] = await Promise.all([
-        supabase.from('service_categories').select('*').eq('project_id', activeProject.id).order('display_order'),
-        // variants and modifiers don't have project_id directly, they link through category_id
-        // We fetch all of them and filter in memory, or we could do a joined query.
-        // For simplicity we fetch all and filter client-side based on category IDs.
+        supabase.from('service_categories').select('*').eq('project_id', projectId).order('display_order'),
         supabase.from('service_variants').select('*').order('display_order'),
         supabase.from('service_modifiers').select('*').order('display_order')
       ]);

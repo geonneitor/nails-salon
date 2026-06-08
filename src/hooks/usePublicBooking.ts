@@ -78,15 +78,21 @@ export function usePublicBooking() {
 
   /* ── Fetch Real Available Slots ── */
   const fetchAvailableSlots = async (date: Date, requiredMinutes: number): Promise<TimeSlot[]> => {
-    if (!businessSettings) return [];
-    
+    // Usar valores por defecto si no hay configuración guardada en DB
+    const settings = businessSettings ?? {
+      opening_hour: '10:00',
+      closing_hour: '19:00',
+      working_days: [1, 2, 3, 4, 5, 6], // Lun-Sáb
+      max_employees: 1,
+    };
+
     const dayOfWeek = date.getDay();
-    if (businessSettings.working_days && !businessSettings.working_days.includes(dayOfWeek)) {
+    if (settings.working_days && !settings.working_days.includes(dayOfWeek)) {
       return []; // Not a working day
     }
 
     // 1. Get base slots
-    const allSlots = buildSlots(businessSettings.opening_hour, businessSettings.closing_hour);
+    const allSlots = buildSlots(settings.opening_hour, settings.closing_hour);
     const validSlots: TimeSlot[] = [];
 
     // 2. Fetch employees
@@ -134,7 +140,7 @@ export function usePublicBooking() {
       return !hasBlockConflict;
     };
 
-    const [closeH, closeM] = businessSettings.closing_hour.split(':').map(Number);
+    const [closeH, closeM] = settings.closing_hour.split(':').map(Number);
     const closingTime = new Date(date);
     closingTime.setHours(closeH, closeM, 0, 0);
 

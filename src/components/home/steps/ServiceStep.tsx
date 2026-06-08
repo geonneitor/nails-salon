@@ -21,6 +21,8 @@ export default function ServiceStep({ data, onSelect }: { data: any, onSelect: (
 
   const handleSelectCategory = (id: string) => {
     setSelectedCategoryId(id);
+    setSelectedVariantId(null);  // RESET: limpiar variante anterior
+    setSelectedModifiers({});    // RESET: limpiar modificadores anteriores
     setStage(1);
   };
 

@@ -1,32 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useServices } from '@/hooks/useServices';
-import { useAppointments } from '@/hooks/useAppointments';
-import { useCustomers } from '@/hooks/useCustomers';
-import { useEmployees } from '@/hooks/useEmployees';
-import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabaseClient';
 import { format } from 'date-fns';
 
-export function useBookingFlow() {
-  const { services, isLoading: loadingServices } = useServices();
-  const { createAppointment, updateAppointment, checkEmployeeAvailability } = useAppointments();
-  const { customers, createCustomer } = useCustomers();
-  const { employees, isLoading: loadingEmployees } = useEmployees();
-  const { activeProject } = useApp();
+const PROJECT_ID = process.env.NEXT_PUBLIC_PROJECT_ID!;
 
+export function useBookingFlow() {
   const [businessSettings, setBusinessSettings] = useState<any>(null);
   const [loadingSettings, setLoadingSettings] = useState(true);
 
   useEffect(() => {
     async function fetchSettings() {
-      if (!activeProject?.id) return;
       try {
         const { data, error } = await supabase
           .from('business_settings')
           .select('*')
-          .eq('project_id', activeProject.id)
+          .eq('project_id', PROJECT_ID)
           .maybeSingle();
         if (error && error.code !== 'PGRST116') throw error;
         if (data) setBusinessSettings(data);
@@ -37,7 +27,7 @@ export function useBookingFlow() {
       }
     }
     fetchSettings();
-  }, [activeProject]);
+  }, []);
 
   const getTimeSlots = () => {
     if (!businessSettings) return [];
@@ -60,85 +50,104 @@ export function useBookingFlow() {
   };
 
   const submitBooking = async (formData: any) => {
-    if (!formData.name || !formData.contact || !formData.ticketDetails || !activeProject?.id) {
+    if (!formData.name || !formData.contact || !formData.ticketDetails) {
       throw new Error('Por favor completa todos los campos.');
     }
 
+    const { date, timeSlot, name, contact, ticketDetails } = formData;
+    const { totalPrice, totalDuration } = ticketDetails;
+
     // 1. Validate working day
     if (businessSettings) {
-      const dayOfWeek = formData.date.getDay();
+      const dayOfWeek = date.getDay();
       if (!businessSettings.working_days.includes(dayOfWeek)) {
         throw new Error('El día seleccionado no es un día laboral.');
       }
     }
 
-    // 2. Customer logic
-    let customerId = '';
-    const existingCustomer = customers.find(c =>
-      (c.email && c.email.toLowerCase() === formData.contact.toLowerCase().trim()) ||
-      (c.phone && c.phone === formData.contact.trim())
-    );
+    // 2. Upsert customer
+    const isEmail = contact.includes('@') && contact.includes('.');
+    let customerId: string;
 
-    if (existingCustomer) {
-      customerId = existingCustomer.id;
+    const { data: existing } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('project_id', PROJECT_ID)
+      .eq(isEmail ? 'email' : 'phone', contact.trim())
+      .maybeSingle();
+
+    if (existing) {
+      customerId = existing.id;
     } else {
-      const isEmail = formData.contact.includes('@') && formData.contact.includes('.');
-      
-      // CORRECCIÓN 1: Se añaden las propiedades obligatorias exigidas por el tipo
-      const newCustomer = await createCustomer({
-        name: formData.name,
-        email: isEmail ? formData.contact : null,
-        phone: !isEmail ? formData.contact : null,
-        birthday: null,
-        service_notes: null,
-        allergies: null,
-        color_formulas: null,
-      });
-      if (!newCustomer) throw new Error('No se pudo crear el registro de clienta');
-      customerId = newCustomer.id;
+      const { data: newCust, error: custErr } = await supabase
+        .from('customers')
+        .insert({
+          project_id: PROJECT_ID,
+          name: name.trim(),
+          email: isEmail ? contact.trim() : null,
+          phone: !isEmail ? contact.trim() : null,
+        })
+        .select('id')
+        .single();
+      if (custErr || !newCust) throw new Error('No se pudo registrar tu contacto.');
+      customerId = newCust.id;
     }
 
-    // 3. Timing
-    const start = new Date(formData.date);
-    start.setHours(formData.timeSlot.h, formData.timeSlot.m, 0, 0);
-    const duration = formData.ticketDetails.totalDuration || 60;
+    // 3. Build start/end times
+    const start = new Date(date);
+    start.setHours(timeSlot.h, timeSlot.m, 0, 0);
+    const duration = totalDuration || 60;
     const end = new Date(start);
     end.setMinutes(end.getMinutes() + duration);
 
-    // 4. Employee availability
-    let employeeId = '';
-    for (const emp of employees) {
-      const { available } = await checkEmployeeAvailability(emp.id, start, end);
-      if (available) {
+    // 4. Find available employee
+    const { data: employees } = await supabase.from('employees').select('id').eq('project_id', PROJECT_ID);
+    let employeeId: string | null = null;
+
+    for (const emp of employees ?? []) {
+      const { data: conflicts } = await supabase
+        .from('appointments')
+        .select('id')
+        .eq('employee_id', emp.id)
+        .lt('start_time', end.toISOString())
+        .gt('end_time', start.toISOString())
+        .not('status', 'eq', 'cancelled');
+        
+      const { data: blocks } = await supabase
+        .from('time_blocks')
+        .select('id')
+        .eq('employee_id', emp.id)
+        .lt('start_time', end.toISOString())
+        .gt('end_time', start.toISOString());
+
+      if ((!conflicts || conflicts.length === 0) && (!blocks || blocks.length === 0)) {
         employeeId = emp.id;
         break;
       }
     }
-    if (!employeeId) throw new Error('No hay empleadas disponibles en este horario.');
+
+    if (!employeeId) throw new Error('Ya no hay horarios disponibles en ese momento.');
 
     // 5. Create appointment
-    // CORRECCIÓN 2 y 3: Se asocia correctamente 'employeeId' y se añade 'ticket_details'
-    const result = await createAppointment({
-      project_id: activeProject.id,
+    const { error: apptErr } = await supabase.from('appointments').insert({
+      project_id: PROJECT_ID,
       customer_id: customerId,
       service_id: null,
       employee_id: employeeId,
       start_time: start.toISOString(),
       end_time: end.toISOString(),
       status: 'pending_advance',
-      ticket_details: formData.ticketDetails,
-      total_price: formData.ticketDetails.totalPrice || 0,
-      total_duration: duration
+      total_price: totalPrice,
+      total_duration: duration,
+      ticket_details: ticketDetails,
     });
 
-    if (!result) throw new Error('Error al crear la cita');
-    return result;
+    if (apptErr) throw new Error('Error al crear la cita. Intenta de nuevo.');
+    
+    return true;
   };
 
   return {
-    services,
-    loadingServices,
-    loadingEmployees,
     businessSettings,
     loadingSettings,
     timeSlots: getTimeSlots(),

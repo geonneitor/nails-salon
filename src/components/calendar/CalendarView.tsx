@@ -39,6 +39,11 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   // Estado de fecha de referencia central
   const [anchorDate, setAnchorDate] = useState<Date>(() => startOfLocalDay(new Date()));
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfLocalDay(new Date()));
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Hooks de UI compartidos
   const { view, setView, hourHeight } = useCalendarView();
@@ -139,6 +144,14 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
     }
     return format(anchorDate, "MMMM 'de' yyyy", { locale: es });
   }, [view, anchorDate]);
+
+  if (!isMounted) {
+    return (
+      <div className="flex h-full items-center justify-center bg-fondo-zen">
+        <Loader2 className="w-8 h-8 animate-spin text-primario-zen/40" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full bg-fondo-zen">

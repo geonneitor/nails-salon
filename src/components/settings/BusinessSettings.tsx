@@ -42,13 +42,34 @@ export function BusinessSettings() {
   async function handleSave() {
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('business_settings')
-        .upsert({
-          project_id: activeProject?.id,
-          ...settings,
-          updated_at: new Date().toISOString(),
-        });
+      let error;
+      
+      // Si settings tiene un id, significa que ya existe en DB -> UPDATE
+      if ((settings as any).id) {
+        const { error: updateError } = await supabase
+          .from('business_settings')
+          .update({
+            max_employees: settings.max_employees,
+            opening_hour: settings.opening_hour,
+            closing_hour: settings.closing_hour,
+            working_days: settings.working_days,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', (settings as any).id);
+        error = updateError;
+      } else {
+        // Si no tiene id, es la primera vez que se guarda -> INSERT
+        const { error: insertError } = await supabase
+          .from('business_settings')
+          .insert({
+            project_id: activeProject?.id,
+            max_employees: settings.max_employees,
+            opening_hour: settings.opening_hour,
+            closing_hour: settings.closing_hour,
+            working_days: settings.working_days,
+          });
+        error = insertError;
+      }
 
       if (error) throw error;
       // FIXED: toast.success en vez de alert()

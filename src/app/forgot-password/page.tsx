@@ -46,9 +46,9 @@ export default function ForgotPasswordPage() {
           <div className="flex justify-center mb-4">
             <div className="relative w-32">
               <img
-                src="/zen-logo.svg"
+                src="/zen-logo.png"
                 alt="Zen Logo"
-                className="w-full h-auto object-contain"
+                className="h-14 w-auto object-contain mb-4 drop-shadow-sm"
                 style={{ height: 'auto' }}
               />
             </div>

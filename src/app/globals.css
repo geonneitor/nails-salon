@@ -123,7 +123,7 @@ body {
   color: var(--on-background);
   font-family: var(--font-manrope), sans-serif;
   -webkit-font-smoothing: antialiased;
-  min-height: max(884px, 100dvh);
+  min-height: 100dvh;
   /* Añadimos un ruido muy sutil o textura si se requiere, pero por ahora mantenemos limpio con profundidad en componentes */
 }
 

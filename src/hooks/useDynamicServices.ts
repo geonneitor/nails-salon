@@ -20,15 +20,16 @@ export function useDynamicServices() {
   const fetchServices = useCallback(async () => {
     const projectId = activeProject?.id || process.env.NEXT_PUBLIC_PROJECT_ID;
 
-    if (!projectId) {
-      setIsLoading(false);
-      return;
-    }
     setIsLoading(true);
     
     try {
+      let catQuery = supabase.from('service_categories').select('*').order('display_order');
+      if (projectId) {
+        catQuery = catQuery.eq('project_id', projectId);
+      }
+
       const [catRes, varRes, modRes] = await Promise.all([
-        supabase.from('service_categories').select('*').eq('project_id', projectId).order('display_order'),
+        catQuery,
         supabase.from('service_variants').select('*').order('display_order'),
         supabase.from('service_modifiers').select('*').order('display_order')
       ]);

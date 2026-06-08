@@ -21,8 +21,15 @@ export async function sendWhatsAppReminder(appointment: AppointmentWithRelations
 
   const appointmentDate = new Date(appointment.start_time);
   const timeString = format(appointmentDate, 'hh:mm a', { locale: es });
+  const price = appointment.total_price || 0;
+  const advance = price * 0.5;
 
-  const messageText = `Hola, ${customerName}, te recordamos tu cita el día de hoy a las ${timeString}. Te pedimos de favor confirmar tu asistencia respondiendo a este mensaje automático. ✨\n\n¡Te esperamos!`;
+  let messageText = '';
+  if (appointment.status === 'pending_advance') {
+    messageText = `¡Hola, ${customerName}! ✨\n\nHemos recibido tu solicitud de cita para hoy a las ${timeString}.\n\nPara confirmarla en nuestro sistema, requerimos un anticipo del 50% ($${advance} MXN).\n\n💳 Puedes transferir a la cuenta XXXXXXXX o realizar un depósito.\nPor favor, envíanos tu comprobante por este medio.\n\n¡Gracias por tu preferencia!`;
+  } else {
+    messageText = `¡Hola, ${customerName}! ✨\n\nTe recordamos tu cita confirmada el día de hoy a las ${timeString}.\n\nTe pedimos de favor confirmar tu asistencia respondiendo a este mensaje.\n\n¡Te esperamos!`;
+  }
 
   if (hasApiKeys) {
     // Aquí iría la lógica del POST a la API oficial

@@ -81,10 +81,10 @@ export function WeekView({
       </div>
 
       {/* Grid de la semana: columna de horas + 7 columnas de días */}
-      <div className="relative flex bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm overflow-hidden">
+      <div className="relative flex bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm overflow-x-auto overflow-y-hidden">
         {/* Etiquetas de hora */}
         <div
-          className="flex-shrink-0 w-14 border-r border-secundario-zen/50"
+          className="flex-shrink-0 w-14 border-r border-secundario-zen/50 bg-fondo-zen sticky left-0 z-20"
           style={{ height: totalHeight }}
         >
           {hourSlots.map((slot) => (
@@ -99,7 +99,7 @@ export function WeekView({
         </div>
 
         {/* 7 columnas de días */}
-        <div className="flex-1 grid grid-cols-7 relative" style={{ height: totalHeight }}>
+        <div className="flex-1 grid grid-cols-7 relative min-w-[500px] md:min-w-0" style={{ height: totalHeight }}>
           {weekDays.map((day, dayIdx) => {
             const layout = appointmentsByDay.get(day.toDateString()) ?? [];
             const isToday = dayIdx === todayColumnIndex;

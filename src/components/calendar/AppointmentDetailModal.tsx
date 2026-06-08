@@ -344,7 +344,7 @@ export function AppointmentDetailModal({
                 onClick={handleSendWhatsApp}
                 className="w-full bg-surface-container-high text-primario-zen border border-secundario-zen/50 py-3 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-secundario-zen/50 transition-all shadow-sm flex items-center justify-center gap-2 font-sans"
               >
-                Recordatorio WhatsApp
+                {appointment.status === 'pending_advance' ? 'Cobrar Anticipo (WhatsApp)' : 'Recordatorio WhatsApp'}
               </button>
               
               {onStatusChange && appointment.status !== 'confirmed_advance' && appointment.status !== 'completed' && appointment.status !== 'cancelled' && appointment.status !== 'no_show' && (

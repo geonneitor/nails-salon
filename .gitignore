@@ -35,3 +35,10 @@ tsconfig.tsbuildinfo
 # Archivos locales / documentación de conversación
 client_report.html
 conversación 1.md
+
+# Archivos generados por herramientas externas (no parte del proyecto)
+App sin título.html
+App sin título_files/
+stitch_zen_nails_appointment_portal/
+.claude/
+server.log

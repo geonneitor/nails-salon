@@ -6,7 +6,8 @@ import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
 import { BusinessSettings } from '@/components/settings/BusinessSettings';
 import { CustomerList } from '@/components/customers/CustomerList';
 import { ServiceList } from '@/components/services/ServiceList';
-import { LayoutGrid, Users, Heart, Clock, Palette } from 'lucide-react';
+import { ManualOperativo } from '@/components/settings/ManualOperativo';
+import { LayoutGrid, Users, Heart, Clock, Palette, BookOpen } from 'lucide-react';
 import { useState } from 'react';
 
 export default function AjustesPage() {
@@ -18,6 +19,7 @@ export default function AjustesPage() {
     { id: 'clientas', label: 'Clientela', icon: Heart, component: <CustomerList /> },
     { id: 'servicios', label: 'Servicios', icon: LayoutGrid, component: <ServiceList /> },
     { id: 'estetica', label: 'Estética', icon: Palette, component: <AppearanceSettings /> },
+    { id: 'manual', label: 'Manual Operativo', icon: BookOpen, component: <ManualOperativo /> },
   ];
 
   const currentTab = tabs.find(t => t.id === activeTab) || tabs[0];

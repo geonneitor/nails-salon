@@ -30,8 +30,13 @@ export default function Hero() {
             backgroundImage: 'url("https://images.unsplash.com/photo-1600948836101-f9ff15e720f7?auto=format&fit=crop&q=80&w=2000")',
           }}
         />
-        {/* Dark Gradient Overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-background/95" />
+        {/* Dark Botanical Gradient Overlay for premium aesthetics and readability */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(26, 31, 20, 0.85) 0%, rgba(26, 31, 20, 0.75) 60%, var(--background) 100%)'
+          }}
+        />
       </motion.div>
 
       {/* Glassmorphism Content Box */}

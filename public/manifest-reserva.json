@@ -1,8 +1,8 @@
 {
-  "name": "Zen Nail Salon - Rituales de Calma",
-  "short_name": "Zen Nails Web",
-  "description": "Sitio web y portal del salón de uñas Zen",
-  "start_url": "/",
+  "name": "Zen Nail Salon - Reservas",
+  "short_name": "Zen Reservas",
+  "description": "Portal de agendamiento y reserva de citas del salón Zen",
+  "start_url": "/reserva",
   "display": "standalone",
   "background_color": "#FAF8F5",
   "theme_color": "#344623",

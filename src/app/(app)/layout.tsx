@@ -1,17 +1,16 @@
-'use client';
+import type { Metadata } from 'next';
+import AppClientLayout from './AppClientLayout';
 
-import { DashboardLayout } from '@/components/layout/DashboardLayout';
+export const metadata: Metadata = {
+  title: 'Zen Nail Salon - Agenda',
+  description: 'Sistema de gestión interna, calendario y agenda del salón Zen.',
+  manifest: '/manifest-app.json',
+};
 
-export default function AppLayout({
+export default function AppServerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // We can add specific auth checks here to ensure only authorized users enter the (app) zone
-
-  return (
-    <DashboardLayout>
-      {children}
-    </DashboardLayout>
-  );
+  return <AppClientLayout>{children}</AppClientLayout>;
 }

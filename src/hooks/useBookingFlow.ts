@@ -29,12 +29,19 @@ export function useBookingFlow() {
     fetchSettings();
   }, []);
 
+  /**
+   * Genera los slots de tiempo disponibles.
+   * Siempre produce slots: usa los settings de BD o un fallback de 9am–8pm
+   * para que la grilla nunca aparezca vacía por falta de configuración.
+   */
   const getTimeSlots = () => {
-    if (!businessSettings) return [];
-    const startHour = parseInt(businessSettings.opening_hour.split(':')[0]);
-    const startMin = parseInt(businessSettings.opening_hour.split(':')[1]);
-    const endHour = parseInt(businessSettings.closing_hour.split(':')[0]);
-    const endMin = parseInt(businessSettings.closing_hour.split(':')[1]);
+    // Fallback to 9am–8pm when businessSettings haven't loaded from DB
+    const openingHour = businessSettings?.opening_hour ?? '09:00';
+    const closingHour = businessSettings?.closing_hour ?? '20:00';
+    const startHour = parseInt(openingHour.split(':')[0]);
+    const startMin = parseInt(openingHour.split(':')[1]);
+    const endHour = parseInt(closingHour.split(':')[0]);
+    const endMin = parseInt(closingHour.split(':')[1]);
     const slots = [];
     let current = new Date(0, 0, 0, startHour, startMin);
     const end = new Date(0, 0, 0, endHour, endMin);

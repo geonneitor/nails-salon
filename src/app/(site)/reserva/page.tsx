@@ -6,14 +6,53 @@ import ZenBookingJourney from '@/components/home/ZenBookingJourney';
 
 export default function BookingPage() {
   return (
-    <div className="min-h-screen bg-fondo-zen pt-24 pb-24 px-5">
-      <div className="max-w-6xl mx-auto mb-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-primario-zen/60 hover:text-primario-zen font-sans text-sm mb-6 transition-colors">
-          <ChevronLeft className="w-4 h-4" /> Volver
-        </Link>
-      </div>
+    <div className="min-h-screen bg-fondo-zen flex flex-col">
+      {/* ── Barra de navegación sticky ── */}
+      <header className="w-full border-b border-secundario-zen/30 bg-fondo-zen/80 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" aria-label="Ir al inicio">
+            <img
+              src="/zen-logo.svg"
+              alt="Zen Nail Salon"
+              className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
+            />
+          </Link>
 
-      <ZenBookingJourney />
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-primario-zen/50 hover:text-primario-zen font-sans text-xs font-semibold uppercase tracking-widest transition-colors"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            Volver
+          </Link>
+        </div>
+      </header>
+
+      {/* ── Contenido principal ── */}
+      <main className="flex-1 w-full max-w-4xl mx-auto px-5 py-12 md:py-16">
+        {/* Hero de la página */}
+        <div className="text-center mb-14">
+          <span className="inline-block text-[10px] uppercase tracking-[0.25em] font-semibold text-primario-zen/40 mb-4">
+            Reserva en línea
+          </span>
+          <h1 className="font-serif text-4xl md:text-5xl text-primario-zen leading-tight mb-4">
+            Agenda tu ritual
+          </h1>
+          <p className="font-sans text-sm text-primario-zen/50 max-w-sm mx-auto leading-relaxed">
+            Completa los pasos a continuación. Tu cita queda confirmada al abonar el anticipo del 50%.
+          </p>
+        </div>
+
+        {/* El formulario de reserva paso a paso */}
+        <ZenBookingJourney />
+      </main>
+
+      {/* ── Footer mínimo ── */}
+      <footer className="border-t border-secundario-zen/30 py-6 text-center">
+        <p className="font-sans text-[10px] uppercase tracking-widest text-primario-zen/30">
+          © {new Date().getFullYear()} Zen Nail Salon · Rituales de Calma
+        </p>
+      </footer>
     </div>
   );
 }

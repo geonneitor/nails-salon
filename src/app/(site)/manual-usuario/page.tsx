@@ -229,8 +229,14 @@ export default function ManualUsuarioPage() {
               <div>
                 <h4 className="font-serif text-lg text-primario-zen mb-2">Garantía del 50% de la Base</h4>
                 <p className="font-sans text-xs text-primario-zen/60 leading-relaxed font-light">
-                  Una vez solicitada tu reserva, tu lugar quedará reservado temporalmente. Recibirás un mensaje de WhatsApp con un enlace seguro para realizar el pago del <strong>50% del servicio base</strong>. 
-                  Dispones de un tiempo establecido para completarlo; una vez recibido el pago, tu cita cambia automáticamente a estado <strong>Confirmado</strong> y se asienta en la agenda de tu artista asignada.
+                  Una vez solicitada tu reserva, tu lugar quedará bloqueado temporalmente. Para confirmarlo en nuestro sistema, requerimos el anticipo de garantía del <strong>50% del servicio base</strong>. 
+                  <br/><br/>
+                  <strong>Datos para Transferencia Bancaria:</strong>
+                  <br/>• <strong>Banco:</strong> BBVA
+                  <br/>• <strong>A nombre de:</strong> Alexandra Garcia
+                  <br/>• <strong>Número de Tarjeta:</strong> 4152 3144 5237 9798
+                  <br/><br/>
+                  Por favor, envía tu comprobante de transferencia al WhatsApp de Alexandra (<strong>686 399 9319</strong>). Una vez recibido el pago, tu cita cambiará automáticamente a estado <strong>Confirmado</strong> y quedará firmemente agendada.
                 </p>
               </div>
             </div>

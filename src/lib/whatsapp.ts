@@ -26,7 +26,7 @@ export async function sendWhatsAppReminder(appointment: AppointmentWithRelations
 
   let messageText = '';
   if (appointment.status === 'pending_advance') {
-    messageText = `¡Hola, ${customerName}! ✨\n\nHemos recibido tu solicitud de cita para hoy a las ${timeString}.\n\nPara confirmarla en nuestro sistema, requerimos un anticipo del 50% ($${advance} MXN).\n\n💳 Puedes transferir a la cuenta XXXXXXXX o realizar un depósito.\nPor favor, envíanos tu comprobante por este medio.\n\n¡Gracias por tu preferencia!`;
+    messageText = `¡Hola, ${customerName}! ✨\n\nHemos recibido tu solicitud de cita para el día ${format(appointmentDate, "dd 'de' MMMM", { locale: es })} a las ${timeString}.\n\nPara confirmar tu lugar en la agenda, requerimos un anticipo del 50% ($${advance} MXN).\n\n💳 *Datos de Pago (Transferencia Bancaria):*\n• *Banco:* BBVA\n• *A nombre de:* Alexandra Garcia\n• *Tarjeta:* 4152 3144 5237 9798\n\nPor favor, envía el comprobante al WhatsApp de Alexandra (*686 399 9319*) para confirmar tu cita.\n\n¡Muchas gracias! 🌿`;
   } else {
     messageText = `¡Hola, ${customerName}! ✨\n\nTe recordamos tu cita confirmada el día de hoy a las ${timeString}.\n\nTe pedimos de favor confirmar tu asistencia respondiendo a este mensaje.\n\n¡Te esperamos!`;
   }

@@ -124,8 +124,15 @@ export default function ConfirmStep({ data, onConfirm, onBack, isSubmitting, err
               Políticas de confirmación
             </p>
             <p className="text-[11px] text-primario-zen/60 leading-relaxed mt-1">
-              Para garantizar tu lugar, se requiere un **anticipo del 50%** de la base (${(ticketDetails?.totalPrice / 2) || 0} MXN). Te enviaremos el enlace por WhatsApp.
+              Para garantizar tu lugar, se requiere un **anticipo del 50%** de la base (${(ticketDetails?.totalPrice / 2) || 0} MXN). 
             </p>
+            <div className="text-[10px] text-primario-zen/50 leading-relaxed mt-2.5 pt-2.5 border-t border-accent-gold-primary/10">
+              <p className="font-semibold text-accent-gold-dark mb-1">Datos para Transferencia:</p>
+              <p>• <strong>Banco:</strong> BBVA</p>
+              <p>• <strong>A nombre de:</strong> Alexandra Garcia</p>
+              <p>• <strong>Tarjeta:</strong> 4152 3144 5237 9798</p>
+              <p className="mt-1">Enviar comprobante al WhatsApp: <strong>686 399 9319</strong></p>
+            </div>
           </div>
         </div>
 

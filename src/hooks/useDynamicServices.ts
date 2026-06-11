@@ -18,7 +18,7 @@ export function useDynamicServices() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchServices = useCallback(async () => {
-    const projectId = activeProject?.id || process.env.NEXT_PUBLIC_PROJECT_ID;
+    const projectId = activeProject?.id || process.env.NEXT_PUBLIC_PROJECT_ID || 'bf2460b5-f50d-4b30-a780-b91f05e3096b';
 
     setIsLoading(true);
     

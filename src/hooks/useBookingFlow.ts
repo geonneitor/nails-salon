@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { format } from 'date-fns';
 
-const PROJECT_ID = process.env.NEXT_PUBLIC_PROJECT_ID!;
+const PROJECT_ID = process.env.NEXT_PUBLIC_PROJECT_ID || 'bf2460b5-f50d-4b30-a780-b91f05e3096b';
 
 export function useBookingFlow() {
   const [businessSettings, setBusinessSettings] = useState<any>(null);

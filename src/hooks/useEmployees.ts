@@ -35,16 +35,27 @@ export function useEmployees() {
 
   const createEmployee = async (payload: Partial<Employee>) => {
     if (!activeProject) throw new Error('No hay proyecto activo');
-    const employeeData = { ...payload, project_id: activeProject.id };
-    const { data, error: e } = await supabase
-      .from('employees')
-      .insert(employeeData)
-      .select()
-      .single();
+    
+    // Llamar a la API interna segura para crear el usuario en Auth y enviar la invitación
+    const response = await fetch('/api/admin/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: payload.email,
+        name: payload.name,
+        role: payload.role,
+        projectId: activeProject.id,
+      }),
+    });
 
-    if (e) throw e;
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Error al invitar empleada.');
+    }
+
     await fetchEmployees();
-    return data;
+    return result.employee;
   };
 
   const updateEmployee = async (id: string, payload: Partial<Employee>) => {

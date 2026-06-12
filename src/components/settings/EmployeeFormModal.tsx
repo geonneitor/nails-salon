@@ -92,12 +92,18 @@ export function EmployeeFormModal({ isOpen, onClose, onSubmit, initialData }: Em
             </select>
           </div>
 
+          {!initialData && (
+            <p className="text-[10px] text-primario-zen/50 text-center px-4 leading-relaxed font-medium">
+              Al registrarla, se le enviará un correo electrónico de invitación para que configure su propia contraseña.
+            </p>
+          )}
+
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full bg-primario-zen text-fondo-zen py-3 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
           >
-            {isSubmitting ? 'Guardando...' : initialData ? 'Actualizar Empleada' : 'Registrar Empleada'}
+            {isSubmitting ? 'Guardando...' : initialData ? 'Actualizar Empleada' : 'Enviar Invitación'}
           </button>
         </form>
       </div>

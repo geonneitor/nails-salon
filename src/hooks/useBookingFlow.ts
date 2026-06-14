@@ -30,29 +30,88 @@ export function useBookingFlow() {
   }, []);
 
   /**
-   * Genera los slots de tiempo disponibles.
-   * Siempre produce slots: usa los settings de BD o un fallback de 9am–8pm
-   * para que la grilla nunca aparezca vacía por falta de configuración.
+   * Obtiene los slots de tiempo y los marca como ocupados si chocan con citas existentes.
    */
-  const getTimeSlots = () => {
-    // Fallback to 9am–8pm when businessSettings haven't loaded from DB
+  const getDailySlots = async (date: Date) => {
+    // 1. Generate base slots
     const openingHour = businessSettings?.opening_hour ?? '09:00';
     const closingHour = businessSettings?.closing_hour ?? '20:00';
     const startHour = parseInt(openingHour.split(':')[0]);
     const startMin = parseInt(openingHour.split(':')[1]);
     const endHour = parseInt(closingHour.split(':')[0]);
     const endMin = parseInt(closingHour.split(':')[1]);
-    const slots = [];
-    let current = new Date(0, 0, 0, startHour, startMin);
-    const end = new Date(0, 0, 0, endHour, endMin);
+    
+    const slots: any[] = [];
+    let current = new Date(date);
+    current.setHours(startHour, startMin, 0, 0);
+    const end = new Date(date);
+    end.setHours(endHour, endMin, 0, 0);
+    
+    const nowTime = new Date().getTime();
+    
     while (current < end) {
+      const slotTime = current.getTime();
       slots.push({
         label: format(current, 'h:mm a'),
         h: current.getHours(),
         m: current.getMinutes(),
+        time: slotTime,
+        isOccupied: slotTime <= nowTime // Disable if the slot is in the past
       });
-      current.setMinutes(current.getMinutes() + 30);
+      current = new Date(current.getTime() + 30 * 60000);
     }
+
+    // 2. Fetch appointments for this day
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    try {
+      const { data: appointments, error } = await supabase
+        .from('appointments')
+        .select('start_time, end_time, status, created_at')
+        .eq('project_id', PROJECT_ID)
+        .gte('start_time', startOfDay.toISOString())
+        .lte('start_time', endOfDay.toISOString())
+        .not('status', 'eq', 'cancelled');
+
+      if (error) throw error;
+
+      if (appointments && appointments.length > 0) {
+        // Filtra citas pending_advance expiradas
+        const validAppointments = appointments.filter(appt => {
+          if (appt.status === 'pending_advance') {
+            const createdAt = new Date(appt.created_at).getTime();
+            const graceMs = (businessSettings?.advance_grace_period_hours ?? 2) * 3600000;
+            if (new Date().getTime() > createdAt + graceMs) {
+              return false; // Ignore because grace period expired
+            }
+          }
+          return true;
+        });
+
+        // Mark overlapping slots as occupied
+        slots.forEach(slot => {
+          const slotStart = slot.time;
+          const slotEnd = slotStart + (30 * 60000); // Assume each slot represents a 30m block
+
+          for (const appt of validAppointments) {
+            const apptStart = new Date(appt.start_time).getTime();
+            const apptEnd = new Date(appt.end_time).getTime();
+            
+            // If the slot overlaps with the appointment, mark as occupied
+            if (slotStart < apptEnd && slotEnd > apptStart) {
+              slot.isOccupied = true;
+              break;
+            }
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Error fetching daily appointments:", err);
+    }
+
     return slots;
   };
 
@@ -107,36 +166,14 @@ export function useBookingFlow() {
     const end = new Date(start);
     end.setMinutes(end.getMinutes() + duration);
 
-    // 4. Find available employee
+    // 4. Find available employee (simplified logic for now)
     const { data: employees } = await supabase.from('employees').select('id').eq('project_id', PROJECT_ID);
-    let employeeId: string | null = null;
+    let employeeId: string | null = employees && employees.length > 0 ? employees[0].id : null;
 
-    for (const emp of employees ?? []) {
-      const { data: conflicts } = await supabase
-        .from('appointments')
-        .select('id')
-        .eq('employee_id', emp.id)
-        .lt('start_time', end.toISOString())
-        .gt('end_time', start.toISOString())
-        .not('status', 'eq', 'cancelled');
-        
-      const { data: blocks } = await supabase
-        .from('time_blocks')
-        .select('id')
-        .eq('employee_id', emp.id)
-        .lt('start_time', end.toISOString())
-        .gt('end_time', start.toISOString());
-
-      if ((!conflicts || conflicts.length === 0) && (!blocks || blocks.length === 0)) {
-        employeeId = emp.id;
-        break;
-      }
-    }
-
-    if (!employeeId) throw new Error('Ya no hay horarios disponibles en ese momento.');
+    if (!employeeId) throw new Error('No hay personal configurado para atender la cita.');
 
     // 5. Create appointment
-    const { error: apptErr } = await supabase.from('appointments').insert({
+    const { data: newAppt, error: apptErr } = await supabase.from('appointments').insert({
       project_id: PROJECT_ID,
       customer_id: customerId,
       service_id: null,
@@ -147,17 +184,38 @@ export function useBookingFlow() {
       total_price: totalPrice,
       total_duration: duration,
       ticket_details: ticketDetails,
-    });
+    }).select('id').single();
 
-    if (apptErr) throw new Error('Error al crear la cita. Intenta de nuevo.');
+    if (apptErr) {
+      console.error(apptErr);
+      throw new Error('Error al crear la cita. Intenta de nuevo.');
+    }
     
-    return true;
+    return newAppt.id;
+  };
+
+  const markProofSent = async (appointmentId: string, proofUrl?: string) => {
+    // Marcamos que se envió comprobante. Podemos guardarlo en ticket_details o en payment_proof_url
+    const updatePayload: any = {};
+    if (proofUrl) {
+      updatePayload.payment_proof_url = proofUrl;
+    }
+    
+    // Obtener ticket details actuales para no sobreescribir
+    const { data: appt } = await supabase.from('appointments').select('ticket_details').eq('id', appointmentId).single();
+    
+    const currentTicket = appt?.ticket_details || {};
+    updatePayload.ticket_details = { ...currentTicket, payment_proof_sent: true };
+
+    const { error } = await supabase.from('appointments').update(updatePayload).eq('id', appointmentId);
+    if (error) throw error;
   };
 
   return {
     businessSettings,
     loadingSettings,
-    timeSlots: getTimeSlots(),
-    submitBooking
+    getDailySlots,
+    submitBooking,
+    markProofSent,
   };
 }

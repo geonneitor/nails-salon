@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import PublicNavbar from '@/components/home/PublicNavbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, 
@@ -83,26 +84,8 @@ export default function ManualUsuarioPage() {
 
   return (
     <div className="min-h-screen bg-fondo-zen flex flex-col">
-      {/* ── Barra de navegación sticky ── */}
-      <header className="w-full border-b border-secundario-zen/30 bg-fondo-zen/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" aria-label="Ir al inicio" className="flex items-center gap-2 text-primario-zen">
-            <img
-              src="/zen-logo.svg"
-              alt="Zen Nail Salon"
-              className="h-8 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
-            />
-          </Link>
-
-          <Link
-            href="/reserva"
-            className="inline-flex items-center gap-1.5 text-primario-zen/50 hover:text-primario-zen font-sans text-xs font-semibold uppercase tracking-widest transition-colors"
-          >
-            <ChevronLeft className="w-3.5 h-3.5" />
-            Volver a Reservas
-          </Link>
-        </div>
-      </header>
+      {/* ── Barra de navegación global ── */}
+      <PublicNavbar />
 
       {/* ── Contenedor principal de dos columnas ── */}
       <div className="flex-1 w-full max-w-5xl mx-auto px-5 py-12 grid grid-cols-1 md:grid-cols-[260px_1fr] gap-12">

@@ -3,27 +3,28 @@
 @tailwind utilities;
 
 :root, [data-theme='zen-light'] {
-  --surface: #FAF8F5;
-  --surface-dim: #EFECE5;
-  --surface-bright: #FAF8F5;
-  --surface-container-lowest: #ffffff;
-  --surface-container-low: #F6F4F0;
-  --surface-container: #F1EFEA;
-  --surface-container-high: #ECEAE4;
-  --surface-container-highest: #E7E4DE;
-  --on-surface: #2C3326;
-  --on-surface-variant: #4A5144;
-  --inverse-surface: #2C3326;
+  --surface: #f6fce8;
+  --surface: #FCFBF8;
+  --surface-dim: #d6dcc9;
+  --surface-bright: #ffffff;
+  --surface-container-lowest: #FFFFFF;
+  --surface-container-low: #F9F8F4;
+  --surface-container: #F4F2EC;
+  --surface-container-high: #EFECE4;
+  --surface-container-highest: #E9E6DC;
+  --on-surface: #2C302A;
+  --on-surface-variant: #5A5E57;
+  --inverse-surface: #2c3225;
   --inverse-on-surface: #edf3e0;
-  --outline: #75786e;
-  --outline-variant: #c5c8bb;
+  --outline: #9CA194;
+  --outline-variant: #DFE2D6;
   --surface-tint: #51643e;
-  --primary: #344623;
+  --primary: #4A5D23;
   --on-primary: #ffffff;
-  --primary-container: #4b5e38;
-  --on-primary-container: #c0d6a7;
+  --primary-container: #D9E8B6;
+  --on-primary-container: #182005;
   --inverse-primary: #b8ce9f;
-  --secondary: #635e55;
+  --secondary: #A09E83;
   --on-secondary: #ffffff;
   --secondary-container: #e6dfd4;
   --on-secondary-container: #676259;
@@ -35,21 +36,8 @@
   --on-error: #ffffff;
   --error-container: #ffdad6;
   --on-error-container: #93000a;
-  --primary-fixed: #d3eab9;
-  --primary-fixed-dim: #b8ce9f;
-  --on-primary-fixed: #102002;
-  --on-primary-fixed-variant: #3a4c28;
-  --secondary-fixed: #e9e1d7;
-  --secondary-fixed-dim: #cdc5bb;
-  --on-secondary-fixed: #1e1b15;
-  --on-secondary-fixed-variant: #4b463e;
-  --tertiary-fixed: #e5e3d6;
-  --tertiary-fixed-dim: #c8c7bb;
-  --on-tertiary-fixed: #1b1c15;
-  --on-tertiary-fixed-variant: #47473e;
-  --background: #FAF8F5;
-  --on-background: #2C3326;
-  --surface-variant: #E7E4DE;
+  --on-background: #181d12;
+  --surface-variant: #dfe5d2;
 
   /* Premium Gold & Botanical Palette */
   --accent-gold-primary: #D4AF37;
@@ -58,7 +46,7 @@
   --deep-botanical-1: #1A1F14;
   --deep-botanical-2: #2D3326;
   --deep-botanical-3: #3d4432;
-  --pearl-white: #F7F5F0;
+  --pearl-white: #ffffff;
 
   /* Luxury Accents */
   --accent-lavender: #B4A0C8;
@@ -66,47 +54,47 @@
   --accent-lavender-dark: #967AA8;
 }
 
-[data-theme='zen-dark'] {
-  --surface: #1A1F14;
-  --surface-dim: #13170E;
-  --surface-bright: #24291D;
-  --surface-container-lowest: #0F120B;
-  --surface-container-low: #151A0F;
-  --surface-container: #1A1F14;
-  --surface-container-high: #21261A;
-  --surface-container-highest: #282D21;
-  --on-surface: #E3E3DC;
-  --on-surface-variant: #C4C8BB;
-  --inverse-surface: #E3E3DC;
-  --inverse-on-surface: #1A1F14;
-  --outline: #8E9285;
-  --outline-variant: #44483F;
-  --surface-tint: #B8CE9F;
-  --primary: #B8CE9F;
-  --on-primary: #223510;
-  --primary-container: #394D25;
-  --on-primary-container: #D3EAB9;
-  --inverse-primary: #4B6137;
-  --secondary: #CDC5BB;
+.dark {
+  --surface: #181d12;
+  --surface-dim: #11140d;
+  --surface-bright: #202619;
+  --surface-container-lowest: #0c0f09;
+  --surface-container-low: #14190e;
+  --surface-container: #181d12;
+  --surface-container-high: #202619;
+  --surface-container-highest: #2c3225;
+  --on-surface: #ffffff;
+  --on-surface-variant: #e2e5db;
+  --inverse-surface: #f6fce8;
+  --inverse-on-surface: #2c3225;
+  --outline: #a3a69f;
+  --outline-variant: #6b7066;
+  --surface-tint: #D4AF37;
+  --primary: #e6fcce;
+  --on-primary: #102002;
+  --primary-container: #4b5e38;
+  --on-primary-container: #d9f2bd;
+  --inverse-primary: #344623;
+  --secondary: #e3dfd8;
   --on-secondary: #343027;
   --secondary-container: #4B463D;
   --on-secondary-container: #EAE1D7;
-  --tertiary: #C8C7BA;
+  --tertiary: #e1e0d6;
   --on-tertiary: #303126;
   --tertiary-container: #47473C;
   --on-tertiary-container: #E4E3D5;
-  --background: #11140D;
-  --on-background: #E3E3DC;
-  --surface-variant: #44483F;
+  --background: #181d12;
+  --on-background: #ffffff;
+  --surface-variant: #3a4231;
 
   /* Premium Gold & Botanical Palette */
-  --accent-gold-primary: #E5C354;
+  --accent-gold-primary: #D4AF37;
   --accent-gold-light: #FCE17A;
   --accent-gold-dark: #B8960C;
-  --deep-botanical-1: #11140D;
-  --deep-botanical-2: #1A1F14;
-  --deep-botanical-3: #24291D;
-  --pearl-white: #EAE8E2;
+  --deep-botanical-1: #0A0A0A;
+  --deep-botanical-2: #181d12;
+  --deep-botanical-3: #202619;
+  --pearl-white: #ffffff;
 }
 
 
@@ -138,7 +126,7 @@ body {
   border: 1px solid var(--surface-container-highest);
 }
 
-[data-theme='zen-dark'] .card-depth {
+.dark .card-depth {
   background: linear-gradient(145deg, var(--surface-container-low), var(--surface-container-high));
   box-shadow: 8px 8px 24px rgba(0,0,0,0.2), -8px -8px 24px rgba(255,255,255,0.02);
 }
@@ -152,8 +140,31 @@ body {
     scrollbar-width: none;
 }
 
+/* Premium Classes */
+.btn-premium-gold {
+  background: linear-gradient(135deg, var(--accent-gold-light) 0%, var(--accent-gold-primary) 100%);
+  color: #121212 !important;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.25);
+  transition: all 0.3s ease;
+}
+
+.btn-premium-gold:hover {
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+  transform: translateY(-2px);
+}
+
+.cream-card {
+  background-color: #F5F4EE;
+  color: #121212;
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
 /* Hero Gradient */
 .hero-gradient {
-  background: radial-gradient(circle at center top, var(--surface-container-low) 0%, var(--background) 80%);
+  background: radial-gradient(circle at center top, #2A2A2A 0%, var(--background) 80%);
 }
 

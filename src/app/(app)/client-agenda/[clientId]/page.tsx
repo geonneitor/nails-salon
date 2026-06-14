@@ -7,31 +7,35 @@ import { CalendarView } from '@/components/calendar/CalendarView';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
+import { ClientHeader } from '@/components/customers/ClientHeader';
+import { ClinicalCard } from '@/components/customers/ClinicalCard';
+import { Customer } from '@/types/supabase';
 
 export default function ClientAgendaPage() {
   const params = useParams();
   const clientId = params.clientId as string;
-  const [customer, setCustomer] = useState<{ name: string } | null>(null);
+  const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchCustomer() {
-      if (!clientId) return;
-      try {
-        const { data, error: err } = await supabase
-          .from('customers')
-          .select('name')
-          .eq('id', clientId)
-          .single();
-        if (err || !data) throw new Error('Cliente no encontrado.');
-        setCustomer(data);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
+  const fetchCustomer = async () => {
+    if (!clientId) return;
+    try {
+      const { data, error: err } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('id', clientId)
+        .single();
+      if (err || !data) throw new Error('Cliente no encontrado.');
+      setCustomer(data);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     fetchCustomer();
   }, [clientId]);
 
@@ -43,18 +47,23 @@ export default function ClientAgendaPage() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-none text-center mb-8"
+        className="w-full max-w-none text-center mb-8 hidden" // Ocultamos el header anterior
       >
         <h1 className="text-primario-zen font-serif text-4xl tracking-wide mb-6">Mi Agenda ZEN</h1>
-        {customer && (
-          <div className="inline-flex items-center gap-3 bg-white/40 backdrop-blur-sm border border-secundario-zen/50 rounded-full px-6 py-2">
-            <User className="w-4 h-4 text-primario-zen" />
-            <span className="text-primario-zen font-serif text-sm">{customer.name}</span>
-          </div>
-        )}
       </motion.div>
 
-      <div className="w-full max-w-none">
+      <div className="w-full max-w-none flex flex-col gap-6">
+        {customer && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 h-full">
+              <ClientHeader customer={customer} />
+            </div>
+            <div className="h-full">
+              <ClinicalCard customer={customer} onUpdated={fetchCustomer} />
+            </div>
+          </div>
+        )}
+        
         <CalendarView readOnly={true} customerFilterId={clientId} />
       </div>
     </main>

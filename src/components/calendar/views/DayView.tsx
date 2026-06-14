@@ -13,6 +13,7 @@ import {
   startOfLocalDay,
 } from '@/lib/calendarGrid';
 import type { AppointmentWithRelations, Employee } from '@/types/supabase';
+import { EmptyDay } from '../EmptyDay';
 
 interface DayViewProps {
   date: Date;
@@ -22,6 +23,7 @@ interface DayViewProps {
   currentTime: Date;
   onAppointmentClick: (a: AppointmentWithRelations) => void;
   onSlotClick?: (date: Date, hour: number, minute: number) => void;
+  selectedAppointmentId?: string | null;
 }
 
 export function DayView({
@@ -32,6 +34,7 @@ export function DayView({
   currentTime,
   onAppointmentClick,
   onSlotClick,
+  selectedAppointmentId,
 }: DayViewProps) {
   const hourSlots = useMemo(() => buildHourSlots('es'), []);
 
@@ -55,9 +58,9 @@ export function DayView({
   }, [employees, dayAppointments]);
 
   return (
-    <div className="flex flex-col gap-3 overflow-hidden">
+    <div className="flex flex-col gap-3 overflow-hidden h-full">
       {/* Encabezado del día */}
-      <div className="flex items-baseline justify-between px-1">
+      <div className="flex items-baseline justify-between px-1 shrink-0">
         <h3 className="font-serif text-primario-zen text-xl capitalize">
           {format(date, "EEEE d 'de' MMMM", { locale: es })}
         </h3>
@@ -69,7 +72,7 @@ export function DayView({
       </div>
 
       {/* Grid: Etiquetas de hora + Columnas de Empleadas */}
-      <div className="relative flex bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm overflow-x-auto overflow-y-hidden">
+      <div className="relative flex bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm overflow-x-auto overflow-y-auto flex-1">
         {/* Columna de horas (Sticky) */}
         <div
           className="flex-shrink-0 w-14 border-r border-secundario-zen/50 bg-fondo-zen z-20 sticky left-0"
@@ -100,7 +103,7 @@ export function DayView({
                 style={{ height: totalHeight }}
               >
                 {/* Nombre de la empleada (Header) */}
-                <div className="sticky top-0 z-10 bg-fondo-zen/90 backdrop-blur-sm border-b border-secundario-zen/40 px-2 py-2 text-center">
+                <div className="sticky top-0 z-30 bg-fondo-zen/90 backdrop-blur-sm border-b border-secundario-zen/40 px-2 py-2 text-center shadow-sm">
                   <span className="text-[11px] uppercase tracking-widest font-bold text-primario-zen/70">
                     {emp.name}
                   </span>
@@ -131,12 +134,15 @@ export function DayView({
                     currentTime={currentTime}
                     columnIndex={0} // Ahora es 0 porque cada empleada tiene su propia columna
                     columnCount={1}
+                    isSelected={selectedAppointmentId === appt.id}
                     onClick={() => onAppointmentClick(appt)}
                   />
                 ))}
               </div>
             ))
           )}
+
+          {employees.length > 0 && dayAppointments.length === 0 && <EmptyDay />}
 
           {/* Línea de hora actual (Cruza todas las columnas) */}
           <TimeIndicatorLine now={currentTime} hourHeight={hourHeight} visible={showTimeLine} />

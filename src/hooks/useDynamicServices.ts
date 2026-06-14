@@ -11,14 +11,14 @@ export interface DynamicServicesData {
   modifiers: ServiceModifier[];
 }
 
-export function useDynamicServices() {
+export function useDynamicServices(explicitProjectId?: string) {
   const { activeProject } = useApp();
   const [data, setData] = useState<DynamicServicesData>({ categories: [], variants: [], modifiers: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchServices = useCallback(async () => {
-    const projectId = activeProject?.id || process.env.NEXT_PUBLIC_PROJECT_ID || 'bf2460b5-f50d-4b30-a780-b91f05e3096b';
+    const projectId = explicitProjectId || activeProject?.id || process.env.NEXT_PUBLIC_PROJECT_ID || 'bf2460b5-f50d-4b30-a780-b91f05e3096b';
 
     setIsLoading(true);
     
@@ -86,6 +86,91 @@ export function useDynamicServices() {
     await fetchServices();
   };
 
+  // --- CATEGORIES CRUD ---
+  const createCategory = async (name: string, selection_type: 'single' | 'multiple') => {
+    const projectId = explicitProjectId || activeProject?.id || process.env.NEXT_PUBLIC_PROJECT_ID;
+    if (!projectId) throw new Error('No project_id available');
+    
+    // Calcula el max display_order
+    const currentMax = data.categories.length > 0 ? Math.max(...data.categories.map(c => c.display_order)) : 0;
+    
+    const { error: e } = await supabase.from('service_categories').insert({
+      project_id: projectId,
+      name,
+      selection_type,
+      display_order: currentMax + 1
+    });
+    if (e) throw e;
+    await fetchServices();
+  };
+
+  const updateCategory = async (id: string, updates: Partial<Omit<ServiceCategory, 'id' | 'project_id' | 'created_at'>>) => {
+    const { error: e } = await supabase.from('service_categories').update(updates).eq('id', id);
+    if (e) throw e;
+    await fetchServices();
+  };
+
+  const deleteCategory = async (id: string) => {
+    const { error: e } = await supabase.from('service_categories').delete().eq('id', id);
+    if (e) throw e;
+    await fetchServices();
+  };
+
+  // --- VARIANTS CRUD ---
+  const createVariant = async (category_id: string, name: string, base_price: number) => {
+    const catVariants = data.variants.filter(v => v.category_id === category_id);
+    const currentMax = catVariants.length > 0 ? Math.max(...catVariants.map(v => v.display_order)) : 0;
+    
+    const { error: e } = await supabase.from('service_variants').insert({
+      category_id,
+      name,
+      base_price,
+      display_order: currentMax + 1
+    });
+    if (e) throw e;
+    await fetchServices();
+  };
+
+  const updateVariant = async (id: string, updates: Partial<Omit<ServiceVariant, 'id' | 'category_id' | 'created_at'>>) => {
+    const { error: e } = await supabase.from('service_variants').update(updates).eq('id', id);
+    if (e) throw e;
+    await fetchServices();
+  };
+
+  const deleteVariant = async (id: string) => {
+    const { error: e } = await supabase.from('service_variants').delete().eq('id', id);
+    if (e) throw e;
+    await fetchServices();
+  };
+
+  // --- MODIFIERS CRUD ---
+  const createModifier = async (category_id: string, name: string, price_delta: number, modifier_type: 'checkbox' | 'quantity') => {
+    const catMods = data.modifiers.filter(m => m.category_id === category_id);
+    const currentMax = catMods.length > 0 ? Math.max(...catMods.map(m => m.display_order)) : 0;
+
+    const { error: e } = await supabase.from('service_modifiers').insert({
+      category_id,
+      name,
+      price_delta,
+      modifier_type,
+      display_order: currentMax + 1
+    });
+    if (e) throw e;
+    await fetchServices();
+  };
+
+  const updateModifier = async (id: string, updates: Partial<Omit<ServiceModifier, 'id' | 'category_id' | 'created_at'>>) => {
+    const { error: e } = await supabase.from('service_modifiers').update(updates).eq('id', id);
+    if (e) throw e;
+    await fetchServices();
+  };
+
+  const deleteModifier = async (id: string) => {
+    const { error: e } = await supabase.from('service_modifiers').delete().eq('id', id);
+    if (e) throw e;
+    await fetchServices();
+  };
+
   return {
     ...data,
     isLoading,
@@ -95,6 +180,15 @@ export function useDynamicServices() {
     updateModifierPrice,
     toggleCategoryActive,
     toggleVariantActive,
-    toggleModifierActive
+    toggleModifierActive,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    createVariant,
+    updateVariant,
+    deleteVariant,
+    createModifier,
+    updateModifier,
+    deleteModifier
   };
 }

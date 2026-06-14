@@ -21,6 +21,7 @@ export function CustomerList() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<'name' | 'visits'>('visits');
 
   const isCompact = preferences?.density === 'compact';
 
@@ -28,7 +29,12 @@ export function CustomerList() {
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (c.phone && c.phone.includes(searchTerm)) ||
     (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  ).sort((a, b) => {
+    if (sortBy === 'visits') {
+      return (b.visit_count || 0) - (a.visit_count || 0);
+    }
+    return a.name.localeCompare(b.name);
+  });
 
   const handleOpenCreateForm = () => {
     setEditingCustomer(null);
@@ -63,6 +69,16 @@ export function CustomerList() {
             className="w-full pl-11 pr-4 py-3 bg-surface-container-lowest border border-secundario-zen/50 rounded-2xl text-primario-zen text-sm focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all shadow-sm"
           />
         </div>
+        
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as 'name' | 'visits')}
+          className="bg-surface-container-lowest border border-secundario-zen/50 rounded-2xl px-4 py-3 text-primario-zen text-sm focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all shadow-sm hidden md:block"
+        >
+          <option value="visits">Más visitas</option>
+          <option value="name">Alfabético</option>
+        </select>
+
         {/* FIXED: copy unificado → "+ Nueva Clienta" */}
         <button
           onClick={handleOpenCreateForm}

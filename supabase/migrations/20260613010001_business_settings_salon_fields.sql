@@ -1,0 +1,6 @@
+ALTER TABLE business_settings 
+ADD COLUMN IF NOT EXISTS salon_name TEXT, 
+ADD COLUMN IF NOT EXISTS salon_phone TEXT, 
+ADD COLUMN IF NOT EXISTS salon_whatsapp TEXT, 
+ADD COLUMN IF NOT EXISTS salon_address TEXT, 
+ADD COLUMN IF NOT EXISTS salon_logo_url TEXT;

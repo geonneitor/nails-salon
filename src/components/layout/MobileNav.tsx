@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Calendar, Users, Scissors, Settings, Home } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Scissors, Settings, Home, Wallet } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Calendario', href: '/calendar', icon: Calendar },
+  { label: 'Caja', href: '/caja', icon: Wallet },
   { label: 'Clientas', href: '/customers', icon: Users },
   { label: 'Servicios', href: '/services', icon: Scissors },
   { label: 'Ajustes', href: '/settings', icon: Settings },

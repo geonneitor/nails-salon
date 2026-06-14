@@ -11,13 +11,38 @@ interface ManiSectionProps {
   maniTonos: number;
   setManiTonos: (v: number) => void;
   onReset: () => void;
+  categories?: any[];
+  variants?: any[];
+  modifiers?: any[];
 }
 
-export function ManiSection({ mani, setMani, maniTonos, setManiTonos, onReset }: ManiSectionProps) {
+export function ManiSection({
+  mani,
+  setMani,
+  maniTonos,
+  setManiTonos,
+  onReset,
+  categories,
+  variants,
+  modifiers
+}: ManiSectionProps) {
+  const maniCategory = categories?.find(c => c.name.toLowerCase().includes('mani') && !c.name.toLowerCase().includes('pedi'));
+  const dbManis = maniCategory && variants
+    ? variants.filter(v => v.category_id === maniCategory.id && v.is_active)
+    : [];
+  const displayManis = dbManis.length > 0
+    ? dbManis.map(v => ({ name: v.name, price: Number(v.base_price) }))
+    : MANIS;
+
+  const extraTonoMod = maniCategory && modifiers
+    ? modifiers.find(m => m.category_id === maniCategory.id && m.name.toLowerCase().includes('tono'))
+    : null;
+  const maniTonoPrice = extraTonoMod ? Number(extraTonoMod.price_delta) : 5;
+
   return (
     <SectionWrapper title="Manicura" icon={<Hand className="w-4 h-4" />} onReset={onReset}>
       <div className="flex flex-wrap gap-2">
-        {MANIS.map((m) => (
+        {displayManis.map((m) => (
           <button
             key={m.name}
             type="button"
@@ -34,7 +59,7 @@ export function ManiSection({ mani, setMani, maniTonos, setManiTonos, onReset }:
       </div>
 
       <div className="flex items-center justify-between border-t border-secundario-zen/30 pt-3">
-        <span className="text-xs font-semibold text-primario-zen/85">Tonos extra (+$5 c/u)</span>
+        <span className="text-xs font-semibold text-primario-zen/85 font-sans">Tonos extra (+${maniTonoPrice} c/u)</span>
         <div className="flex items-center gap-3">
           <button
             type="button"

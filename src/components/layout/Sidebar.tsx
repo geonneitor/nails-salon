@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Calendar, Users, Scissors, Settings, LogOut, ChevronDown } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Scissors, Settings, LogOut, ChevronDown, Wallet } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabaseClient';
 import { useState } from 'react';
@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Calendario', href: '/calendar', icon: Calendar },
+  { label: 'Caja', href: '/caja', icon: Wallet },
   { label: 'Clientas', href: '/customers', icon: Users },
   { label: 'Servicios', href: '/services', icon: Scissors },
   { label: 'Ajustes', href: '/settings', icon: Settings },
@@ -45,56 +46,16 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Project Selector */}
-        <div className="relative">
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className={`flex items-center justify-between px-4 py-3 rounded-2xl bg-secundario-zen/30 text-primario-zen text-xs font-medium hover:bg-secundario-zen/50 transition-all border border-secundario-zen/60 shadow-sm ${isCollapsed ? 'justify-center px-0' : ''}`}
-          >
+        {/* Active Project Display */}
+        {activeProject && (
+          <div className={`flex items-center justify-between px-4 py-3 rounded-2xl bg-secundario-zen/30 text-primario-zen text-xs font-medium border border-secundario-zen/60 shadow-sm ${isCollapsed ? 'justify-center px-0' : ''}`}>
             {!isCollapsed && (
-              <span className="truncate">
-                {activeProject ? activeProject.name : 'Seleccionar Salón'}
+              <span className="truncate text-center w-full">
+                {activeProject.name}
               </span>
             )}
-            <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-          </button>
-
-          <AnimatePresence>
-            {isOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className={`absolute top-full left-0 bg-fondo-zen border border-secundario-zen/50 rounded-2xl shadow-xl z-50 overflow-hidden ${isCollapsed ? 'ml-2 w-48' : 'w-full'}`}
-              >
-                <div className="py-2 max-h-60 overflow-y-auto">
-                  {projects.length > 0 ? (
-                    projects.map((project) => (
-                      <button
-                        key={project.id}
-                        onClick={() => {
-                          setActiveProject(project);
-                          setIsOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-2.5 text-xs transition-colors ${
-                          activeProject?.id === project.id
-                            ? 'bg-primario-zen text-fondo-zen font-semibold'
-                            : 'text-primario-zen/60 hover:bg-secundario-zen/40 hover:text-primario-zen'
-                        }`}
-                      >
-                        {project.name}
-                      </button>
-                    ))
-                  ) : (
-                    <p className="px-4 py-2 text-xs text-primario-zen/40 italic">
-                      No hay proyectos disponibles.
-                    </p>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+          </div>
+        )}
 
         {/* Navigation Links */}
         <nav className="flex flex-col gap-3">

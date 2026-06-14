@@ -1,7 +1,6 @@
 'use client';
 
 import { EmployeeList } from '@/components/settings/EmployeeList';
-import { ProjectList } from '@/components/settings/ProjectList';
 import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
 import { BusinessSettings } from '@/components/settings/BusinessSettings';
 import { CustomerList } from '@/components/customers/CustomerList';
@@ -15,7 +14,7 @@ export default function AjustesPage() {
 
   const tabs = [
     { id: 'negocio', label: 'Negocio', icon: Clock, component: <BusinessSettings /> },
-    { id: 'equipo', label: 'Equipo', icon: Users, component: <EmployeeList /> },
+    { id: 'equipo', label: 'Colaboradores', icon: Users, component: <EmployeeList /> },
     { id: 'clientas', label: 'Clientela', icon: Heart, component: <CustomerList /> },
     { id: 'servicios', label: 'Servicios', icon: LayoutGrid, component: <ServiceList /> },
     { id: 'estetica', label: 'Estética', icon: Palette, component: <AppearanceSettings /> },
@@ -51,10 +50,6 @@ export default function AjustesPage() {
               </button>
             ))}
 
-            <div className="mt-10 p-4 bg-secundario-zen/20 rounded-2xl border border-dashed border-secundario-zen/40">
-              <p className="text-primario-zen/40 text-[10px] uppercase tracking-widest font-bold mb-2">Proyecto Actual</p>
-              <ProjectList />
-            </div>
           </div>
 
           {/* Contenido del Tab Activo */}

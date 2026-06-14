@@ -8,8 +8,15 @@
 export type EmployeeRole = 'TOTAL' | 'ONLY_BOOK';
 
 export type AppointmentStatus = 'pending_advance' | 'confirmed_advance' | 'completed' | 'cancelled' | 'no_show' | 'free';
+export type PaymentStatus = 'unpaid' | 'advance' | 'paid';
 
 export type AppRole = 'admin' | 'employee';
+
+export interface UserRoleRecord {
+  id: string; // auth.users.id
+  role: AppRole;
+  project_id: string | null; // Nulo = Super Admin (ve todo). Especificado = Admin de una sola sucursal.
+}
 
 export type ThemeType = 'zen-light' | 'zen-dark' | 'high-contrast';
 export type DensityType = 'comfortable' | 'compact';
@@ -131,10 +138,12 @@ export interface Appointment {
   start_time: string; // TIMESTAMPTZ → ISO string
   end_time: string;   // TIMESTAMPTZ → ISO string
   status: AppointmentStatus;
+  payment_status: PaymentStatus;
   created_at: string;
   ticket_details: TicketDetails | null;
   total_price: number;
   total_duration: number;
+  payment_proof_url: string | null;
 }
 
 export interface TimeBlock {
@@ -176,7 +185,10 @@ export type AppointmentWithRelations = Appointment & {
 
 // ----- PAYLOADS DE MUTACIÓN -----
 
-export type CreateAppointmentPayload = Omit<Appointment, 'id' | 'created_at'>;
+export type CreateAppointmentPayload = Omit<Appointment, 'id' | 'created_at' | 'payment_status' | 'payment_proof_url'> & {
+  payment_status?: PaymentStatus;
+  payment_proof_url?: string | null;
+};
 export type UpdateAppointmentPayload = Partial<
-  Pick<Appointment, 'employee_id' | 'start_time' | 'end_time' | 'status' | 'ticket_details' | 'total_price' | 'total_duration'>
+  Pick<Appointment, 'employee_id' | 'start_time' | 'end_time' | 'status' | 'payment_status' | 'ticket_details' | 'total_price' | 'total_duration'>
 >;

@@ -36,6 +36,11 @@ export async function POST(request: Request) {
 
     if (roleError) {
       console.error('Error insertando rol:', roleError);
+      try {
+        await supabaseAdmin.auth.admin.deleteUser(userId);
+      } catch (deleteError) {
+        console.error('Error rollback al borrar usuario de auth:', deleteError);
+      }
       return NextResponse.json({ error: 'Usuario invitado pero falló asignación de rol.' }, { status: 500 });
     }
 
@@ -54,6 +59,11 @@ export async function POST(request: Request) {
 
     if (employeeError) {
       console.error('Error insertando empleado:', employeeError);
+      try {
+        await supabaseAdmin.auth.admin.deleteUser(userId);
+      } catch (deleteError) {
+        console.error('Error rollback al borrar usuario de auth:', deleteError);
+      }
       return NextResponse.json({ error: 'Usuario invitado pero falló creación de perfil en agenda.' }, { status: 500 });
     }
 

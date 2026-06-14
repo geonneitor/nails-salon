@@ -7,11 +7,11 @@
 // Soporta propiedades opcionales de lectura y filtrado por cliente.
 // ============================================================
 
-import { useMemo, useState, useEffect } from 'react';
-import { addDays, format, startOfWeek, subDays } from 'date-fns';
+import { useMemo, useState, useEffect, useCallback } from 'react';
+import { addDays, format, startOfWeek, subDays, addWeeks, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Plus, RefreshCw, Loader2, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, RefreshCw, Loader2, Filter, Sparkles } from 'lucide-react';
 import { AppointmentDetailModal } from './AppointmentDetailModal';
 import { NewAppointmentModal } from './NewAppointmentModal';
 import { ViewSwitcher } from './ViewSwitcher';
@@ -22,6 +22,8 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useTimeBlocks } from '@/hooks/useTimeBlocks';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useCalendarView } from '@/hooks/useCalendarView';
+import { useCalendarShortcuts } from '@/hooks/useCalendarShortcuts';
+import { useToast } from '@/components/ui/ToastProvider';
 import { useApp } from '@/context/AppContext';
 import { GRID_END_HOUR, GRID_HOURS, GRID_START_HOUR, startOfLocalDay } from '@/lib/calendarGrid';
 import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supabase';
@@ -33,8 +35,9 @@ interface CalendarViewProps {
 }
 
 export function CalendarView({ readOnly = false, customerFilterId }: CalendarViewProps) {
-  const { activeProject } = useApp();
+  const { activeProject, role, user } = useApp();
   const projectId = activeProject?.id ?? null;
+  const toast = useToast();
 
   // Estado de fecha de referencia central
   const [anchorDate, setAnchorDate] = useState<Date>(() => startOfLocalDay(new Date()));
@@ -50,12 +53,15 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
 
   // Modales
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithRelations | null>(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [prefilledDate, setPrefilledDate] = useState<Date>(() => startOfLocalDay(new Date()));
 
   // Filtros de Empleados
   const { employees } = useEmployees();
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('all');
+  // Si es empleada, forzamos su ID
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>(role === 'employee' && user ? user.id : 'all');
+  const effectiveEmployeeId = role === 'employee' && user ? user.id : selectedEmployeeId;
 
   // Consultas de datos concurrentes vinculadas al proyecto pasando el string | null esperado
   const { appointments, isLoading, refetch, createAppointment, updateAppointment } = useAppointments({ projectId });
@@ -65,8 +71,8 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   const filteredAppointments = useMemo(() => {
     let result = appointments;
 
-    if (selectedEmployeeId !== 'all') {
-      result = result.filter((a) => a.employee_id === selectedEmployeeId);
+    if (effectiveEmployeeId !== 'all') {
+      result = result.filter((a) => a.employee_id === effectiveEmployeeId);
     }
 
     if (customerFilterId) {
@@ -74,7 +80,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
     }
 
     return result;
-  }, [appointments, selectedEmployeeId, customerFilterId]);
+  }, [appointments, effectiveEmployeeId, customerFilterId]);
 
   // Sincronizar anchorDate si cambia la fecha seleccionada en vista diaria
   useEffect(() => {
@@ -120,8 +126,63 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
     if (success) {
       setSelectedAppointment((prev) => (prev && prev.id === id ? { ...prev, status: newStatus } : prev));
       refetch();
+      // Toast feedback premium
+      const labels: Record<AppointmentStatus, string> = {
+        pending_advance: 'Pendiente',
+        confirmed_advance: 'Confirmada',
+        completed: 'Cobrada',
+        free: 'Gratis',
+        cancelled: 'Cancelada',
+        no_show: 'No se presentó',
+      };
+      toast.success('Cita actualizada', `Ahora: ${labels[newStatus] ?? newStatus}`);
+    } else {
+      toast.error('No se pudo actualizar', 'Intenta de nuevo en un momento.');
     }
   };
+
+  // Helper: ejecuta un atajo de teclado y devuelve el resultado
+  const runShortcut = useCallback(
+    (shortcut: Parameters<typeof useCalendarShortcuts>[0]['onShortcut'] extends (s: infer S) => void ? S : never) => {
+      switch (shortcut.type) {
+        case 'new':
+          handleOpenNewModal();
+          return;
+        case 'prev-day':
+          handlePrev();
+          return;
+        case 'next-day':
+          handleNext();
+          return;
+        case 'prev-week':
+          setAnchorDate((d) => subWeeks(d, 1));
+          return;
+        case 'next-week':
+          setAnchorDate((d) => addWeeks(d, 1));
+          return;
+        case 'today':
+          handleToday();
+          return;
+        case 'set-status': {
+          if (!selectedAppointmentId) {
+            toast.info('Selecciona una cita', 'Haz clic en una cita del calendario y vuelve a intentar.');
+            return;
+          }
+          handleStatusChange(selectedAppointmentId, shortcut.status);
+          return;
+        }
+        case 'escape': {
+          if (isNewModalOpen) setIsNewModalOpen(false);
+          else if (selectedAppointment) setSelectedAppointment(null);
+          return;
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedAppointmentId, isNewModalOpen, selectedAppointment]
+  );
+
+  useCalendarShortcuts({ onShortcut: runShortcut, enabled: !readOnly });
 
   const handleOpenNewModal = (date?: Date) => {
     if (readOnly) return; // Desactivado en modo lectura
@@ -197,11 +258,12 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
           <div className="flex items-center gap-2 bg-secundario-zen/10 border border-secundario-zen/40 rounded-full px-3.5 py-1.5">
             <Filter className="w-3 h-3 text-primario-zen/40" />
             <select
-              value={selectedEmployeeId}
+              value={effectiveEmployeeId}
               onChange={(e) => setSelectedEmployeeId(e.target.value)}
-              className="bg-transparent text-xs text-primario-zen/70 focus:outline-none pr-2 font-medium cursor-pointer"
+              disabled={role === 'employee'}
+              className="bg-transparent text-xs text-primario-zen/70 focus:outline-none pr-2 font-medium cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <option value="all">Todos los Especialistas</option>
+              {role !== 'employee' && <option value="all">Todos los Especialistas</option>}
               {employees.map((emp) => (
                 <option key={emp.id} value={emp.id}>
                   {emp.name}
@@ -211,6 +273,23 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
           </div>
 
           <ViewSwitcher value={view} onChange={setView} />
+
+          {/* Atajos premium: tipografía editorial, como un pie de revista. */}
+          {!readOnly && (
+            <div
+              className="hidden xl:flex items-baseline gap-2 text-[10px] text-primario-zen/50 font-serif italic select-none"
+              title="Atajos: N nueva · ← → día · ↑ ↓ semana · T hoy · 1 confirmar · 2 cobrada · 3 no-show · 4 cancelar · Esc cerrar"
+            >
+              <Sparkles className="w-3 h-3 text-gold-primary" strokeWidth={1.5} />
+              <span>
+                <KeyCap>N</KeyCap> nueva
+                <span className="mx-1.5 text-gold-primary/60">·</span>
+                <KeyCap>1</KeyCap>–<KeyCap>4</KeyCap> estado
+                <span className="mx-1.5 text-gold-primary/60">·</span>
+                <KeyCap>Esc</KeyCap> cerrar
+              </span>
+            </div>
+          )}
 
           {/* Renderizado condicional del botón de Nueva Cita basado en readOnly */}
           {!readOnly && (
@@ -222,6 +301,25 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
             </button>
           )}
         </div>
+      </div>
+
+      {/* Ornamento editorial: línea dorada + rombo. Separa la barra de la grilla
+          y aporta ese "magazine spread" que diferencia a Zen de un admin genérico. */}
+      <div className="flex items-center gap-3 mb-3" aria-hidden>
+        <span className="h-px flex-1 bg-gradient-to-r from-transparent via-gold-primary/30 to-gold-primary/30" />
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 10 10"
+          className="text-gold-primary"
+        >
+          <path
+            d="M5 0 L10 5 L5 10 L0 5 Z"
+            fill="currentColor"
+            opacity="0.55"
+          />
+        </svg>
+        <span className="h-px flex-1 bg-gradient-to-l from-transparent via-gold-primary/30 to-gold-primary/30" />
       </div>
 
       {/* Contenedor de la Grilla de Vistas Animada */}
@@ -239,7 +337,11 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
               date={anchorDate}
               appointments={filteredAppointments}
               hourHeight={hourHeight}
-              onAppointmentClick={setSelectedAppointment}
+              onAppointmentClick={(a) => {
+                setSelectedAppointment(a);
+                setSelectedAppointmentId(a.id);
+              }}
+              selectedAppointmentId={selectedAppointmentId}
               employees={employees}
               currentTime={new Date()}
             />
@@ -250,7 +352,11 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
               date={anchorDate}
               appointments={filteredAppointments}
               hourHeight={hourHeight}
-              onAppointmentClick={setSelectedAppointment}
+              onAppointmentClick={(a) => {
+                setSelectedAppointment(a);
+                setSelectedAppointmentId(a.id);
+              }}
+              selectedAppointmentId={selectedAppointmentId}
               currentTime={new Date()}
             />
           )}
@@ -306,3 +412,15 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
 }
 
 export { GRID_START_HOUR, GRID_END_HOUR, GRID_HOURS };
+
+/**
+ * Cáp de teclado con tipografía editorial: caja fina, fondo cream, tracking generoso.
+ * Pensado para integrarse con la voz de "revista" del calendario, no para parecer un IDE.
+ */
+function KeyCap({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center justify-center min-w-[1.1rem] h-[1.1rem] px-1 rounded-[0.25rem] border border-primario-zen/20 bg-fondo-zen/80 text-primario-zen/80 font-sans text-[9px] font-semibold leading-none -translate-y-px">
+      {children}
+    </span>
+  );
+}

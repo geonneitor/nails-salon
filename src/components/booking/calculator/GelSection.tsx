@@ -11,13 +11,38 @@ interface GelSectionProps {
   gelTonos: number;
   setGelTonos: (v: number) => void;
   onReset: () => void;
+  categories?: any[];
+  variants?: any[];
+  modifiers?: any[];
 }
 
-export function GelSection({ gel, setGel, gelTonos, setGelTonos, onReset }: GelSectionProps) {
+export function GelSection({
+  gel,
+  setGel,
+  gelTonos,
+  setGelTonos,
+  onReset,
+  categories,
+  variants,
+  modifiers
+}: GelSectionProps) {
+  const gelCategory = categories?.find(c => c.name.toLowerCase().includes('gel') || c.name.toLowerCase().includes('protec'));
+  const dbGels = gelCategory && variants
+    ? variants.filter(v => v.category_id === gelCategory.id && v.is_active)
+    : [];
+  const displayGels = dbGels.length > 0
+    ? dbGels.map(v => ({ name: v.name, price: Number(v.base_price) }))
+    : GELS;
+
+  const extraTonoMod = gelCategory && modifiers
+    ? modifiers.find(m => m.category_id === gelCategory.id && m.name.toLowerCase().includes('tono'))
+    : null;
+  const gelTonoPrice = extraTonoMod ? Number(extraTonoMod.price_delta) : 5;
+
   return (
     <SectionWrapper title="Gel Protección" icon={<Shield className="w-4 h-4" />} onReset={onReset}>
       <div className="flex flex-wrap gap-2">
-        {GELS.map((g) => (
+        {displayGels.map((g) => (
           <button
             key={g.name}
             type="button"
@@ -34,7 +59,7 @@ export function GelSection({ gel, setGel, gelTonos, setGelTonos, onReset }: GelS
       </div>
 
       <div className="flex items-center justify-between border-t border-secundario-zen/30 pt-3">
-        <span className="text-xs font-semibold text-primario-zen/85">Tonos extra (+$5 c/u)</span>
+        <span className="text-xs font-semibold text-primario-zen/85 font-sans">Tonos extra (+${gelTonoPrice} c/u)</span>
         <div className="flex items-center gap-3">
           <button
             type="button"

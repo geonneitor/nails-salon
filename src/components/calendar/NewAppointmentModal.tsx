@@ -11,7 +11,6 @@ import { X, Loader2, UserPlus, Search } from 'lucide-react';
 import { format, addMinutes, setHours, setMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useCustomers } from '@/hooks/useCustomers';
-import { useServices } from '@/hooks/useServices';
 import { useEmployees } from '@/hooks/useEmployees';
 import { NailMenuCalculator } from '@/components/booking/NailMenuCalculator';
 import { CustomerFormModal } from '@/components/customers/CustomerFormModal';
@@ -56,7 +55,6 @@ export function NewAppointmentModal({
   onSubmit,
 }: NewAppointmentModalProps) {
   const { customers, isLoading: loadingC, createCustomer } = useCustomers();
-  const { services, isLoading: loadingS } = useServices();
   const { employees, isLoading: loadingE } = useEmployees();
 
   const [customerId, setCustomerId] = useState('');
@@ -115,7 +113,7 @@ export function NewAppointmentModal({
     }
   };
 
-  const isDataLoading = loadingC || loadingS || loadingE;
+  const isDataLoading = loadingC || loadingE;
 
   return (
     <AnimatePresence>

@@ -15,6 +15,13 @@ export function BusinessSettings() {
     opening_hour: '09:00',
     closing_hour: '20:00',
     working_days: [1, 2, 3, 4, 5],
+    salon_name: '',
+    salon_phone: '',
+    salon_whatsapp: '',
+    salon_address: '',
+    salon_logo_url: '',
+    advance_grace_period_hours: 2,
+    bank_details: '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -53,6 +60,13 @@ export function BusinessSettings() {
             opening_hour: settings.opening_hour,
             closing_hour: settings.closing_hour,
             working_days: settings.working_days,
+            salon_name: settings.salon_name,
+            salon_phone: settings.salon_phone,
+            salon_whatsapp: settings.salon_whatsapp,
+            salon_address: settings.salon_address,
+            salon_logo_url: settings.salon_logo_url,
+            advance_grace_period_hours: settings.advance_grace_period_hours,
+            bank_details: settings.bank_details,
             updated_at: new Date().toISOString(),
           })
           .eq('id', (settings as any).id);
@@ -67,6 +81,13 @@ export function BusinessSettings() {
             opening_hour: settings.opening_hour,
             closing_hour: settings.closing_hour,
             working_days: settings.working_days,
+            salon_name: settings.salon_name,
+            salon_phone: settings.salon_phone,
+            salon_whatsapp: settings.salon_whatsapp,
+            salon_address: settings.salon_address,
+            salon_logo_url: settings.salon_logo_url,
+            advance_grace_period_hours: settings.advance_grace_period_hours,
+            bank_details: settings.bank_details,
           });
         error = insertError;
       }
@@ -101,6 +122,71 @@ export function BusinessSettings() {
         </button>
       </div>
 
+      {/* Identidad del Salón */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40">
+            Nombre del Salón
+          </label>
+          <input
+            type="text"
+            placeholder="Ej: Zen Nails"
+            value={settings.salon_name || ''}
+            onChange={(e) => setSettings({ ...settings, salon_name: e.target.value })}
+            className="w-full bg-white/50 border border-secundario-zen/50 rounded-xl px-4 py-2 text-primario-zen focus:outline-none focus:ring-2 focus:ring-primario-zen/20 transition-all"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40">
+            Teléfono (Llamadas)
+          </label>
+          <input
+            type="text"
+            placeholder="Ej: 5512345678"
+            value={settings.salon_phone || ''}
+            onChange={(e) => setSettings({ ...settings, salon_phone: e.target.value })}
+            className="w-full bg-white/50 border border-secundario-zen/50 rounded-xl px-4 py-2 text-primario-zen focus:outline-none focus:ring-2 focus:ring-primario-zen/20 transition-all"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40">
+            WhatsApp
+          </label>
+          <input
+            type="text"
+            placeholder="Ej: 5512345678"
+            value={settings.salon_whatsapp || ''}
+            onChange={(e) => setSettings({ ...settings, salon_whatsapp: e.target.value })}
+            className="w-full bg-white/50 border border-secundario-zen/50 rounded-xl px-4 py-2 text-primario-zen focus:outline-none focus:ring-2 focus:ring-primario-zen/20 transition-all"
+          />
+        </div>
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40">
+            Dirección
+          </label>
+          <input
+            type="text"
+            placeholder="Dirección del salón"
+            value={settings.salon_address || ''}
+            onChange={(e) => setSettings({ ...settings, salon_address: e.target.value })}
+            className="w-full bg-white/50 border border-secundario-zen/50 rounded-xl px-4 py-2 text-primario-zen focus:outline-none focus:ring-2 focus:ring-primario-zen/20 transition-all"
+          />
+        </div>
+        <div className="space-y-2 md:col-span-2">
+          <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40">
+            Logo URL
+          </label>
+          <input
+            type="text"
+            placeholder="https://..."
+            value={settings.salon_logo_url || ''}
+            onChange={(e) => setSettings({ ...settings, salon_logo_url: e.target.value })}
+            className="w-full bg-white/50 border border-secundario-zen/50 rounded-xl px-4 py-2 text-primario-zen focus:outline-none focus:ring-2 focus:ring-primario-zen/20 transition-all"
+          />
+        </div>
+      </div>
+
+      {/* Reglas Operativas */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40 flex items-center gap-2">
@@ -168,6 +254,33 @@ export function BusinessSettings() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40 flex items-center gap-2">
+            <Clock className="w-3 h-3" />
+            Límite Anticipo (Horas)
+          </label>
+          <input
+            type="number"
+            value={settings.advance_grace_period_hours ?? 2}
+            onChange={(e) => setSettings({ ...settings, advance_grace_period_hours: parseInt(e.target.value) })}
+            className="w-full bg-white/50 border border-secundario-zen/50 rounded-xl px-4 py-2 text-primario-zen focus:outline-none focus:ring-2 focus:ring-primario-zen/20 transition-all"
+          />
+          <p className="text-[10px] text-primario-zen/50 italic">Tiempo de gracia para enviar el comprobante.</p>
+        </div>
+
+        <div className="space-y-2 md:col-span-2">
+          <label className="text-xs uppercase tracking-widest font-bold text-primario-zen/40">
+            Datos Bancarios (Para Anticipos)
+          </label>
+          <textarea
+            rows={4}
+            placeholder="Banco: Tu Banco&#10;Cuenta: 0000000000&#10;CLABE: 000000000000000000&#10;Beneficiario: Tu Nombre"
+            value={settings.bank_details || ''}
+            onChange={(e) => setSettings({ ...settings, bank_details: e.target.value })}
+            className="w-full bg-white/50 border border-secundario-zen/50 rounded-xl px-4 py-2 text-primario-zen focus:outline-none focus:ring-2 focus:ring-primario-zen/20 transition-all resize-none"
+          />
         </div>
       </div>
     </div>

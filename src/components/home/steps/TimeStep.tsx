@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { format, addDays, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -16,9 +16,30 @@ export default function TimeStep({
   onSelect: (date: Date, slot: any) => void;
   onBack: () => void;
 }) {
-  const { timeSlots, loadingSettings } = useBookingFlow();
+  const { loadingSettings, getDailySlots } = useBookingFlow();
   const [selectedDate, setSelectedDate] = useState<Date>(data.date ?? new Date());
   const [selectedSlot, setSelectedSlot] = useState<any>(data.timeSlot ?? null);
+  const [timeSlots, setTimeSlots] = useState<any[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    async function loadSlots() {
+      setLoadingSlots(true);
+      try {
+        const slots = await getDailySlots(selectedDate);
+        if (active) {
+          setTimeSlots(slots);
+        }
+      } catch (err) {
+        console.error("Error loading slots:", err);
+      } finally {
+        if (active) setLoadingSlots(false);
+      }
+    }
+    loadSlots();
+    return () => { active = false; };
+  }, [selectedDate, getDailySlots]);
 
   const dateOptions = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i));
 
@@ -87,7 +108,7 @@ export default function TimeStep({
           </p>
         </div>
 
-        {loadingSettings ? (
+        {loadingSettings || loadingSlots ? (
           /* Skeleton mientras carga */
           <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
             {Array.from({ length: 10 }).map((_, i) => (
@@ -101,7 +122,7 @@ export default function TimeStep({
           </div>
         ) : (
           <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
-            {timeSlots.map((slot) => {
+            {timeSlots.map((slot: any) => {
               const isSelected = selectedSlot?.label === slot.label;
               return (
                 <motion.button

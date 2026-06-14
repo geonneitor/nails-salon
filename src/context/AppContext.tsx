@@ -56,11 +56,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   /** Función dedicada a refrescar la lista de proyectos en tiempo real */
-  const fetchProjects = useCallback(async () => {
-    const { data: projectsData } = await supabase
+  const fetchProjects = useCallback(async (allowedProjectId?: string | null) => {
+    let query = supabase
       .from('projects')
       .select('*')
       .order('created_at', { ascending: true });
+
+    if (allowedProjectId) {
+      query = query.eq('id', allowedProjectId);
+    }
+
+    const { data: projectsData } = await query;
 
     const projectList: Project[] = projectsData ?? [];
     setProjects(projectList);
@@ -73,17 +79,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   /** Carga el rol y los proyectos disponibles para el usuario dado. */
   const loadUserData = useCallback(async (authUser: User) => {
-    // 1. Obtener rol de la tabla user_roles
+    // 1. Obtener rol y project_id de la tabla user_roles
     const { data: roleData } = await supabase
       .from('user_roles')
-      .select('role')
+      .select('role, project_id')
       .eq('id', authUser.id)
       .single();
 
     setRole((roleData?.role as AppRole) ?? null);
 
     // 2. Obtener proyectos accesibles mediante la función modularizada
-    await fetchProjects();
+    await fetchProjects(roleData?.project_id);
 
     // 3. Obtener preferencias del usuario
     const { data: prefData, error: prefError } = await supabase
@@ -195,6 +201,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, [loadUserData]);
+
+  // ----- Sincronización de Tema Visual -----
+  useEffect(() => {
+    if (!preferences?.theme) return;
+    
+    if (preferences.theme === 'zen-dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [preferences?.theme]);
 
   // ----- Funciones de Preferencias -----
 

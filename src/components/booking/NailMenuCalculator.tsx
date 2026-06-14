@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import type { TicketDetails } from '@/types/supabase';
-import { calculateNailTotals } from '@/lib/nail-menu-calculator';
+import { calculateDynamicNailTotals } from '@/lib/nail-menu-calculator';
+import { useDynamicServices } from '@/hooks/useDynamicServices';
 
 import { ServiceCategoryToggles } from './calculator/ServiceCategoryToggles';
 import { FullSetSection } from './calculator/FullSetSection';
@@ -20,6 +21,8 @@ interface NailMenuCalculatorProps {
 }
 
 export function NailMenuCalculator({ value, onChange }: NailMenuCalculatorProps) {
+  const { categories, variants, modifiers } = useDynamicServices();
+
   // ── ESTADOS LOCALES ──
   const [activeServices, setActiveServices] = useState<Set<string>>(new Set(value?.activeServices ?? []));
   const [fsSistema, setFsSistema] = useState<string | null>(value?.fs_sistema ?? null);
@@ -57,7 +60,7 @@ export function NailMenuCalculator({ value, onChange }: NailMenuCalculatorProps)
   };
 
   // ── CÁLCULOS ──
-  const { totalPrice, totalDuration, summaryLines } = calculateNailTotals({
+  const { totalPrice, totalDuration, summaryLines } = calculateDynamicNailTotals({
     activeServices: Array.from(activeServices),
     fs_sistema: fsSistema, fs_forma: fsForma, fs_largo: fsLargo, fs_tonos: fsTonos,
     dis, dis_tonos: disTonos,
@@ -66,7 +69,7 @@ export function NailMenuCalculator({ value, onChange }: NailMenuCalculatorProps)
     gel, gel_tonos: gelTonos,
     mani, mani_tonos: maniTonos,
     pedi, pedi_tonos: pediTonos,
-  });
+  }, categories, variants, modifiers);
 
   useEffect(() => {
     onChange({
@@ -101,6 +104,9 @@ export function NailMenuCalculator({ value, onChange }: NailMenuCalculatorProps)
           fsLargo={fsLargo} setFsLargo={setFsLargo}
           fsTonos={fsTonos} setFsTonos={setFsTonos}
           onReset={() => resetSection('fullset')}
+          categories={categories}
+          variants={variants}
+          modifiers={modifiers}
         />
       )}
 
@@ -109,6 +115,9 @@ export function NailMenuCalculator({ value, onChange }: NailMenuCalculatorProps)
           dis={dis} setDis={setDis}
           disTonos={disTonos} setDisTonos={setDisTonos}
           onReset={() => resetSection('disenos')}
+          categories={categories}
+          variants={variants}
+          modifiers={modifiers}
         />
       )}
 
@@ -117,6 +126,9 @@ export function NailMenuCalculator({ value, onChange }: NailMenuCalculatorProps)
           deco={deco} setDeco={setDeco}
           decoTonos={decoTonos} setDecoTonos={setDecoTonos}
           onReset={() => resetSection('deco')}
+          categories={categories}
+          variants={variants}
+          modifiers={modifiers}
         />
       )}
 
@@ -125,6 +137,9 @@ export function NailMenuCalculator({ value, onChange }: NailMenuCalculatorProps)
           repo={repo} setRepo={setRepo}
           repoTonos={repoTonos} setRepoTonos={setRepoTonos}
           onReset={() => resetSection('repo')}
+          categories={categories}
+          variants={variants}
+          modifiers={modifiers}
         />
       )}
 
@@ -133,6 +148,9 @@ export function NailMenuCalculator({ value, onChange }: NailMenuCalculatorProps)
           gel={gel} setGel={setGel}
           gelTonos={gelTonos} setGelTonos={setGelTonos}
           onReset={() => resetSection('gel')}
+          categories={categories}
+          variants={variants}
+          modifiers={modifiers}
         />
       )}
 
@@ -141,6 +159,9 @@ export function NailMenuCalculator({ value, onChange }: NailMenuCalculatorProps)
           mani={mani} setMani={setMani}
           maniTonos={maniTonos} setManiTonos={setManiTonos}
           onReset={() => resetSection('mani')}
+          categories={categories}
+          variants={variants}
+          modifiers={modifiers}
         />
       )}
 
@@ -149,6 +170,9 @@ export function NailMenuCalculator({ value, onChange }: NailMenuCalculatorProps)
           pedi={pedi} setPedi={setPedi}
           pediTonos={pediTonos} setPediTonos={setPediTonos}
           onReset={() => resetSection('pedi')}
+          categories={categories}
+          variants={variants}
+          modifiers={modifiers}
         />
       )}
 

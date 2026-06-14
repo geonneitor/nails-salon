@@ -23,6 +23,7 @@ interface WeekViewProps {
   currentTime: Date;
   onAppointmentClick: (a: AppointmentWithRelations) => void;
   onSlotClick?: (date: Date, hour: number, minute: number) => void;
+  selectedAppointmentId?: string | null;
 }
 
 const WEEK_DAY_LABELS = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'];
@@ -40,6 +41,7 @@ export function WeekView({
   currentTime,
   onAppointmentClick,
   onSlotClick,
+  selectedAppointmentId,
 }: WeekViewProps) {
   const hourSlots = useMemo(() => buildHourSlots('es'), []);
 
@@ -66,9 +68,9 @@ export function WeekView({
   const isCurrentWeek = todayColumnIndex !== -1;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 h-full overflow-hidden">
       {/* Encabezado: rango de la semana */}
-      <div className="flex items-baseline justify-between px-1">
+      <div className="flex items-baseline justify-between px-1 shrink-0">
         <h3 className="font-serif text-primario-zen text-xl capitalize">
           {format(weekStart, "d 'de' MMM", { locale: es })} —{' '}
           {format(addDays(weekStart, 6), "d 'de' MMM yyyy", { locale: es })}
@@ -81,7 +83,7 @@ export function WeekView({
       </div>
 
       {/* Grid de la semana: columna de horas + 7 columnas de días */}
-      <div className="relative flex bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm overflow-x-auto overflow-y-hidden">
+      <div className="relative flex flex-1 bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm overflow-x-auto overflow-y-auto">
         {/* Etiquetas de hora */}
         <div
           className="flex-shrink-0 w-14 border-r border-secundario-zen/50 bg-fondo-zen sticky left-0 z-20"
@@ -111,7 +113,7 @@ export function WeekView({
                 } border-secundario-zen/30`}
               >
                 {/* Encabezado de día */}
-                <div className="sticky top-0 z-10 bg-fondo-zen/95 backdrop-blur-sm border-b border-secundario-zen/40 px-1 py-1.5 text-center">
+                <div className="sticky top-0 z-30 bg-fondo-zen/95 backdrop-blur-sm border-b border-secundario-zen/40 px-1 py-1.5 text-center shadow-sm">
                   <div className="text-[9px] uppercase tracking-widest text-primario-zen/40 font-semibold">
                     {WEEK_DAY_LABELS[dayIdx]}
                   </div>
@@ -148,6 +150,7 @@ export function WeekView({
                     currentTime={currentTime}
                     columnIndex={columnIndex}
                     columnCount={columnCount}
+                    isSelected={selectedAppointmentId === appointment.id}
                     onClick={() => onAppointmentClick(appointment)}
                   />
                 ))}

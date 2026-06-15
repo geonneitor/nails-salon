@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { verifyAdminAccess } from '@/lib/supabaseServer';
 
 export async function POST(request: Request) {
   try {
@@ -10,6 +11,11 @@ export async function POST(request: Request) {
         { error: 'Faltan datos obligatorios (email, name, role, projectId).' },
         { status: 400 }
       );
+    }
+
+    const access = await verifyAdminAccess(projectId);
+    if (access.status !== 200) {
+      return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
     // 1. Crear el usuario en Supabase Auth enviando un correo de invitación

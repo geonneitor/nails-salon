@@ -16,6 +16,7 @@ import { useEmployees } from '@/hooks/useEmployees';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Skeleton, SkeletonText } from '@/components/ui/Skeleton';
 import { sendWhatsAppReminder } from '@/lib/whatsapp';
+import { useApp } from '@/context/AppContext';
 
 interface AppointmentDetailModalProps {
   appointment: AppointmentWithRelations | null;
@@ -91,8 +92,9 @@ export function AppointmentDetailModal({
   onStatusChange,
 }: AppointmentDetailModalProps) {
   const toast = useToast();
+  const { activeProject } = useApp();
   const [isEditingEmployee, setIsEditingEmployee] = useState(false);
-  const { updateAppointment, error: updateError } = useAppointments();
+  const { updateAppointment, error: updateError } = useAppointments({ projectId: activeProject?.id ?? null });
   const { employees, isLoading: employeesLoading } = useEmployees();
 
   if (!isOpen) return null;

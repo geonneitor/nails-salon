@@ -110,10 +110,17 @@ export function TodayTimeline({
               {format(start, 'HH:mm', { locale: es })}
             </span>
 
-            <button
-              type="button"
+            <div
+              role="button"
+              tabIndex={0}
               onClick={() => onSelect(appt)}
-              className="w-full text-left flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 hover:border-gold-primary/50 hover:shadow-soft-shadow transition-all"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelect(appt);
+                }
+              }}
+              className="w-full text-left flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 hover:border-gold-primary/50 hover:shadow-soft-shadow transition-all cursor-pointer"
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -178,7 +185,7 @@ export function TodayTimeline({
                   />
                 )}
               </div>
-            </button>
+            </div>
           </motion.li>
         );
       })}

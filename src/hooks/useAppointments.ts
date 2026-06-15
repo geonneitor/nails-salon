@@ -242,10 +242,15 @@ export function useAppointments({
 
   const updateAppointment = useCallback(
     async (id: string, payload: UpdateAppointmentPayload): Promise<boolean> => {
+      if (!projectId) {
+        setError('No hay un proyecto activo seleccionado.');
+        return false;
+      }
       const { error: updateError } = await supabase
         .from('appointments')
         .update(payload)
-        .eq('id', id);
+        .eq('id', id)
+        .eq('project_id', projectId);
 
       if (updateError) {
         setError(updateError.message);

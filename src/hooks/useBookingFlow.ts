@@ -108,8 +108,8 @@ export function useBookingFlow() {
           }
         });
       }
-    } catch (err) {
-      console.error("Error fetching daily appointments:", err);
+    } catch (err: any) {
+      console.error("Error fetching daily appointments:", err?.message || err);
     }
 
     return slots;
@@ -131,32 +131,19 @@ export function useBookingFlow() {
       }
     }
 
-    // 2. Upsert customer
+    // 2. Upsert customer securely via RPC
     const isEmail = contact.includes('@') && contact.includes('.');
-    let customerId: string;
+    
+    const { data: customerId, error: custErr } = await supabase.rpc('get_or_create_customer', {
+      p_project_id: PROJECT_ID,
+      p_name: name.trim(),
+      p_email: isEmail ? contact.trim() : null,
+      p_phone: !isEmail ? contact.trim() : null
+    });
 
-    const { data: existing } = await supabase
-      .from('customers')
-      .select('id')
-      .eq('project_id', PROJECT_ID)
-      .eq(isEmail ? 'email' : 'phone', contact.trim())
-      .maybeSingle();
-
-    if (existing) {
-      customerId = existing.id;
-    } else {
-      const { data: newCust, error: custErr } = await supabase
-        .from('customers')
-        .insert({
-          project_id: PROJECT_ID,
-          name: name.trim(),
-          email: isEmail ? contact.trim() : null,
-          phone: !isEmail ? contact.trim() : null,
-        })
-        .select('id')
-        .single();
-      if (custErr || !newCust) throw new Error('No se pudo registrar tu contacto.');
-      customerId = newCust.id;
+    if (custErr || !customerId) {
+      console.error(custErr);
+      throw new Error('No se pudo registrar tu contacto por razones de seguridad.');
     }
 
     // 3. Build start/end times

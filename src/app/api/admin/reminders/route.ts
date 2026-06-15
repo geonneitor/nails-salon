@@ -11,12 +11,17 @@
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-
-const PROJECT_ID = process.env.NEXT_PUBLIC_PROJECT_ID || 'bf2460b5-f50d-4b30-a780-b91f05e3096b';
+import { verifyAdminAccess } from '@/lib/supabaseServer';
 
 // Listar reminders. Soporta ?status=pending|sent|cancelled|failed
 // y ?dateFrom=ISO (default: 30 días atrás).
 export async function GET(request: Request) {
+  const access = await verifyAdminAccess();
+  if (access.status !== 200) {
+    return NextResponse.json({ ok: false, error: access.error }, { status: access.status });
+  }
+  const PROJECT_ID = access.roleData!.project_id;
+
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
   const dateFrom =
@@ -43,6 +48,12 @@ export async function GET(request: Request) {
 // Acciones sobre un reminder existente: { id, action: 'cancel' | 'mark_sent' }
 export async function POST(request: Request) {
   try {
+    const access = await verifyAdminAccess();
+    if (access.status !== 200) {
+      return NextResponse.json({ ok: false, error: access.error }, { status: access.status });
+    }
+    const PROJECT_ID = access.roleData!.project_id;
+
     const body = await request.json();
     const { id, action } = body as { id?: string; action?: string };
     if (!id || !action) {

@@ -9,8 +9,7 @@
 
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
-
-const PROJECT_ID = process.env.NEXT_PUBLIC_PROJECT_ID || 'bf2460b5-f50d-4b30-a780-b91f05e3096b';
+import { verifyAdminAccess } from '@/lib/supabaseServer';
 
 const DEFAULTS = {
   admin_whatsapp: '',
@@ -21,6 +20,11 @@ const DEFAULTS = {
 };
 
 export async function GET() {
+  const access = await verifyAdminAccess();
+  if (access.status !== 200) {
+    return NextResponse.json({ ok: false, error: access.error }, { status: access.status });
+  }
+  const PROJECT_ID = access.roleData!.project_id;
   const { data, error } = await supabaseAdmin
     .from('admin_notification_settings')
     .select('*')
@@ -33,6 +37,12 @@ export async function GET() {
 
 export async function PUT(request: Request) {
   try {
+    const access = await verifyAdminAccess();
+    if (access.status !== 200) {
+      return NextResponse.json({ ok: false, error: access.error }, { status: access.status });
+    }
+    const PROJECT_ID = access.roleData!.project_id;
+
     const body = await request.json();
     const allowed = [
       'admin_whatsapp',

@@ -40,7 +40,7 @@ export async function GET(request: Request) {
   //    En dev, si se llama con ?dev=1 se permite el bypass (NO production).
   const url = new URL(request.url);
   const isDevBypass =
-    process.env.NODE_ENV !== 'production' && url.searchParams.get('dev') === '1';
+    process.env.ALLOW_CRON_BYPASS === 'true' && url.searchParams.get('dev') === '1';
 
   const provided = request.headers.get('x-cron-secret');
   const expected = process.env.CRON_SECRET;

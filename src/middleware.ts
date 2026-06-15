@@ -5,62 +5,74 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
 
-  // 1. Initialize Response object
+  // 1. Validar env vars antes de tocar Supabase. Si faltan, no crasheamos:
+  //    dejamos pasar las rutas públicas y devolvemos 503 a las protegidas.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseMissing = !supabaseUrl || !supabaseAnonKey;
+
+  if (supabaseMissing) {
+    console.error(
+      '[middleware] Faltan NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY'
+    );
+  }
+
+  // 2. Initialize Response object
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
 
-  // 2. Initialize Supabase SSR client
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(cookieName: string) {
-          return request.cookies.get(cookieName)?.value;
+  // 3. Initialize Supabase SSR client (solo si tenemos las env vars)
+  const supabase = supabaseMissing
+    ? null
+    : createServerClient(supabaseUrl as string, supabaseAnonKey as string, {
+        cookies: {
+          get(cookieName: string) {
+            return request.cookies.get(cookieName)?.value;
+          },
+          set(cookieName: string, value: string, options: CookieOptions) {
+            request.cookies.set({
+              name: cookieName,
+              value,
+              ...options,
+            });
+            response = NextResponse.next({
+              request: {
+                headers: request.headers,
+              },
+            });
+            response.cookies.set(cookieName, value, options);
+          },
+          remove(cookieName: string, options: CookieOptions) {
+            request.cookies.set({
+              name: cookieName,
+              value: '',
+              ...options,
+            });
+            response = NextResponse.next({
+              request: {
+                headers: request.headers,
+              },
+            });
+            response.cookies.set(cookieName, '', options);
+          },
         },
-        set(cookieName: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name: cookieName,
-            value,
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set(cookieName, value, options);
-        },
-        remove(cookieName: string, options: CookieOptions) {
-          request.cookies.set({
-            name: cookieName,
-            value: '',
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set(cookieName, '', options);
-        },
-      },
-    }
-  );
+      });
 
-  // 3. Resolve user session
+  // 4. Resolve user session (degradar a null si Supabase no está disponible)
   let user = null;
-  try {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
-  } catch (error) {
-    console.error('Error verifying user in middleware:', error);
+  if (supabase) {
+    try {
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } catch (error) {
+      console.error('Error verifying user in middleware:', error);
+    }
   }
 
-  // 4. Subdomain & Routing Logic
+  // 5. Subdomain & Routing Logic
   const rootDomain = 'zen.com';
   const appDomain = `app.${rootDomain}`;
   const isLocal = hostname.includes('localhost');
@@ -82,7 +94,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 5. Protected Routes Check
+  // 6. Protected Routes Check
   const isLoginPage = pathname.startsWith('/login');
   const isProtectedRoute = 
     pathname.startsWith('/dashboard') || 
@@ -90,6 +102,14 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/customers') || 
     pathname.startsWith('/services') || 
     pathname.startsWith('/settings');
+
+  // 6a. Si Supabase está caído, las protegidas devuelven 503 (inciso b acordado).
+  if (supabaseMissing && isProtectedRoute) {
+    return NextResponse.json(
+      { error: 'Servicio temporalmente no disponible. Intenta de nuevo en un momento.' },
+      { status: 503, headers: { 'Retry-After': '60' } }
+    );
+  }
 
   if (!user && isProtectedRoute) {
     return NextResponse.redirect(new URL('/login', request.url));

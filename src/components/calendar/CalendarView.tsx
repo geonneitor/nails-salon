@@ -43,9 +43,12 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   const [anchorDate, setAnchorDate] = useState<Date>(() => startOfLocalDay(new Date()));
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfLocalDay(new Date()));
   const [isMounted, setIsMounted] = useState(false);
+  const [currentTime, setCurrentTime] = useState(() => new Date());
 
   useEffect(() => {
     setIsMounted(true);
+    const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+    return () => clearInterval(timer);
   }, []);
 
   // Hooks de UI compartidos
@@ -343,7 +346,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
               }}
               selectedAppointmentId={selectedAppointmentId}
               employees={employees}
-              currentTime={new Date()}
+              currentTime={currentTime}
             />
           )}
 
@@ -357,7 +360,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
                 setSelectedAppointmentId(a.id);
               }}
               selectedAppointmentId={selectedAppointmentId}
-              currentTime={new Date()}
+              currentTime={currentTime}
             />
           )}
 
@@ -401,7 +404,12 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
           onClose={() => setIsNewModalOpen(false)}
           defaultDate={prefilledDate}
           onSubmit={async (payload) => {
-            const res = await createAppointment({ ...payload, project_id: projectId ?? payload.project_id ?? "" } as any);
+            const finalProjectId = projectId ?? payload.project_id;
+            if (!finalProjectId) {
+              toast.error('Error', 'No hay proyecto activo para la cita.');
+              return null;
+            }
+            const res = await createAppointment({ ...payload, project_id: finalProjectId } as any);
             if (res) refetch();
             return res;
           }}

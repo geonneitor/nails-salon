@@ -129,6 +129,7 @@ export function useCustomers(options: UseCustomersOptions = {}): UseCustomersRet
         .from('customers')
         .update(payload)
         .eq('id', id)
+        .eq('project_id', projectId)
         .select()
         .single();
 
@@ -151,7 +152,8 @@ export function useCustomers(options: UseCustomersOptions = {}): UseCustomersRet
       const { error: e } = await supabase
         .from('customers')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('project_id', projectId);
 
       if (e) {
         setError(e.message);
@@ -181,8 +183,17 @@ export function useCustomers(options: UseCustomersOptions = {}): UseCustomersRet
   const uploadPhoto = useCallback(async (customerId: string, file: File, notes?: string): Promise<CustomerGallery | null> => {
     if (!projectId) return null;
     
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${customerId}/${uuidv4()}.${fileExt}`;
+    if (!file.type.startsWith('image/')) {
+      setError('El archivo debe ser una imagen válida.');
+      return null;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('La imagen no debe superar los 5MB.');
+      return null;
+    }
+
+    const safeExt = file.type.split('/')[1] ?? 'bin';
+    const fileName = `${projectId}/${customerId}/${uuidv4()}.${safeExt}`;
     
     // Upload file to bucket
     const { error: uploadError } = await supabase.storage

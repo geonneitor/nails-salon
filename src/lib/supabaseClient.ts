@@ -6,12 +6,16 @@
 
 import { createBrowserClient } from '@supabase/ssr';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://xeclkyydwouszqisgfmr.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlY2xreXlkd291c3pxaXNnZm1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxOTY1NDYsImV4cCI6MjA5NTc3MjU0Nn0.DtT5Hc9Udh2gVO7lK3Wf7-02FR2xggBSA8xGT54-1Zk';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
+  // Fail-fast: NO usar fallbacks hardcodeados. Si llegamos aquí, el build o el
+  // runtime carece de configuración y debe fallar de forma explícita en lugar
+  // de inicializar un cliente con valores fantasma.
   throw new Error(
-    'Faltan variables de entorno: NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY'
+    'Faltan variables de entorno: NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY. ' +
+    'Configúralas en .env.local (ver .env.example) antes de continuar.'
   );
 }
 

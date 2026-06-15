@@ -59,20 +59,24 @@ export function useEmployees() {
   };
 
   const updateEmployee = async (id: string, payload: Partial<Employee>) => {
+    if (!activeProject) throw new Error('No hay proyecto activo');
     const { error: e } = await supabase
       .from('employees')
       .update(payload)
-      .eq('id', id);
+      .eq('id', id)
+      .eq('project_id', activeProject.id);
 
     if (e) throw e;
     await fetchEmployees();
   };
 
   const deleteEmployee = async (id: string) => {
+    if (!activeProject) throw new Error('No hay proyecto activo');
     const { error: e } = await supabase
       .from('employees')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('project_id', activeProject.id);
 
     if (e) throw e;
     await fetchEmployees();

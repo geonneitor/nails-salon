@@ -228,6 +228,7 @@ export function NewAppointmentModal({
                         <p className="px-4 py-2 text-[10px] text-primario-zen/40 uppercase tracking-widest font-semibold">
                           Selecciona una clienta de la lista
                         </p>
+                      )}
                     </div>
                   </div>
                 </div>

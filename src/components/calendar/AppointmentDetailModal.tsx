@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, User, Scissors, CreditCard, CheckCircle2, AlertCircle, Edit3 } from 'lucide-react';
+import { X, Clock, User, Scissors, CreditCard, CheckCircle2, AlertCircle, Edit3, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supabase';
@@ -171,6 +171,17 @@ export function AppointmentDetailModal({
       return;
     }
     await sendWhatsAppReminder(appointment);
+  };
+
+  /** Marca no-show y abre WhatsApp con el mensaje de política de inasistencia. */
+  const handleNoShow = async () => {
+    if (!onStatusChange) return;
+    onStatusChange(appointment.id, 'no_show');
+    if (appointment.customer.phone) {
+      await sendWhatsAppReminder(appointment, 'no_show');
+    } else {
+      toast.warning('Sin teléfono', 'La clienta no tiene teléfono registrado; el mensaje no pudo enviarse.');
+    }
   };
 
   const renderTicketDetailsBreakdown = () => {
@@ -367,11 +378,11 @@ export function AppointmentDetailModal({
                     Cancelar
                   </button>
                   <button
-                    onClick={() => onStatusChange(appointment.id, 'no_show')}
-                    className="flex-1 px-4 py-2 rounded-xl border border-purple-200 text-purple-700 uppercase tracking-widest text-[10px] font-bold hover:bg-purple-50 transition-all"
-                    title="Retiene el anticipo por inasistencia"
+                    onClick={handleNoShow}
+                    className="flex-1 px-4 py-2 rounded-xl border border-purple-200 text-purple-700 uppercase tracking-widest text-[10px] font-bold hover:bg-purple-50 transition-all flex items-center justify-center gap-1.5"
+                    title="Retiene el anticipo y envía aviso por WhatsApp"
                   >
-                    No Show
+                    <MessageCircle className="w-3 h-3" /> No Show
                   </button>
                 </div>
               )}

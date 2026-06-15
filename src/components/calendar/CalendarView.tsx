@@ -15,6 +15,7 @@ import { ChevronLeft, ChevronRight, Plus, RefreshCw, Loader2, Filter, Sparkles }
 import { AppointmentDetailModal } from './AppointmentDetailModal';
 import { NewAppointmentModal } from './NewAppointmentModal';
 import { ViewSwitcher } from './ViewSwitcher';
+import { ZoomControls } from './ZoomControls';
 import { DayView } from './views/DayView';
 import { WeekView } from './views/WeekView';
 import { MonthView } from './views/MonthView';
@@ -52,7 +53,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   }, []);
 
   // Hooks de UI compartidos
-  const { view, setView, hourHeight } = useCalendarView();
+  const { view, setView, zoom, setZoom, hourHeight } = useCalendarView();
 
   // Modales
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentWithRelations | null>(null);
@@ -275,6 +276,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
             </select>
           </div>
 
+          <ZoomControls value={zoom} onChange={setZoom} />
           <ViewSwitcher value={view} onChange={setView} />
 
           {/* Atajos premium: tipografía editorial, como un pie de revista. */}

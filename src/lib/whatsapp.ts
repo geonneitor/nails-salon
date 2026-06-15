@@ -6,8 +6,12 @@ import type { AppointmentWithRelations } from '@/types/supabase';
  * Interfaz para el servicio de WhatsApp.
  * Esta función está preparada para conectarse a una API en el futuro.
  * Actualmente genera un enlace manual como fallback.
+ * @param messageType - Sobrescribe el tipo de mensaje. Si se omite, usa appointment.status.
  */
-export async function sendWhatsAppReminder(appointment: AppointmentWithRelations): Promise<boolean> {
+export async function sendWhatsAppReminder(
+  appointment: AppointmentWithRelations,
+  messageType?: 'pending_advance' | 'reminder' | 'no_show'
+): Promise<boolean> {
   const customerName = appointment.customer.name;
   const customerPhone = appointment.customer.phone;
   
@@ -24,9 +28,14 @@ export async function sendWhatsAppReminder(appointment: AppointmentWithRelations
   const price = appointment.total_price || 0;
   const advance = price * 0.5;
 
+  // Determinar tipo de mensaje efectivo
+  const effectiveType = messageType ?? (appointment.status === 'pending_advance' ? 'pending_advance' : 'reminder');
+
   let messageText = '';
-  if (appointment.status === 'pending_advance') {
+  if (effectiveType === 'pending_advance') {
     messageText = `¡Hola, ${customerName}! ✨\n\nHemos recibido tu solicitud de cita para el día ${format(appointmentDate, "dd 'de' MMMM", { locale: es })} a las ${timeString}.\n\nPara confirmar tu lugar en la agenda, requerimos un anticipo del 50% ($${advance} MXN).\n\n💳 *Datos de Pago (Transferencia Bancaria):*\n• *Banco:* BBVA\n• *A nombre de:* Alexandra Garcia\n• *Tarjeta:* 4152 3144 5237 9798\n\nPor favor, envía el comprobante al WhatsApp de Alexandra (*686 399 9319*) para confirmar tu cita.\n\n¡Muchas gracias! 🌿`;
+  } else if (effectiveType === 'no_show') {
+    messageText = `¡Hola, ${customerName}! 😊✨\n\nLamento mucho la situación, sé que a veces pueden surgir imprevistos 🤍 Sin embargo, al no haberse asistido a la cita, el anticipo se pierde, ya que ese espacio fue reservado especialmente para ti y no pudo ser asignado a otra persona 💅🏻\n\nPor este motivo, no es posible realizar reembolso ni aplicar el anticipo para reagendar 🙏🏻\n\nEsta política aplica para todas las citas sin excepción, ya que nos ayuda a respetar los tiempos y espacios de cada clienta ✨\n\nSi deseas agendar nuevamente, con gusto puedo apartarte un nuevo espacio 💖 Solo sería necesario realizar un nuevo anticipo para confirmarlo 🗓️\n\nGracias por tu comprensión y apoyo 🤍✨`;
   } else {
     messageText = `¡Hola, ${customerName}! ✨\n\nTe recordamos tu cita confirmada el día de hoy a las ${timeString}.\n\nTe pedimos de favor confirmar tu asistencia respondiendo a este mensaje.\n\n¡Te esperamos!`;
   }

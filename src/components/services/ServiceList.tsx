@@ -3,10 +3,10 @@
 // src/components/services/ServiceList.tsx
 // Gestor de Cotizador (Dynamic Services Admin con CRUD)
 // ============================================================
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useDynamicServices } from '@/hooks/useDynamicServices';
 import { SkeletonCard } from '@/components/ui/Skeleton';
-import { Edit2, Check, X, Tag, Plus, Trash2 } from 'lucide-react';
+import { Edit2, Check, X, Tag, Plus, Trash2, GripVertical } from 'lucide-react';
 
 export function ServiceList({
   onVariantEdited,
@@ -27,6 +27,31 @@ export function ServiceList({
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editPrice, setEditPrice] = useState(0);
+
+  // Estado de drag-and-drop de categorías
+  const draggedCatId = useRef<string | null>(null);
+
+  const handleCatDragStart = (id: string) => { draggedCatId.current = id; };
+
+  const handleCatDrop = async (targetId: string) => {
+    const fromId = draggedCatId.current;
+    if (!fromId || fromId === targetId) return;
+    draggedCatId.current = null;
+
+    // Reordena localmente y persiste el nuevo display_order en Supabase
+    const ordered = [...categories];
+    const fromIdx = ordered.findIndex(c => c.id === fromId);
+    const toIdx = ordered.findIndex(c => c.id === targetId);
+    if (fromIdx === -1 || toIdx === -1) return;
+
+    const [moved] = ordered.splice(fromIdx, 1);
+    ordered.splice(toIdx, 0, moved);
+
+    // Actualizar display_order secuencialmente (no bloquea la UI)
+    ordered.forEach((cat, idx) => {
+      updateCategory(cat.id, { display_order: idx + 1 });
+    });
+  };
 
   // Estados de creación
   const [isCreatingCat, setIsCreatingCat] = useState(false);
@@ -172,7 +197,14 @@ export function ServiceList({
         const catModifiers = modifiers.filter(m => m.category_id === category.id);
 
         return (
-          <div key={category.id} className="bg-white/50 border border-secundario-zen/40 rounded-3xl p-6 shadow-sm">
+          <div
+            key={category.id}
+            className="bg-white/50 border border-secundario-zen/40 rounded-3xl p-6 shadow-sm cursor-grab active:cursor-grabbing active:opacity-60 transition-opacity"
+            draggable
+            onDragStart={() => handleCatDragStart(category.id)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={() => handleCatDrop(category.id)}
+          >
             <div className="flex justify-between items-start mb-6 border-b border-secundario-zen/30 pb-4">
               {editingItemId === `cat_${category.id}` ? (
                 <div className="flex items-center gap-2 flex-1 mr-4">
@@ -182,6 +214,7 @@ export function ServiceList({
                 </div>
               ) : (
                 <h3 className="font-serif text-xl text-primario-zen flex items-center gap-3">
+                  <GripVertical className="w-4 h-4 text-primario-zen/25 shrink-0" />
                   <Tag className="w-5 h-5 text-accent-gold" />
                   {category.name}
                   <span className="text-xs uppercase font-sans tracking-wider text-primario-zen/40 bg-secundario-zen/20 px-2 py-1 rounded-full">{category.selection_type}</span>

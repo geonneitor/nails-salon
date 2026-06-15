@@ -28,21 +28,30 @@ export function useDynamicServices(explicitProjectId?: string) {
         catQuery = catQuery.eq('project_id', projectId);
       }
 
-      const [catRes, varRes, modRes] = await Promise.all([
-        catQuery,
-        supabase.from('service_variants').select('*').order('display_order'),
-        supabase.from('service_modifiers').select('*').order('display_order')
-      ]);
-
+      // 1. Primero obtenemos las categorías del proyecto
+      const catRes = await catQuery;
       if (catRes.error) throw catRes.error;
-      if (varRes.error) throw varRes.error;
-      if (modRes.error) throw modRes.error;
 
       const categories = catRes.data as ServiceCategory[];
       const catIds = categories.map(c => c.id);
 
-      const variants = (varRes.data as ServiceVariant[]).filter(v => catIds.includes(v.category_id));
-      const modifiers = (modRes.data as ServiceModifier[]).filter(m => catIds.includes(m.category_id));
+      // 2. Luego filtramos variants y modifiers SOLO de esas categorías
+      //    Esto garantiza que ORDER BY display_order aplique solo al proyecto correcto
+      //    y evita mezclar datos de otros proyectos en la BD.
+      const [varRes, modRes] = await Promise.all([
+        catIds.length > 0
+          ? supabase.from('service_variants').select('*').in('category_id', catIds).order('display_order')
+          : Promise.resolve({ data: [], error: null }),
+        catIds.length > 0
+          ? supabase.from('service_modifiers').select('*').in('category_id', catIds).order('display_order')
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
+      if (varRes.error) throw varRes.error;
+      if (modRes.error) throw modRes.error;
+
+      const variants = varRes.data as ServiceVariant[];
+      const modifiers = modRes.data as ServiceModifier[];
 
       setData({ categories, variants, modifiers });
     } catch (e: any) {

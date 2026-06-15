@@ -165,7 +165,19 @@ export function NewAppointmentModal({
               <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
                 {/* Cliente */}
-                <Field label="Cliente">
+                <div className="flex flex-col gap-1.5 font-sans">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/50">
+                      Cliente
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingCustomer(true)}
+                      className="flex items-center gap-1 text-[10px] uppercase tracking-widest font-bold text-primario-zen hover:text-primario-zen/70 transition-colors"
+                    >
+                      <UserPlus className="w-3 h-3" /> Nueva clienta
+                    </button>
+                  </div>
                   <div className="relative flex flex-col gap-2">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primario-zen/40" />
@@ -216,10 +228,9 @@ export function NewAppointmentModal({
                         <p className="px-4 py-2 text-[10px] text-primario-zen/40 uppercase tracking-widest font-semibold">
                           Selecciona una clienta de la lista
                         </p>
-                      )}
                     </div>
                   </div>
-                </Field>
+                </div>
 
                 {/* Empleado */}
                 <Field label="Empleada">

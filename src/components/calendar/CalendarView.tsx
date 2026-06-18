@@ -60,6 +60,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
   const [prefilledDate, setPrefilledDate] = useState<Date>(() => startOfLocalDay(new Date()));
+  const [prefilledEmployeeId, setPrefilledEmployeeId] = useState<string | undefined>(undefined);
 
   // Filtros de Empleados
   const { employees } = useEmployees();
@@ -145,6 +146,13 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
     }
   };
 
+  const handleOpenNewModal = (date?: Date, empId?: string) => {
+    if (readOnly) return; // Desactivado en modo lectura
+    setPrefilledDate(date ?? startOfLocalDay(new Date()));
+    setPrefilledEmployeeId(empId);
+    setIsNewModalOpen(true);
+  };
+
   // Helper: ejecuta un atajo de teclado y devuelve el resultado
   const runShortcut = useCallback(
     (shortcut: Parameters<typeof useCalendarShortcuts>[0]['onShortcut'] extends (s: infer S) => void ? S : never) => {
@@ -187,12 +195,6 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   );
 
   useCalendarShortcuts({ onShortcut: runShortcut, enabled: !readOnly });
-
-  const handleOpenNewModal = (date?: Date) => {
-    if (readOnly) return; // Desactivado en modo lectura
-    setPrefilledDate(date ?? startOfLocalDay(new Date()));
-    setIsNewModalOpen(true);
-  };
 
   // Título dinámico de la cabecera del calendario
   const headerTitle = useMemo(() => {
@@ -346,6 +348,11 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
                 setSelectedAppointment(a);
                 setSelectedAppointmentId(a.id);
               }}
+              onSlotClick={(date, hour, minute, empId) => {
+                const clickedDate = new Date(date);
+                clickedDate.setHours(hour, minute, 0, 0);
+                handleOpenNewModal(clickedDate, empId);
+              }}
               selectedAppointmentId={selectedAppointmentId}
               employees={employees}
               currentTime={currentTime}
@@ -360,6 +367,12 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
               onAppointmentClick={(a) => {
                 setSelectedAppointment(a);
                 setSelectedAppointmentId(a.id);
+              }}
+              onSlotClick={(date, hour, minute) => {
+                const clickedDate = new Date(date);
+                clickedDate.setHours(hour, minute, 0, 0);
+                // No tenemos empleada específica en la vista semanal de momento, si la hay se pasa
+                handleOpenNewModal(clickedDate);
               }}
               selectedAppointmentId={selectedAppointmentId}
               currentTime={currentTime}
@@ -405,6 +418,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
           isOpen={isNewModalOpen}
           onClose={() => setIsNewModalOpen(false)}
           defaultDate={prefilledDate}
+          defaultEmployeeId={prefilledEmployeeId}
           onSubmit={async (payload) => {
             const finalProjectId = projectId ?? payload.project_id;
             if (!finalProjectId) {

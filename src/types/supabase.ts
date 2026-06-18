@@ -111,6 +111,7 @@ export interface ServiceModifier {
 
 export interface TicketDetails {
   activeServices: string[];
+  booking_color?: string;
   fs_sistema?: string | null;
   fs_forma?: string | null;
   fs_largo?: number | null;

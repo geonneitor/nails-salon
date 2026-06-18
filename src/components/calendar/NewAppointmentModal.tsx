@@ -2,12 +2,12 @@
 
 // ============================================================
 // src/components/calendar/NewAppointmentModal.tsx
-// Formulario premium para crear una nueva cita.
+// Formulario premium para crear una nueva cita (Flujo Directo).
 // ============================================================
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2, UserPlus, Search, ChevronRight, ChevronLeft } from 'lucide-react';
+import { X, Loader2, UserPlus, Search, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { format, addMinutes, setHours, setMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useCustomers } from '@/hooks/useCustomers';
@@ -21,17 +21,21 @@ import type { CreateAppointmentPayload, TicketDetails } from '@/types/supabase';
 interface NewAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  defaultDate: Date;
+  defaultDate: Date; // Incluye la hora exacta seleccionada
+  defaultEmployeeId?: string;
   onSubmit: (payload: CreateAppointmentPayload) => Promise<unknown>;
 }
 
-// Slots de hora disponibles: 8am → 8pm cada 30 min
-const TIME_SLOTS = Array.from({ length: 25 }, (_, i) => {
-  const totalMinutes = 8 * 60 + i * 30;
-  const h = Math.floor(totalMinutes / 60);
-  const m = totalMinutes % 60;
-  return { label: format(setMinutes(setHours(new Date(), h), m), 'h:mm a'), h, m };
-});
+const BOOKING_COLORS = [
+  '#4ade80', // green
+  '#fbbf24', // yellow
+  '#60a5fa', // blue
+  '#a78bfa', // purple
+  '#f87171', // red
+  '#a3e635', // lime
+  '#2dd4bf', // teal
+  '#f472b6', // pink
+];
 
 /** Campo de formulario reutilizable */
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
@@ -52,6 +56,7 @@ export function NewAppointmentModal({
   isOpen,
   onClose,
   defaultDate,
+  defaultEmployeeId,
   onSubmit,
 }: NewAppointmentModalProps) {
   const { customers, isLoading: loadingC, createCustomer } = useCustomers();
@@ -59,73 +64,35 @@ export function NewAppointmentModal({
   const { activeProject } = useApp();
   const projectId = activeProject?.id || process.env.NEXT_PUBLIC_PROJECT_ID || '489e898d-3b2a-4775-b784-93a0e1a473e0';
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [occupiedSlots, setOccupiedSlots] = useState<Set<string>>(new Set());
-  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [step, setStep] = useState<1 | 2>(1);
 
   const [customerId, setCustomerId] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
   const [isAddingCustomer, setIsAddingCustomer] = useState(false);
+  
   const [employeeId, setEmployeeId] = useState('');
   const [ticketDetails, setTicketDetails] = useState<TicketDetails | null>(null);
   const [totalPrice, setTotalPrice] = useState(0);
   const [totalDuration, setTotalDuration] = useState(0);
-  const [timeSlot, setTimeSlot] = useState(TIME_SLOTS[4]); // 10:00 a.m. por defecto
+  const [bookingColor, setBookingColor] = useState<string>(BOOKING_COLORS[0]);
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch daily appointments to find busy slots
+  // Al abrir el modal, resetear estados e inicializar el empleado si viene en props
   useEffect(() => {
-    if (!isOpen) return;
-
-    async function fetchDailyAppointments() {
-      setLoadingSlots(true);
-      try {
-        const startOfDay = new Date(defaultDate);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(defaultDate);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const { data: appts, error: apptErr } = await supabase
-          .from('appointments')
-          .select('start_time, end_time, status')
-          .eq('project_id', projectId)
-          .gte('start_time', startOfDay.toISOString())
-          .lte('start_time', endOfDay.toISOString())
-          .not('status', 'eq', 'cancelled');
-
-        if (apptErr) throw apptErr;
-
-        const busy = new Set<string>();
-
-        if (appts && appts.length > 0) {
-          appts.forEach((appt) => {
-            const apptStart = new Date(appt.start_time).getTime();
-            const apptEnd = new Date(appt.end_time).getTime();
-
-            TIME_SLOTS.forEach((slot) => {
-              const slotStart = new Date(defaultDate);
-              slotStart.setHours(slot.h, slot.m, 0, 0);
-              const slotStartTime = slotStart.getTime();
-              const slotEndTime = slotStartTime + 30 * 60000;
-
-              if (slotStartTime < apptEnd && slotEndTime > apptStart) {
-                busy.add(slot.label);
-              }
-            });
-          });
-        }
-
-        setOccupiedSlots(busy);
-      } catch (e) {
-        console.error('Error fetching busy slots:', e);
-      } finally {
-        setLoadingSlots(false);
-      }
+    if (isOpen) {
+      setStep(1);
+      setCustomerId('');
+      setCustomerSearch('');
+      setEmployeeId(defaultEmployeeId || '');
+      setTicketDetails(null);
+      setTotalPrice(0);
+      setTotalDuration(0);
+      setBookingColor(BOOKING_COLORS[0]);
+      setError(null);
     }
-
-    fetchDailyAppointments();
-  }, [isOpen, defaultDate, projectId]);
+  }, [isOpen, defaultEmployeeId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,8 +108,13 @@ export function NewAppointmentModal({
       return;
     }
 
-    const start = setMinutes(setHours(defaultDate, timeSlot.h), timeSlot.m);
+    const start = defaultDate;
     const end = addMinutes(start, totalDuration > 0 ? totalDuration : 60);
+
+    const finalTicketDetails: TicketDetails = {
+      ...ticketDetails,
+      booking_color: bookingColor,
+    };
 
     setSubmitting(true);
     const result = await onSubmit({
@@ -153,21 +125,13 @@ export function NewAppointmentModal({
       start_time: start.toISOString(),
       end_time: end.toISOString(),
       status: 'pending_advance',
-      ticket_details: ticketDetails,
+      ticket_details: finalTicketDetails,
       total_price: totalPrice,
       total_duration: totalDuration,
     });
     setSubmitting(false);
 
     if (result) {
-      // Reset y cerrar
-      setCustomerId('');
-      setCustomerSearch('');
-      setEmployeeId('');
-      setTicketDetails(null);
-      setTotalPrice(0);
-      setTotalDuration(0);
-      setStep(1);
       onClose();
     } else {
       setError('No se pudo agendar la cita. Verifica que no haya un conflicto de horario.');
@@ -186,7 +150,7 @@ export function NewAppointmentModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => { setStep(1); onClose(); }}
+            onClick={onClose}
             className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
           />
 
@@ -197,20 +161,20 @@ export function NewAppointmentModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="relative w-full md:max-w-xl bg-surface-container-lowest rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-6 md:p-8 max-h-[95vh] overflow-y-auto"
+            className="relative w-full md:max-w-xl bg-surface-container-lowest rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-6 md:p-8 max-h-[95vh] flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex justify-between items-start mb-6 shrink-0">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-primario-zen/40 font-semibold mb-1">
-                  {format(defaultDate, "EEEE, d 'de' MMMM", { locale: es })}
+                  {format(defaultDate, "EEEE, d 'de' MMMM · h:mm a", { locale: es })}
                 </p>
                 <h2 className="font-serif text-primario-zen text-2xl tracking-wide">
-                  Nueva Cita a la Carta
+                  Nueva Cita
                 </h2>
               </div>
               <button
-                onClick={() => { setStep(1); onClose(); }}
+                onClick={onClose}
                 aria-label="Cerrar formulario"
                 className="p-2 rounded-full text-primario-zen/40 hover:text-primario-zen hover:bg-secundario-zen/40 transition-all"
               >
@@ -219,58 +183,52 @@ export function NewAppointmentModal({
             </div>
 
             {isDataLoading ? (
-              <div className="flex justify-center py-12">
+              <div className="flex justify-center py-12 shrink-0">
                 <Loader2 className="w-6 h-6 animate-spin text-primario-zen/50" />
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5 flex-1 min-h-0">
 
-                {/* PASO 1: HORARIO */}
+                {/* PASO 1: SERVICIOS */}
                 {step === 1 && (
-                  <div className="flex flex-col gap-4">
-                    <div className="flex items-center justify-between">
+                  <div className="flex flex-col gap-4 h-full overflow-hidden">
+                    <div className="flex items-center justify-between shrink-0">
                       <h3 className="text-xs uppercase tracking-widest font-bold text-primario-zen/50">
-                        Paso 1: Selecciona la hora
+                        Paso 1: Servicios
                       </h3>
-                      <span className="text-xs text-primario-zen/40 font-medium font-sans">1 de 3</span>
+                      <span className="text-xs text-primario-zen/40 font-medium font-sans">1 de 2</span>
                     </div>
 
-                    {loadingSlots ? (
-                      <div className="flex justify-center py-8">
-                        <Loader2 className="w-6 h-6 animate-spin text-primario-zen/50" />
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-4 gap-2 max-h-60 overflow-y-auto pr-1">
-                        {TIME_SLOTS.map((slot) => {
-                          const isSelected = timeSlot.label === slot.label;
-                          const isOccupied = occupiedSlots.has(slot.label);
+                    {/* Cotizador Interactivo */}
+                    <div className="flex-1 border border-secundario-zen/30 rounded-2xl p-4 bg-white/30 overflow-y-auto">
+                      <NailMenuCalculator
+                        value={ticketDetails}
+                        onChange={({ ticketDetails: details, totalPrice: price, totalDuration: duration }) => {
+                          setTicketDetails(details);
+                          setTotalPrice(price);
+                          setTotalDuration(duration);
+                        }}
+                      />
+                    </div>
 
-                          return (
-                            <button
-                              type="button"
-                              key={slot.label}
-                              disabled={isOccupied}
-                              onClick={() => setTimeSlot(slot)}
-                              className={`py-3 rounded-xl text-xs font-medium transition-all border relative ${
-                                isSelected
-                                  ? 'bg-primario-zen text-fondo-zen border-primario-zen font-bold shadow-md'
-                                  : isOccupied
-                                  ? 'bg-gray-100/50 border-gray-200 text-gray-400/60 cursor-not-allowed line-through'
-                                  : 'border-secundario-zen/50 text-primario-zen/70 hover:bg-secundario-zen/30 hover:border-primario-zen/40'
-                              }`}
-                            >
-                              {slot.label}
-                            </button>
-                          );
-                        })}
+                    {/* Resumen Final en Paso 1 */}
+                    <div className="bg-secundario-zen/30 rounded-2xl p-4 text-sm text-primario-zen/80 border border-secundario-zen/50 font-sans shrink-0">
+                      <div className="flex justify-between items-center">
+                        <p><span className="font-semibold">Tiempo total estimado</span></p>
+                        <p>{totalDuration} min</p>
                       </div>
-                    )}
+                      <div className="flex justify-between items-center mt-1">
+                        <p className="font-semibold">Costo base aproximado</p>
+                        <p className="font-semibold">${totalPrice} MXN</p>
+                      </div>
+                    </div>
 
-                    <div className="flex justify-end mt-4">
+                    <div className="flex justify-end mt-2 shrink-0">
                       <button
                         type="button"
                         onClick={() => setStep(2)}
-                        className="bg-primario-zen text-fondo-zen px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-opacity-90 transition-all flex items-center gap-1.5 shadow-sm"
+                        disabled={!ticketDetails || ticketDetails.activeServices.length === 0}
+                        className="bg-primario-zen text-fondo-zen px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-opacity-90 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         Siguiente paso <ChevronRight className="w-4 h-4" />
                       </button>
@@ -278,14 +236,14 @@ export function NewAppointmentModal({
                   </div>
                 )}
 
-                {/* PASO 2: CLIENTE Y EMPLEADA */}
+                {/* PASO 2: CLIENTA Y DETALLES FINAL */}
                 {step === 2 && (
-                  <div className="flex flex-col gap-5">
+                  <div className="flex flex-col gap-5 h-full overflow-y-auto pr-1">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xs uppercase tracking-widest font-bold text-primario-zen/50">
-                        Paso 2: Clienta y Especialista
+                        Paso 2: Clienta y Detalles
                       </h3>
-                      <span className="text-xs text-primario-zen/40 font-medium font-sans">2 de 3</span>
+                      <span className="text-xs text-primario-zen/40 font-medium font-sans">2 de 2</span>
                     </div>
 
                     {/* Cliente */}
@@ -314,7 +272,7 @@ export function NewAppointmentModal({
                           />
                         </div>
 
-                        <div className="max-h-48 overflow-y-auto rounded-xl border border-secundario-zen/50 bg-white/50 backdrop-blur-sm">
+                        <div className="max-h-40 overflow-y-auto rounded-xl border border-secundario-zen/50 bg-white/50 backdrop-blur-sm">
                           {customers
                             .filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()))
                             .map((c) => (
@@ -325,13 +283,14 @@ export function NewAppointmentModal({
                                   setCustomerId(c.id);
                                   setCustomerSearch(c.name);
                                 }}
-                                className={`w-full text-left px-4 py-2 text-sm transition-colors font-sans ${
+                                className={`w-full text-left px-4 py-2 text-sm transition-colors font-sans flex flex-col ${
                                   customerId === c.id
                                     ? 'bg-primario-zen text-fondo-zen font-semibold'
                                     : 'text-primario-zen hover:bg-secundario-zen/30'
                                 }`}
                               >
-                                {c.name}
+                                <span>{c.name}</span>
+                                {c.phone && <span className="text-xs opacity-70">{c.phone}</span>}
                               </button>
                             ))
                           }
@@ -378,58 +337,28 @@ export function NewAppointmentModal({
                       )}
                     </Field>
 
-                    <div className="flex justify-between items-center mt-4">
-                      <button
-                        type="button"
-                        onClick={() => setStep(1)}
-                        className="border border-primario-zen/40 text-primario-zen px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-secundario-zen/20 transition-all flex items-center gap-1.5"
-                      >
-                        <ChevronLeft className="w-4 h-4" /> Atrás
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!customerId || !employeeId}
-                        onClick={() => setStep(3)}
-                        className="bg-primario-zen text-fondo-zen px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5 shadow-sm"
-                      >
-                        Siguiente paso <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* PASO 3: SERVICIOS Y CONFIRMACIÓN */}
-                {step === 3 && (
-                  <div className="flex flex-col gap-5">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xs uppercase tracking-widest font-bold text-primario-zen/50">
-                        Paso 3: Servicios y Confirmación
-                      </h3>
-                      <span className="text-xs text-primario-zen/40 font-medium font-sans">3 de 3</span>
-                    </div>
-
-                    {/* Cotizador Interactivo */}
-                    <div className="border border-secundario-zen/30 rounded-2xl p-4 bg-white/30 max-h-[35vh] overflow-y-auto">
-                      <NailMenuCalculator
-                        value={ticketDetails}
-                        onChange={({ ticketDetails: details, totalPrice: price, totalDuration: duration }) => {
-                          setTicketDetails(details);
-                          setTotalPrice(price);
-                          setTotalDuration(duration);
-                        }}
-                      />
-                    </div>
-
-                    {/* Resumen Final */}
-                    {totalPrice > 0 && (
-                      <div className="bg-secundario-zen/30 rounded-2xl p-4 text-sm text-primario-zen/80 border border-secundario-zen/50 font-sans">
-                        <p><span className="font-semibold">Resumen de Cita</span> · {totalDuration} min</p>
-                        <p className="text-primario-zen/60 text-xs mt-0.5">
-                          {timeSlot.label} → {format(addMinutes(setMinutes(setHours(defaultDate, timeSlot.h), timeSlot.m), totalDuration), 'h:mm a')}
-                        </p>
-                        <p className="font-semibold mt-2">${totalPrice} MXN</p>
+                    {/* Selector de Color */}
+                    <div className="flex flex-col gap-2 font-sans mb-2">
+                      <label className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/50">
+                        Booking color
+                      </label>
+                      <div className="flex flex-wrap gap-3">
+                        {BOOKING_COLORS.map(color => (
+                          <button
+                            key={color}
+                            type="button"
+                            onClick={() => setBookingColor(color)}
+                            className="w-8 h-8 rounded-full shadow-sm border border-black/10 flex items-center justify-center transition-transform hover:scale-110"
+                            style={{ backgroundColor: color }}
+                            aria-label={`Seleccionar color ${color}`}
+                          >
+                            {bookingColor === color && (
+                              <Check className="w-4 h-4 text-white drop-shadow-md" strokeWidth={3} />
+                            )}
+                          </button>
+                        ))}
                       </div>
-                    )}
+                    </div>
 
                     {/* Error */}
                     {error && (
@@ -438,10 +367,10 @@ export function NewAppointmentModal({
                       </p>
                     )}
 
-                    <div className="flex justify-between items-center mt-4">
+                    <div className="flex justify-between items-center mt-2 pt-4 border-t border-secundario-zen/40">
                       <button
                         type="button"
-                        onClick={() => setStep(2)}
+                        onClick={() => setStep(1)}
                         className="border border-primario-zen/40 text-primario-zen px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-secundario-zen/20 transition-all flex items-center gap-1.5"
                       >
                         <ChevronLeft className="w-4 h-4" /> Atrás
@@ -450,7 +379,7 @@ export function NewAppointmentModal({
                       <button
                         id="submit-new-appointment"
                         type="submit"
-                        disabled={submitting}
+                        disabled={submitting || !customerId || !employeeId}
                         className="bg-primario-zen text-fondo-zen px-6 py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 font-sans"
                       >
                         {submitting ? (
@@ -466,6 +395,8 @@ export function NewAppointmentModal({
               </form>
             )}
           </motion.div>
+          
+          {/* Modal secundario para creación de cliente */}
           <CustomerFormModal
             isOpen={isAddingCustomer}
             onClose={() => setIsAddingCustomer(false)}

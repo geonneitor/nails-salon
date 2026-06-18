@@ -22,7 +22,7 @@ interface DayViewProps {
   hourHeight: number;
   currentTime: Date;
   onAppointmentClick: (a: AppointmentWithRelations) => void;
-  onSlotClick?: (date: Date, hour: number, minute: number) => void;
+  onSlotClick?: (date: Date, hour: number, minute: number, employeeId: string) => void;
   selectedAppointmentId?: string | null;
 }
 
@@ -114,7 +114,7 @@ export function DayView({
                   <button
                     key={slot.hour}
                     type="button"
-                    onClick={() => onSlotClick?.(startOfLocalDay(date), slot.hour, 0)}
+                    onClick={() => onSlotClick?.(startOfLocalDay(date), slot.hour, 0, emp.id)}
                     aria-label={`Agendar con ${emp.name} a las ${slot.label}`}
                     className="absolute left-0 right-0 border-b border-secundario-zen/20 hover:bg-secundario-zen/20 transition-colors"
                     style={{

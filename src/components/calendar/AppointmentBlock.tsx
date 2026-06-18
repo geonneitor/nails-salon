@@ -118,6 +118,13 @@ export function AppointmentBlock({
   const leftPct = columnIndex * widthPct;
   const inset = 2;
 
+  const customColor = appointment.ticket_details?.booking_color;
+  const customStyle = customColor ? {
+    backgroundColor: customColor,
+    borderColor: customColor,
+    color: '#ffffff',
+  } : {};
+
   return (
     <motion.div
       style={{
@@ -125,6 +132,7 @@ export function AppointmentBlock({
         height,
         left: `calc(${leftPct}% + ${inset}px)`,
         width: `calc(${widthPct}% - ${inset * 2}px)`,
+        ...customStyle,
       }}
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{

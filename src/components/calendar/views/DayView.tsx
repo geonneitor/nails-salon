@@ -72,7 +72,7 @@ export function DayView({
       </div>
 
       {/* Grid: Etiquetas de hora + Columnas de Empleadas */}
-      <div className="relative flex bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm overflow-x-auto overflow-y-auto flex-1">
+      <div className="relative flex bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm overflow-x-auto overflow-y-auto flex-1" data-tour="calendar-slots">
         {/* Columna de horas (Sticky) */}
         <div
           className="flex-shrink-0 w-14 border-r border-secundario-zen/50 bg-fondo-zen z-20 sticky left-0"

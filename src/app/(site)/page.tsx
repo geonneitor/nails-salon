@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Instagram, MessageCircle, Music2 } from 'lucide-react';
+import { ChevronDown, Instagram, MessageCircle, Music2, Flower2, Calendar } from 'lucide-react';
 import PublicNavbar from '@/components/home/PublicNavbar';
+import { useZenAssistant } from '@/context/ZenAssistantContext';
 
 function FAQAccordion({ faq }: { faq: {q: string, a: string} }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,23 +40,25 @@ function FAQAccordion({ faq }: { faq: {q: string, a: string} }) {
 }
 
 export default function LandingPage() {
+  const { startTour, isActive } = useZenAssistant();
+
   const faqs = [
     {
       q: '¿Cómo agendar mi cita paso a paso?',
-      a: '¡Agendar es muy intuitivo y rápido!\n\n1. Da clic en "Reserva tu Cita" en la parte inferior.\n2. Elige el servicio de tu preferencia (ej. Manicura Zen).\n3. Selecciona a tu artista favorita y el horario ideal.\n4. ¡Listo! Recibirás la confirmación de tu espacio.'
+      a: '¡Agendar es muy intuitivo y rápido!\n\n1. Da clic en "AGENDAR YA" en la parte inferior.\n2. Elige el servicio de tu preferencia (ej. Pedicura Spa).\n3. Selecciona el horario ideal.\n4. ¡Listo! Recibirás la confirmación de tu espacio.\n\nTambién puedes activar nuestro "Asistente Zen" tocando la flor de loto para un recorrido interactivo.'
     },
     {
-      q: '¿Cómo funciona la política de anticipo del 50%?',
-      a: 'Para garantizar tu espacio exclusivo y brindarte un servicio impecable, solicitamos un anticipo del 50% del valor de tu servicio principal al momento de agendar.\n\nEste proceso es totalmente seguro y nos ayuda a mantener la agenda fluida para todas nuestras clientas. El 50% restante lo liquidas cómodamente el día de tu visita en el salón.'
+      q: '¿Cómo funciona la política de anticipo?',
+      a: 'Para garantizar tu espacio exclusivo y brindarte un servicio impecable, solicitamos un anticipo mínimo al momento de agendar.\n\nEste proceso es totalmente seguro y nos ayuda a mantener la agenda fluida para todas nuestras clientas.'
     },
     {
       q: '¿Qué pasa si llego tarde o necesito cancelar?',
-      a: 'Entendemos que el día a día puede ser impredecible. Cuentas con una tolerancia de gracia de 15 minutos.\n\nSi necesitas cancelar o reagendar tu ritual, te pedimos amablemente que nos notifiques con al menos 24 horas de anticipación para que tu anticipo siga siendo válido y podamos ceder el espacio a otra clienta.'
+      a: 'Entendemos que el día a día puede ser impredecible. Cuentas con una tolerancia de gracia de 15 minutos.\n\nSi necesitas cancelar o reagendar tu ritual, te pedimos amablemente que nos notifiques con anticipación para que tu anticipo siga siendo válido y podamos ceder el espacio a otra clienta.'
     }
   ];
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-on-background font-sans transition-colors duration-500 pb-28 md:pb-32">
+    <div className="min-h-screen overflow-x-hidden bg-background text-on-background font-sans transition-colors duration-500 pb-40 md:pb-32 relative">
       <PublicNavbar />
 
       {/* ── Bento Gallery Section (Hero Replacement) ── */}
@@ -68,18 +71,18 @@ export default function LandingPage() {
         >
           <div>
             <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant mb-3 block">
-              Nuestra Colección
+              Bienvenida a la Calma
             </span>
             <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl text-on-surface leading-[1.1]">
-              El arte del detalle,<br />
-              elevado a la perfección.
+              Relajación profunda,<br />
+              belleza natural.
             </h1>
           </div>
           <Link 
             href="/reserva" 
             className="text-[10px] uppercase tracking-[0.15em] font-bold text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 mt-5 md:mt-0 pb-2 border-b border-transparent hover:border-primary"
           >
-            VER MENÚ COMPLETO 
+            VER EXPERIENCIAS 
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
           </Link>
         </motion.div>
@@ -93,13 +96,13 @@ export default function LandingPage() {
           {/* Left Column: Tall image */}
           <div className="relative h-[280px] md:h-[600px] rounded-[2rem] overflow-hidden group shadow-sm">
             <img 
-              src="https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=800&auto=format&fit=crop" 
-              alt="Manicura Ritual"
+              src="/images/spa_hero.png" 
+              alt="Ritual Pedicura Spa"
               className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
             <h3 className="absolute bottom-6 left-6 md:bottom-8 md:left-8 text-white font-serif text-xl md:text-3xl drop-shadow-md">
-              Manicura Ritual
+              Ritual Pedicura Spa
             </h3>
           </div>
 
@@ -107,45 +110,32 @@ export default function LandingPage() {
           <div className="flex flex-col gap-4 md:gap-6 md:h-[600px]">
             <div className="relative h-[200px] md:flex-1 rounded-[2rem] overflow-hidden group shadow-sm">
               <img 
-                src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop" 
-                alt="Pedicura Zen"
+                src="/images/spa_detail.png" 
+                alt="Detalle Botánico"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <h3 className="absolute bottom-4 left-5 md:bottom-6 md:left-6 text-white font-serif text-lg md:text-2xl drop-shadow-md">
-                Pedicura Zen
+                Esencia Botánica
               </h3>
             </div>
             
             <div className="relative h-[200px] md:flex-1 rounded-[2rem] overflow-hidden group shadow-sm bg-surface-variant">
               <img 
-                src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop" 
-                alt="Arte & Diseño"
+                src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop" 
+                alt="Masaje Relajante"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-90" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
               <h3 className="absolute bottom-4 left-5 md:bottom-6 md:left-6 text-white font-serif text-lg md:text-2xl drop-shadow-md">
-                Arte & Diseño
+                Masaje Relajante
               </h3>
             </div>
-          </div>
-
-          {/* Bottom Row: Wide image */}
-          <div className="md:col-span-2 relative h-[200px] md:h-[350px] rounded-[2rem] overflow-hidden group shadow-sm">
-            <img 
-              src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=1600&auto=format&fit=crop" 
-              alt="Extensiones Acrílicas"
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <h3 className="absolute bottom-5 left-5 md:bottom-8 md:left-8 text-white font-serif text-lg md:text-3xl drop-shadow-md">
-              Extensiones Acrílicas
-            </h3>
           </div>
         </motion.div>
       </section>
 
-      {/* ── Philosophy (About Us) & Book Button ── */}
+      {/* ── Philosophy (About Us) ── */}
       <section className="px-6 md:px-12 py-16 max-w-4xl mx-auto text-left relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -155,7 +145,7 @@ export default function LandingPage() {
         >
           <h2 className="font-serif text-3xl md:text-4xl text-primary mb-6">Nuestra Esencia</h2>
           <p className="text-lg md:text-xl text-on-surface-variant font-light leading-relaxed mb-12">
-            Encuentra el equilibrio perfecto entre naturaleza y elegancia. Nuestros tratamientos orgánicos nutren tu cuerpo y alma, inspirados en la filosofía Zen para ofrecerte un momento de profunda relajación y conexión interior.
+            Cada masaje y tratamiento está diseñado a medida para nutrir tu cuerpo y mente. Inspirados en la estética zen y los elementos de la naturaleza, ofrecemos un refugio de paz donde puedes desconectar del mundo y reconectar contigo misma.
           </p>
         </motion.div>
       </section>
@@ -170,22 +160,22 @@ export default function LandingPage() {
           viewport={{ once: true }}
           className="font-serif text-3xl md:text-4xl text-on-surface mb-12 max-w-4xl mx-auto"
         >
-          Servicios Signature
+          Tratamientos Especiales
         </motion.h2>
 
         <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-8 pt-4 snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-8 md:overflow-visible md:px-0 md:pb-0 md:pt-0">
           {[
             {
+              title: 'Pedicura Spa Orgánica',
+              desc: 'Relajación profunda a través de un ritual botánico con esencias naturales, diseñado para revitalizar pies cansados y mejorar la circulación.',
+            },
+            {
               title: 'Manicura Zen',
-              desc: 'Una experiencia delicada y medicinal que restaura la vitalidad natural de tus uñas con acabados vibrantes y duraderos.',
+              desc: 'Una experiencia delicada que restaura la vitalidad natural de tus manos con masajes terapéuticos y un acabado impecable.',
             },
             {
-              title: 'Ritual Pedicura Aroma',
-              desc: 'Relajación profunda a través de un ritual botánico pintado a mano, diseñado para revitalizar pies cansados.',
-            },
-            {
-              title: 'Tratamiento Armónico',
-              desc: 'Suaviza, alisa y rejuvenece tus manos con infusiones orgánicas, dejando resultados visibles y duraderos.',
+              title: 'Terapia Armónica',
+              desc: 'Tratamientos personalizados que alivian la tensión acumulada, dejando una sensación de ligereza y bienestar total.',
             }
           ].map((service, i) => (
             <motion.div
@@ -228,15 +218,15 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="pt-16 pb-12 px-6 text-center mt-10">
+      <footer className="pt-16 pb-24 px-6 text-center mt-10">
         <div className="flex justify-center gap-6 mb-8">
-          <a href="#" className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
+          <a href="https://instagram.com" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
             <Instagram className="w-5 h-5" />
           </a>
-          <a href="#" className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
+          <a href="https://wa.me/5211234567890?text=Hola,%20me%20gustaría%20más%20información" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
             <MessageCircle className="w-5 h-5" /> {/* Whatsapp */}
           </a>
-          <a href="#" className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
+          <a href="https://tiktok.com" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
             <Music2 className="w-5 h-5" /> {/* TikTok */}
           </a>
         </div>
@@ -245,6 +235,40 @@ export default function LandingPage() {
           © {new Date().getFullYear()} Zen Salón. Todos los derechos reservados.
         </p>
       </footer>
+
+      {/* ── Floating Zen Assistant Button ── */}
+      {!isActive && (
+        <motion.button
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={startTour}
+          className="fixed bottom-24 left-6 md:bottom-8 md:left-8 z-50 bg-surface-container-lowest border-2 border-primary/30 shadow-2xl p-3 rounded-full flex items-center gap-3 pr-5 text-primary hover:border-primary transition-colors group"
+          title="Iniciar Asistente Zen"
+        >
+          <div className="relative flex items-center justify-center">
+            <div className="absolute inset-0 bg-primary rounded-full animate-ping opacity-20" />
+            <Flower2 className="w-6 h-6 animate-[spin_10s_linear_infinite]" />
+          </div>
+          <span className="font-serif text-sm font-bold tracking-wide">
+            Asistente Zen
+          </span>
+        </motion.button>
+      )}
+
+      {/* ── Sticky Booking Button ── */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-background via-background/90 to-transparent z-40 pointer-events-none flex justify-center md:justify-end">
+        <Link
+          href="/reserva"
+          data-tour="agendar-btn"
+          className="pointer-events-auto bg-primary text-white w-full md:w-auto px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-opacity-90 hover:-translate-y-1 transition-all"
+        >
+          <Calendar className="w-4 h-4" />
+          Agendar Ya
+        </Link>
+      </div>
+
     </div>
   );
 }

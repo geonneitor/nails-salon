@@ -200,7 +200,7 @@ export function NewAppointmentModal({
                     </div>
 
                     {/* Cotizador Interactivo */}
-                    <div className="flex-1 border border-secundario-zen/30 rounded-2xl p-4 bg-white/30 overflow-y-auto">
+                    <div data-tour="service-menu" className="flex-1 border border-secundario-zen/30 rounded-2xl p-4 bg-white/30 overflow-y-auto">
                       <NailMenuCalculator
                         value={ticketDetails}
                         onChange={({ ticketDetails: details, totalPrice: price, totalDuration: duration }) => {
@@ -226,6 +226,7 @@ export function NewAppointmentModal({
                     <div className="flex justify-end mt-2 shrink-0">
                       <button
                         type="button"
+                        data-tour="next-step-btn"
                         onClick={() => setStep(2)}
                         disabled={!ticketDetails || ticketDetails.activeServices.length === 0}
                         className="bg-primario-zen text-fondo-zen px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-opacity-90 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
@@ -379,6 +380,7 @@ export function NewAppointmentModal({
                       <button
                         id="submit-new-appointment"
                         type="submit"
+                        data-tour="confirm-btn"
                         disabled={submitting || !customerId || !employeeId}
                         className="bg-primario-zen text-fondo-zen px-6 py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 font-sans"
                       >

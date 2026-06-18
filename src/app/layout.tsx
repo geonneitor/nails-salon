@@ -4,6 +4,8 @@ import './globals.css';
 import { AppProvider } from '@/context/AppContext';
 import { ToastProvider } from '@/components/ui/ToastProvider';
 import { ConfirmDialogProvider } from '@/components/ui/ConfirmDialog';
+import { ZenAssistantProvider } from '@/context/ZenAssistantContext';
+import { ZenAssistantOverlay } from '@/components/tutorial/ZenAssistantOverlay';
 
 const libreCaslon = Libre_Caslon_Text({ 
   weight: ['400', '700'],
@@ -47,7 +49,10 @@ export default function RootLayout({
         <AppProvider>
           <ToastProvider>
             <ConfirmDialogProvider>
-              {children}
+              <ZenAssistantProvider>
+                {children}
+                <ZenAssistantOverlay />
+              </ZenAssistantProvider>
             </ConfirmDialogProvider>
           </ToastProvider>
         </AppProvider>

@@ -55,7 +55,13 @@ export function useAppointmentReminders({
         setReminders((data as AppointmentReminder[]) ?? []);
         setIsLoading(false);
       }
-      if (error) console.warn('[reminders] load error:', error.message);
+      if (error) {
+        if (error.code === '42P01') {
+          // La tabla appointment_reminders no existe aún, silenciar el error.
+        } else {
+          console.warn('[reminders] load error:', error.message);
+        }
+      }
     }
     load();
 

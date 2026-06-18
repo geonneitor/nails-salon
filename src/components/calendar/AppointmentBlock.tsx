@@ -123,6 +123,7 @@ export function AppointmentBlock({
     backgroundColor: customColor,
     borderColor: customColor,
     color: '#ffffff',
+    textShadow: '0px 1px 3px rgba(0,0,0,0.4)',
   } : {};
 
   return (
@@ -157,22 +158,24 @@ export function AppointmentBlock({
       <button
         type="button"
         onClick={onClick}
-        className="w-full h-full px-2 py-1.5 hover:brightness-105 transition-all text-left overflow-hidden"
+        className="w-full h-full px-2 py-1.5 hover:brightness-105 transition-all text-left overflow-hidden flex flex-col justify-start"
         aria-label={`Cita de ${appointment.customer.name} a las ${format(start, 'h:mm a')}`}
       >
-        <div className="flex flex-col gap-0.5 h-full">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] opacity-90 leading-tight">
+        <div className="flex flex-col gap-0.5 h-full w-full overflow-hidden">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] opacity-90 leading-tight truncate w-full">
             {format(start, 'h:mm a')}
-            <span className="opacity-60"> · {currentStyle.label}</span>
+            {height >= 70 && <span className="opacity-60"> · {currentStyle.label}</span>}
           </span>
-          <span className="text-xs font-serif font-medium leading-tight truncate">
+          <span className={`text-xs font-serif font-medium leading-tight ${height < 70 ? 'truncate' : 'line-clamp-2'} w-full`}>
             {serviceName}
           </span>
-          <span className="text-[10px] opacity-80 leading-tight truncate italic">
-            {appointment.customer.name}
-          </span>
-          {appointment.employee && (
-            <span className={`mt-auto text-[9px] ${currentStyle.pill} rounded-full px-1.5 py-0.5 self-start uppercase tracking-[0.15em]`}>
+          {height >= 60 && (
+            <span className="text-[10px] opacity-80 leading-tight truncate italic w-full">
+              {appointment.customer.name}
+            </span>
+          )}
+          {height >= 85 && appointment.employee && (
+            <span className={`mt-auto text-[9px] ${currentStyle.pill} rounded-full px-1.5 py-0.5 self-start uppercase tracking-[0.15em] truncate max-w-full`}>
               {appointment.employee.name}
             </span>
           )}

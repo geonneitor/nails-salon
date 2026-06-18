@@ -89,7 +89,7 @@ export function FullSetSection({
 
         <div>
           <p className="text-[9px] font-bold text-primario-zen/50 uppercase tracking-widest mb-1.5">Largo (Largo {'>'} 2 añade +$50 por nivel)</p>
-          <div className="flex gap-1 overflow-x-auto pb-1 max-w-full">
+          <div className="flex flex-wrap gap-1 pb-1 w-full">
             {LARGOS.map((largo) => (
               <button
                 key={largo}

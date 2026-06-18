@@ -369,6 +369,15 @@ export function AppointmentDetailModal({
                 </button>
               )}
 
+              {onStatusChange && appointment.status === 'confirmed_advance' && (
+                <button
+                  onClick={() => onStatusChange(appointment.id, 'completed')}
+                  className="w-full bg-gold-primary text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-gold-dark transition-all shadow-sm font-sans"
+                >
+                  Cobrar Cita
+                </button>
+              )}
+
               {onStatusChange && appointment.status !== 'cancelled' && appointment.status !== 'no_show' && appointment.status !== 'completed' && (
                 <div className="flex gap-2 mt-2 pt-4 border-t border-secundario-zen/30">
                   <button

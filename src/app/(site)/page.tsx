@@ -55,29 +55,29 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-on-background font-sans transition-colors duration-500 pb-32">
+    <div className="min-h-screen overflow-x-hidden bg-background text-on-background font-sans transition-colors duration-500 pb-28 md:pb-32">
       <PublicNavbar />
 
       {/* ── Bento Gallery Section (Hero Replacement) ── */}
-      <section className="px-6 md:px-12 pt-32 md:pt-40 pb-16 max-w-[1400px] mx-auto relative z-10">
+      <section className="px-4 md:px-12 pt-28 md:pt-40 pb-10 md:pb-16 max-w-[1400px] mx-auto relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12"
+          className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12"
         >
           <div>
-            <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant mb-4 block">
+            <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant mb-3 block">
               Nuestra Colección
             </span>
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-on-surface leading-[1.1]">
+            <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl text-on-surface leading-[1.1]">
               El arte del detalle,<br />
               elevado a la perfección.
             </h1>
           </div>
           <Link 
             href="/reserva" 
-            className="text-[10px] uppercase tracking-[0.15em] font-bold text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 mt-8 md:mt-0 pb-2 border-b border-transparent hover:border-primary"
+            className="text-[10px] uppercase tracking-[0.15em] font-bold text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 mt-5 md:mt-0 pb-2 border-b border-transparent hover:border-primary"
           >
             VER MENÚ COMPLETO 
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
@@ -88,57 +88,57 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
+          className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6"
         >
           {/* Left Column: Tall image */}
-          <div className="relative h-[400px] md:h-[600px] rounded-[2rem] overflow-hidden group shadow-sm">
+          <div className="relative h-[280px] md:h-[600px] rounded-[2rem] overflow-hidden group shadow-sm">
             <img 
               src="https://images.unsplash.com/photo-1604654894610-df63bc536371?q=80&w=800&auto=format&fit=crop" 
               alt="Manicura Ritual"
               className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <h3 className="absolute bottom-8 left-8 text-white font-serif text-2xl md:text-3xl drop-shadow-md">
+            <h3 className="absolute bottom-6 left-6 md:bottom-8 md:left-8 text-white font-serif text-xl md:text-3xl drop-shadow-md">
               Manicura Ritual
             </h3>
           </div>
 
           {/* Right Column: Two small images vertically */}
-          <div className="flex flex-col gap-4 md:gap-6 h-[400px] md:h-[600px]">
-            <div className="relative flex-1 rounded-[2rem] overflow-hidden group shadow-sm">
+          <div className="flex flex-col gap-4 md:gap-6 md:h-[600px]">
+            <div className="relative h-[200px] md:flex-1 rounded-[2rem] overflow-hidden group shadow-sm">
               <img 
                 src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop" 
                 alt="Pedicura Zen"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <h3 className="absolute bottom-6 left-6 text-white font-serif text-xl md:text-2xl drop-shadow-md">
+              <h3 className="absolute bottom-4 left-5 md:bottom-6 md:left-6 text-white font-serif text-lg md:text-2xl drop-shadow-md">
                 Pedicura Zen
               </h3>
             </div>
             
-            <div className="relative flex-1 rounded-[2rem] overflow-hidden group shadow-sm bg-surface-variant">
+            <div className="relative h-[200px] md:flex-1 rounded-[2rem] overflow-hidden group shadow-sm bg-surface-variant">
               <img 
                 src="https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=800&auto=format&fit=crop" 
                 alt="Arte & Diseño"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-90" 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <h3 className="absolute bottom-6 left-6 text-white font-serif text-xl md:text-2xl drop-shadow-md">
+              <h3 className="absolute bottom-4 left-5 md:bottom-6 md:left-6 text-white font-serif text-lg md:text-2xl drop-shadow-md">
                 Arte & Diseño
               </h3>
             </div>
           </div>
 
           {/* Bottom Row: Wide image */}
-          <div className="md:col-span-2 relative h-[280px] md:h-[350px] rounded-[2rem] overflow-hidden group shadow-sm mt-2 md:mt-0">
+          <div className="md:col-span-2 relative h-[200px] md:h-[350px] rounded-[2rem] overflow-hidden group shadow-sm">
             <img 
               src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=1600&auto=format&fit=crop" 
               alt="Extensiones Acrílicas"
               className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <h3 className="absolute bottom-8 left-8 text-white font-serif text-2xl md:text-3xl drop-shadow-md">
+            <h3 className="absolute bottom-5 left-5 md:bottom-8 md:left-8 text-white font-serif text-lg md:text-3xl drop-shadow-md">
               Extensiones Acrílicas
             </h3>
           </div>

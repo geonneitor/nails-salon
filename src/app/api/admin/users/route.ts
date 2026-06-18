@@ -4,7 +4,7 @@ import { verifyAdminAccess } from '@/lib/supabaseServer';
 
 export async function POST(request: Request) {
   try {
-    const { email, name, role, projectId } = await request.json();
+    const { email, name, role, projectId, password } = await request.json();
 
     if (!email || !name || !role || !projectId) {
       return NextResponse.json(
@@ -18,17 +18,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: access.error }, { status: access.status });
     }
 
-    // 1. Crear el usuario en Supabase Auth enviando un correo de invitación
-    // El usuario recibirá un enlace para establecer su contraseña
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      data: {
+    // 1. Crear el usuario en Supabase Auth directamente con contraseña
+    const finalPassword = password || 'ZenAdmin123!';
+
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: email,
+      password: finalPassword,
+      email_confirm: true,
+      user_metadata: {
         name: name,
         project_id: projectId
       }
     });
 
     if (authError) {
-      console.error('Error invitando usuario:', authError);
+      console.error('Error creando usuario:', authError);
       return NextResponse.json({ error: authError.message }, { status: 400 });
     }
 

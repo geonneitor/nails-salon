@@ -27,18 +27,19 @@ export function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-1 transition-all duration-300 ${
-                isActive
-                ? 'text-primario-zen scale-105'
-                : 'text-primario-zen/40 hover:text-primario-zen'
-              }`}
+              className="relative flex items-center justify-center p-3"
             >
-              <div className={`p-2 rounded-2xl transition-all duration-300 ${isActive ? 'bg-primario-zen text-fondo-zen shadow-lg shadow-primario-zen/20' : 'bg-transparent'}`}>
-                <Icon strokeWidth={isActive ? 2.5 : 2} className="w-6 h-6" />
-              </div>
-              <span className={`text-[10px] uppercase tracking-widest transition-all duration-300 ${isActive ? 'font-bold translate-y-[-1px]' : 'font-medium'}`}>
-                {item.label}
-              </span>
+              <Icon 
+                strokeWidth={isActive ? 2.5 : 2} 
+                className={`w-6 h-6 transition-all duration-300 ${
+                  isActive 
+                    ? 'text-primario-zen scale-110' 
+                    : 'text-primario-zen/40 hover:text-primario-zen'
+                }`} 
+              />
+              {isActive && (
+                <span className="absolute -bottom-1 w-1 h-1 rounded-full bg-primario-zen" />
+              )}
             </Link>
           );
         })}

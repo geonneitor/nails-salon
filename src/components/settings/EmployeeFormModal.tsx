@@ -16,6 +16,7 @@ export function EmployeeFormModal({ isOpen, onClose, onSubmit, initialData }: Em
   const [formData, setFormData] = useState({
     name: initialData?.name || '',
     email: initialData?.email || '',
+    password: '',
     role: initialData?.role || 'ONLY_BOOK',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -93,9 +94,23 @@ export function EmployeeFormModal({ isOpen, onClose, onSubmit, initialData }: Em
           </div>
 
           {!initialData && (
-            <p className="text-[10px] text-primario-zen/50 text-center px-4 leading-relaxed font-medium">
-              Al registrarla, se le enviará un correo electrónico de invitación para que configure su propia contraseña.
-            </p>
+            <div className="flex flex-col gap-2">
+              <label className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/50">
+                Contraseña Temporal
+              </label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full bg-white/50 border border-secundario-zen/50 rounded-xl px-4 py-3 text-primario-zen text-sm focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all"
+                placeholder="Mínimo 6 caracteres"
+                required={!initialData}
+                minLength={6}
+              />
+              <p className="text-[10px] text-primario-zen/50 leading-relaxed font-medium mt-1">
+                Se creará su cuenta de inmediato. Podrá iniciar sesión con este correo y contraseña.
+              </p>
+            </div>
           )}
 
           <button
@@ -103,7 +118,7 @@ export function EmployeeFormModal({ isOpen, onClose, onSubmit, initialData }: Em
             disabled={isSubmitting}
             className="w-full bg-primario-zen text-fondo-zen py-3 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50"
           >
-            {isSubmitting ? 'Guardando...' : initialData ? 'Actualizar Empleada' : 'Enviar Invitación'}
+            {isSubmitting ? 'Guardando...' : initialData ? 'Actualizar Empleada' : 'Crear Cuenta'}
           </button>
         </form>
       </div>

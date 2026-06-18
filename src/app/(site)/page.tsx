@@ -1,13 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Instagram, MessageCircle, Music2, Calendar, Sparkles, Droplets, Leaf } from 'lucide-react';
 import PublicNavbar from '@/components/home/PublicNavbar';
 import { useZenAssistant } from '@/context/ZenAssistantContext';
 import { LotusCharacter } from '@/components/tutorial/LotusCharacter';
-import ZenBookingJourney from '@/components/home/ZenBookingJourney';
 
 function FAQAccordion({ faq }: { faq: {q: string, a: string} }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,10 +60,10 @@ export default function LandingPage() {
 
   const marqueeImages = [
     '/images/spa_hero.png',
-    'spa_pedicure_station_1781818028853.png',
+    '/images/spa_pedicure_station.png',
     '/images/spa_detail.png',
-    'zen_salon_interior_1781818036692.png',
-    'nail_art_minimalist_1781818020367.png',
+    '/images/zen_salon_interior.png',
+    '/images/nail_art_minimalist.png',
   ];
 
   return (
@@ -89,16 +88,6 @@ export default function LandingPage() {
           <p className="text-lg text-on-surface-variant font-light mb-10 max-w-2xl mx-auto">
             Descubre un concepto de salón diferente. Nos especializamos en diseño de uñas impecable y pedicura botánica, fusionando la higiene clínica con una atmósfera de paz absoluta. Sin prisas.
           </p>
-          <button 
-            onClick={() => {
-              document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            data-tour="agendar-btn"
-            className="bg-primary text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-opacity-90 hover:-translate-y-1 transition-all"
-          >
-            <Calendar className="w-5 h-5" />
-            Reservar mi Espacio
-          </button>
         </motion.div>
       </section>
 
@@ -111,7 +100,7 @@ export default function LandingPage() {
           {[...marqueeImages, ...marqueeImages].map((src, i) => (
             <div key={i} className="relative w-[60vw] md:w-[400px] h-[300px] md:h-[400px] flex-none rounded-[2rem] overflow-hidden shadow-md">
               <img 
-                src={`/${src.replace(/^\//, '')}`} 
+                src={src} 
                 alt={`Zen Experience ${i}`}
                 className="w-full h-full object-cover" 
               />
@@ -170,17 +159,34 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Embedded Booking Journey ── */}
-      <section id="booking-section" className="px-4 md:px-12 py-16 relative bg-surface-container-low rounded-t-[3rem] mt-10">
+      {/* ── Beneficios de los Rituales ── */}
+      <section className="px-4 md:px-12 py-16 relative bg-surface-container-low rounded-t-[3rem] mt-10">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="font-serif text-3xl md:text-5xl text-on-surface mb-4">Reserva tu Ritual</h2>
-            <p className="text-on-surface-variant">Selecciona tus servicios y asegura tu cita en minutos.</p>
+            <span className="text-[10px] uppercase tracking-widest font-bold text-primary mb-2 block">Bienestar Holístico</span>
+            <h2 className="font-serif text-3xl md:text-5xl text-on-surface mb-4">Beneficios de Nuestros Rituales</h2>
+            <p className="text-on-surface-variant max-w-2xl mx-auto">Más allá de la estética, cada servicio está diseñado para aportarte beneficios terapéuticos y un momento de auténtica desconexión.</p>
           </div>
           
-          <div className="bg-surface-container-lowest rounded-[2rem] shadow-xl overflow-hidden border border-outline-variant/30">
-            {/* Renderizamos el journey directamente */}
-            <ZenBookingJourney />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm border border-outline-variant/30 flex flex-col items-start text-left">
+              <h3 className="font-serif text-2xl text-on-surface mb-3">Pedicura Spa Botánica</h3>
+              <ul className="space-y-3 font-light text-on-surface-variant">
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Mejora la Circulación:</strong> Los baños calientes y exfoliaciones estimulan el flujo sanguíneo, aliviando la pesadez.</li>
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Prevención Clínica:</strong> Mantenemos la salud de las uñas y detectamos a tiempo problemas como uñas encarnadas o sequedad extrema.</li>
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Exfoliación Profunda:</strong> Elimina células muertas, previniendo durezas y dejando la piel suave y renovada.</li>
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Alivio del Estrés:</strong> El contacto con el agua tibia y las esencias botánicas actúan como aromaterapia relajante.</li>
+              </ul>
+            </div>
+            <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm border border-outline-variant/30 flex flex-col items-start text-left">
+              <h3 className="font-serif text-2xl text-on-surface mb-3">Manicura Zen y Uñas</h3>
+              <ul className="space-y-3 font-light text-on-surface-variant">
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Salud Cuticular:</strong> Hidratación y remoción cuidadosa de cutículas que evitan infecciones y padrastros.</li>
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Fortalecimiento:</strong> Aplicación de bases nutritivas y geles de alta gama que protegen tus uñas naturales del quiebre.</li>
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Arte que Empodera:</strong> Diseños minimalistas y elegantes que elevan tu autoestima y reflejan tu personalidad.</li>
+                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Masaje Focalizado:</strong> El masaje final de manos alivia la tensión de las articulaciones provocada por dispositivos y trabajo de escritorio.</li>
+              </ul>
+            </div>
           </div>
         </div>
       </section>
@@ -245,19 +251,28 @@ export default function LandingPage() {
         </motion.button>
       )}
 
-      {/* ── Sticky Booking Button (Mobile Only) ── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/90 to-transparent z-40 pointer-events-none flex justify-center">
-        <button
-          onClick={() => {
-            document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' });
-          }}
-          data-tour="agendar-btn"
-          className="pointer-events-auto bg-primary text-white w-full px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-opacity-90 hover:-translate-y-1 transition-all"
+      {/* ── Sticky Booking Button (Global Design) ── */}
+      <AnimatePresence>
+        <motion.div 
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 100, opacity: 0 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-[320px]"
         >
-          <Calendar className="w-4 h-4" />
-          Agendar Ya
-        </button>
-      </div>
+          <Link
+            href="/reserva"
+            data-tour="agendar-btn"
+            className="w-full relative group overflow-hidden bg-primary hover:bg-primary/90 text-on-primary shadow-[0_8px_30px_rgba(74,93,35,0.4)] hover:shadow-[0_12px_40px_rgba(74,93,35,0.5)] rounded-full px-8 py-4 transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-3"
+          >
+            {/* Brillo animado pasando de fondo */}
+            <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            
+            <Calendar className="w-5 h-5 shrink-0" />
+            <span className="font-semibold text-sm uppercase tracking-widest">Reserva tu Cita</span>
+          </Link>
+        </motion.div>
+      </AnimatePresence>
 
     </div>
   );

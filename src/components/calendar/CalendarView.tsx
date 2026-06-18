@@ -298,11 +298,11 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
             </div>
           )}
 
-          {/* Renderizado condicional del botón de Nueva Cita basado en readOnly */}
+          {/* Botón Nueva Cita: Visible solo en pantallas medianas hacia arriba */}
           {!readOnly && (
             <button
               onClick={() => handleOpenNewModal()}
-              className="bg-primario-zen text-fondo-zen text-[10px] font-semibold uppercase tracking-widest px-5 py-2.5 rounded-full flex items-center gap-2 hover:bg-opacity-90 transition-all shadow-sm"
+              className="hidden md:flex bg-primario-zen text-fondo-zen text-[10px] font-semibold uppercase tracking-widest px-5 py-2.5 rounded-full items-center gap-2 hover:bg-opacity-90 transition-all shadow-sm shrink-0"
             >
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" /> Nueva Cita
             </button>
@@ -330,15 +330,16 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
       </div>
 
       {/* Contenedor de la Grilla de Vistas Animada */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${view}-${anchorDate.toISOString()}`}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.15, ease: 'easeOut' }}
-          className="flex-1 min-h-0 bg-fondo-zen rounded-2xl border border-secundario-zen/30 shadow-sm overflow-hidden"
-        >
+      <div className="relative flex-1 min-h-0">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`${view}-${anchorDate.toISOString()}`}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="h-full w-full bg-fondo-zen rounded-2xl border border-secundario-zen/30 shadow-sm overflow-hidden"
+          >
           {view === 'day' && (
             <DayView
               date={anchorDate}
@@ -394,6 +395,18 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
         </motion.div>
       </AnimatePresence>
 
+      {/* Botón Flotante (FAB) para móviles: Siempre visible encima de la grilla */}
+      {!readOnly && (
+        <button
+          onClick={() => handleOpenNewModal()}
+          className="md:hidden absolute bottom-4 right-4 z-[40] bg-primario-zen text-fondo-zen p-4 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all border-4 border-fondo-zen/50"
+          title="Nueva Cita"
+        >
+          <Plus className="w-7 h-7 stroke-[2.5]" />
+        </button>
+      )}
+    </div>
+
       {/* Indicador de carga discreto */}
       {isLoading && (
         <div className="fixed bottom-4 right-4 bg-fondo-zen border border-secundario-zen/60 rounded-full px-3 py-1.5 shadow-sm flex items-center gap-2 z-30">
@@ -431,6 +444,8 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
           }}
         />
       )}
+
+
     </div>
   );
 }

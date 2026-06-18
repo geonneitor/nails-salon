@@ -42,6 +42,7 @@ export function useEmployees() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: payload.email,
+        password: (payload as any).password,
         name: payload.name,
         role: payload.role,
         projectId: activeProject.id,

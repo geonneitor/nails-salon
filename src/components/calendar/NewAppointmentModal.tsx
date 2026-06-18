@@ -5,14 +5,15 @@
 // Formulario premium para crear una nueva cita (Flujo Directo).
 // ============================================================
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, UserPlus, Search, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 import { format, addMinutes, setHours, setMinutes } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
-import { NailMenuCalculator } from '@/components/booking/NailMenuCalculator';
+import { useDynamicServices } from '@/hooks/useDynamicServices';
+import { DynamicServiceSelector } from '@/components/booking/DynamicServiceSelector';
 import { CustomerFormModal } from '@/components/customers/CustomerFormModal';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabaseClient';
@@ -71,9 +72,13 @@ export function NewAppointmentModal({
   const [isAddingCustomer, setIsAddingCustomer] = useState(false);
   
   const [employeeId, setEmployeeId] = useState('');
-  const [ticketDetails, setTicketDetails] = useState<TicketDetails | null>(null);
-  const [totalPrice, setTotalPrice] = useState(0);
-  const [totalDuration, setTotalDuration] = useState(0);
+  
+  // Dynamic Services State
+  const { categories, variants, modifiers, isLoading: isServicesLoading } = useDynamicServices();
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+  const [selectedModifiers, setSelectedModifiers] = useState<Record<string, number>>({});
+
   const [bookingColor, setBookingColor] = useState<string>(BOOKING_COLORS[0]);
 
   const [submitting, setSubmitting] = useState(false);
@@ -86,13 +91,65 @@ export function NewAppointmentModal({
       setCustomerId('');
       setCustomerSearch('');
       setEmployeeId(defaultEmployeeId || '');
-      setTicketDetails(null);
-      setTotalPrice(0);
-      setTotalDuration(0);
+      setSelectedCategoryIds([]);
+      setSelectedVariants({});
+      setSelectedModifiers({});
       setBookingColor(BOOKING_COLORS[0]);
       setError(null);
     }
   }, [isOpen, defaultEmployeeId]);
+
+  // Set default variants when category is selected
+  useEffect(() => {
+    setSelectedVariants(prev => {
+      const next = { ...prev };
+      let changed = false;
+      selectedCategoryIds.forEach(catId => {
+        if (!next[catId]) {
+          const defaultVar = variants.find(v => v.category_id === catId && v.is_active);
+          if (defaultVar) {
+            next[catId] = defaultVar.id;
+            changed = true;
+          }
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [selectedCategoryIds, variants]);
+
+  // Compute current total
+  const currentTotal = useMemo(() => {
+    let price = 0;
+    let duration = 0;
+    let names: string[] = [];
+
+    selectedCategoryIds.forEach(catId => {
+      const cat = categories.find(c => c.id === catId);
+      if (cat) {
+        names.push(cat.name);
+        const varId = selectedVariants[catId];
+        if (varId) {
+          const v = variants.find(v => v.id === varId);
+          if (v) {
+            price += v.base_price;
+            duration += v.base_duration_minutes;
+            if (v.name !== "Base") names.push(`  + ${v.name}`);
+          }
+        }
+      }
+    });
+
+    Object.entries(selectedModifiers).forEach(([modId, qty]) => {
+      const m = modifiers.find(x => x.id === modId);
+      if (m && qty > 0) {
+        price += m.price_delta * qty;
+        duration += m.duration_delta * qty;
+        names.push(`${m.name}${qty > 1 ? ` (x${qty})` : ''}`);
+      }
+    });
+
+    return { price, duration, names };
+  }, [selectedCategoryIds, selectedVariants, selectedModifiers, categories, variants, modifiers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,16 +160,16 @@ export function NewAppointmentModal({
       return;
     }
 
-    if (!ticketDetails || ticketDetails.activeServices.length === 0) {
-      setError('Por favor selecciona al menos una categoría de servicio y cotiza.');
+    if (selectedCategoryIds.length === 0) {
+      setError('Por favor selecciona al menos una categoría de servicio.');
       return;
     }
 
     const start = defaultDate;
-    const end = addMinutes(start, totalDuration > 0 ? totalDuration : 60);
+    const end = addMinutes(start, currentTotal.duration > 0 ? currentTotal.duration : 60);
 
     const finalTicketDetails: TicketDetails = {
-      ...ticketDetails,
+      activeServices: currentTotal.names,
       booking_color: bookingColor,
     };
 
@@ -126,8 +183,8 @@ export function NewAppointmentModal({
       end_time: end.toISOString(),
       status: 'pending_advance',
       ticket_details: finalTicketDetails,
-      total_price: totalPrice,
-      total_duration: totalDuration,
+      total_price: currentTotal.price,
+      total_duration: currentTotal.duration,
     });
     setSubmitting(false);
 
@@ -201,13 +258,16 @@ export function NewAppointmentModal({
 
                     {/* Cotizador Interactivo */}
                     <div data-tour="service-menu" className="flex-1 border border-secundario-zen/30 rounded-2xl p-4 bg-white/30 overflow-y-auto">
-                      <NailMenuCalculator
-                        value={ticketDetails}
-                        onChange={({ ticketDetails: details, totalPrice: price, totalDuration: duration }) => {
-                          setTicketDetails(details);
-                          setTotalPrice(price);
-                          setTotalDuration(duration);
-                        }}
+                      <DynamicServiceSelector
+                        categories={categories}
+                        variants={variants}
+                        modifiers={modifiers}
+                        selectedCategoryIds={selectedCategoryIds}
+                        onChangeCategoryIds={setSelectedCategoryIds}
+                        selectedVariants={selectedVariants}
+                        onChangeVariants={setSelectedVariants}
+                        selectedModifiers={selectedModifiers}
+                        onChangeModifiers={setSelectedModifiers}
                       />
                     </div>
 
@@ -215,11 +275,11 @@ export function NewAppointmentModal({
                     <div className="bg-secundario-zen/30 rounded-2xl p-4 text-sm text-primario-zen/80 border border-secundario-zen/50 font-sans shrink-0">
                       <div className="flex justify-between items-center">
                         <p><span className="font-semibold">Tiempo total estimado</span></p>
-                        <p>{totalDuration} min</p>
+                        <p>{currentTotal.duration} min</p>
                       </div>
                       <div className="flex justify-between items-center mt-1">
                         <p className="font-semibold">Costo base aproximado</p>
-                        <p className="font-semibold">${totalPrice} MXN</p>
+                        <p className="font-semibold">${currentTotal.price} MXN</p>
                       </div>
                     </div>
 
@@ -228,7 +288,7 @@ export function NewAppointmentModal({
                         type="button"
                         data-tour="next-step-btn"
                         onClick={() => setStep(2)}
-                        disabled={!ticketDetails || ticketDetails.activeServices.length === 0}
+                        disabled={selectedCategoryIds.length === 0}
                         className="bg-primario-zen text-fondo-zen px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-opacity-90 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         Siguiente paso <ChevronRight className="w-4 h-4" />

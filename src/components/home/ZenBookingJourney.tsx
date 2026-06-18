@@ -11,56 +11,14 @@ import { useApp } from '@/context/AppContext';
 import { RebookActions } from '@/components/booking/RebookActions';
 import { supabase } from '@/lib/supabaseClient';
 import {
-  Sparkles, Shield, Heart, Scissors, Clock, Check,
-  Plus, Minus, CalendarDays, BookOpen, User, Phone, CheckCircle, ArrowRight,
-  Landmark, Upload, FileText, FileImage
+  Sparkles, CalendarDays, BookOpen, User, Phone, CheckCircle, ArrowRight,
+  Landmark, Upload, FileText, FileImage, Check
 } from 'lucide-react';
+import { DynamicServiceSelector } from '@/components/booking/DynamicServiceSelector';
 
 // ============================================================
-// METADATOS DE DISEÑO
+// COMPONENTE PRINCIPAL
 // ============================================================
-const getCategoryMeta = (name: string) => {
-  const normalized = name.toLowerCase().trim();
-  
-  if (normalized.includes('full set') || normalized.includes('acril')) {
-    return {
-      subtitle: 'Alargamiento y escultura con acrílico de autor.',
-      icon: Sparkles,
-      bgActive: 'bg-amber-50/50 dark:bg-amber-900/20',
-      borderActive: 'border-amber-400 dark:border-amber-500',
-    };
-  }
-  if (normalized.includes('gel') || normalized.includes('protec')) {
-    return {
-      subtitle: 'Fortalecimiento y brillo de alta duración.',
-      icon: Shield,
-      bgActive: 'bg-purple-50/50 dark:bg-purple-900/20',
-      borderActive: 'border-purple-400 dark:border-purple-500',
-    };
-  }
-  if (normalized.includes('pedi') || normalized.includes('pie')) {
-    return {
-      subtitle: 'Exfoliación profunda y masaje hidro-relajante.',
-      icon: Scissors,
-      bgActive: 'bg-blue-50/50 dark:bg-blue-900/20',
-      borderActive: 'border-blue-400 dark:border-blue-500',
-    };
-  }
-  if (normalized.includes('mani') || normalized.includes('mano')) {
-    return {
-      subtitle: 'Ritual clásico de embellecimiento y nutrición.',
-      icon: Heart,
-      bgActive: 'bg-emerald-50/50 dark:bg-emerald-900/20',
-      borderActive: 'border-emerald-400 dark:border-emerald-500',
-    };
-  }
-  return {
-    subtitle: 'Personaliza tu ritual con nuestra selección.',
-    icon: Sparkles,
-    bgActive: 'bg-primary/10',
-    borderActive: 'border-primary',
-  };
-};
 
 export default function ZenBookingJourney() {
   const toast = useToast();
@@ -72,8 +30,8 @@ export default function ZenBookingJourney() {
   const [loadingSlots, setLoadingSlots] = useState(true);
 
   // Unified State
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   const [selectedModifiers, setSelectedModifiers] = useState<Record<string, number>>({});
   
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -138,16 +96,24 @@ export default function ZenBookingJourney() {
   }, [selectedDate]);
 
   const activeCategories = categories.filter(c => c.is_active && c.selection_type !== 'add_on');
-  const catVariants = useMemo(() => variants.filter(v => v.category_id === selectedCategoryId && v.is_active), [variants, selectedCategoryId]);
-  const catModifiers = useMemo(() => modifiers.filter(m => m.category_id === selectedCategoryId && m.is_active), [modifiers, selectedCategoryId]);
+  const catModifiers = useMemo(() => modifiers.filter(m => selectedCategoryIds.includes(m.category_id!) && m.is_active), [modifiers, selectedCategoryIds]);
 
   useEffect(() => {
-    if (catVariants.length > 0) {
-      setSelectedVariantId(catVariants[0].id);
-    } else {
-      setSelectedVariantId(null);
-    }
-  }, [selectedCategoryId, catVariants]);
+    setSelectedVariants(prev => {
+      const next = { ...prev };
+      let changed = false;
+      selectedCategoryIds.forEach(catId => {
+        if (!next[catId]) {
+          const defaultVar = variants.find(v => v.category_id === catId && v.is_active);
+          if (defaultVar) {
+            next[catId] = defaultVar.id;
+            changed = true;
+          }
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [selectedCategoryIds, variants]);
 
   // Compute Totals
   const currentTotal = useMemo(() => {
@@ -155,17 +121,21 @@ export default function ZenBookingJourney() {
     let duration = 0;
     let names: string[] = [];
 
-    const cat = categories.find(c => c.id === selectedCategoryId);
-    if (cat) names.push(cat.name);
-
-    if (selectedVariantId) {
-      const v = variants.find(v => v.id === selectedVariantId);
-      if (v) {
-        price += v.base_price;
-        duration += v.base_duration_minutes;
-        if (v.name !== "Base") names.push(v.name);
+    selectedCategoryIds.forEach(catId => {
+      const cat = categories.find(c => c.id === catId);
+      if (cat) {
+        names.push(cat.name);
+        const varId = selectedVariants[catId];
+        if (varId) {
+          const v = variants.find(v => v.id === varId);
+          if (v) {
+            price += v.base_price;
+            duration += v.base_duration_minutes;
+            if (v.name !== "Base") names.push(`  + ${v.name}`);
+          }
+        }
       }
-    }
+    });
 
     Object.entries(selectedModifiers).forEach(([modId, qty]) => {
       const m = modifiers.find(x => x.id === modId);
@@ -177,23 +147,12 @@ export default function ZenBookingJourney() {
     });
 
     return { price, duration, names };
-  }, [selectedVariantId, selectedModifiers, selectedCategoryId, categories, variants, modifiers]);
+  }, [selectedCategoryIds, selectedVariants, selectedModifiers, categories, variants, modifiers]);
 
-  const handleModifierQuantity = (id: string, delta: number) => {
-    setSelectedModifiers(prev => {
-      const current = prev[id] || 0;
-      const next = Math.max(0, current + delta);
-      if (next === 0) {
-        const copy = { ...prev };
-        delete copy[id];
-        return copy;
-      }
-      return { ...prev, [id]: next };
-    });
-  };
+
 
   const handleCreateAppointment = async () => {
-    if (!selectedCategoryId || !selectedTimeSlot || !name.trim() || !contact.trim()) {
+    if (selectedCategoryIds.length === 0 || !selectedTimeSlot || !name.trim() || !contact.trim()) {
       toast.error('Faltan datos', 'Por favor completa todos los campos requeridos.');
       return;
     }
@@ -318,126 +277,17 @@ export default function ZenBookingJourney() {
           >
             {/* IZQUIERDA: Lista de Servicios (scroll natural) */}
             <div className="flex flex-col gap-6 w-full">
-              <section>
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="w-5 h-5 text-primary" />
-                  <h2 className="font-serif text-2xl text-on-surface">Selecciona tu Servicio</h2>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" data-tour="service-menu">
-                  {activeCategories.map(c => {
-                    const meta = getCategoryMeta(c.name);
-                    const isSelected = selectedCategoryId === c.id;
-                    return (
-                      <motion.button
-                        key={c.id}
-                        whileTap={{ scale: 0.98 }}
-                        whileHover={{ y: -2 }}
-                        animate={{ y: isSelected ? -2 : 0 }}
-                        onClick={() => {
-                          setSelectedCategoryId(c.id);
-                          setSelectedModifiers({});
-                        }}
-                        className={`relative w-full text-left p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-md
-                          ${isSelected ? `${meta.bgActive} ${meta.borderActive}` : 'bg-surface-container-lowest border-outline-variant/30 hover:border-primary/50'}
-                        `}
-                      >
-                        {isSelected && (
-                          <div className="absolute top-4 right-4 w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
-                            <Check className="w-3.5 h-3.5" strokeWidth={3} />
-                          </div>
-                        )}
-                        <h3 className={`font-serif text-xl mb-2 pr-8 flex items-center gap-2 ${isSelected ? 'text-primary' : 'text-on-surface'}`}>
-                          <motion.div animate={{ rotate: isSelected ? 4 : 0 }}>
-                            {React.createElement(meta.icon, { className: 'w-4 h-4' })}
-                          </motion.div>
-                          {c.name}
-                        </h3>
-                        <p className="font-sans text-xs text-on-surface-variant font-light leading-relaxed mb-2">
-                          {meta.subtitle}
-                        </p>
-                        
-                        {/* Variantes */}
-                        <AnimatePresence>
-                          {isSelected && catVariants.length > 0 && (
-                            <motion.div 
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden mt-2 pt-4 border-t border-primary/20 space-y-2"
-                            >
-                              <p className="text-[10px] uppercase tracking-widest font-bold text-primary/70 mb-2">Variantes</p>
-                              {catVariants.map(v => (
-                                <div 
-                                  key={v.id}
-                                  onClick={(e) => { e.stopPropagation(); setSelectedVariantId(v.id); }}
-                                  className={`flex items-center justify-between p-3 rounded-xl border text-xs cursor-pointer transition-colors ${
-                                    selectedVariantId === v.id ? 'bg-background border-primary/50 text-primary font-semibold' : 'border-transparent text-on-surface hover:bg-background/50'
-                                  }`}
-                                >
-                                  <span className="truncate pr-2">{v.name}</span>
-                                  <span className="whitespace-nowrap font-medium">${v.base_price}</span>
-                                </div>
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </section>
-
-              {/* Complementos */}
-              <AnimatePresence>
-                {selectedCategoryId && catModifiers.length > 0 && (
-                  <motion.section
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                  >
-                    <div className="flex items-center gap-2 mb-4">
-                      <Plus className="w-5 h-5 text-primary" />
-                      <h2 className="font-serif text-2xl text-on-surface">Complementos Adicionales</h2>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {catModifiers.map(m => {
-                        const qty = selectedModifiers[m.id] || 0;
-                        const isSelected = qty > 0;
-                        const isPerUnit = m.modifier_type === 'per_unit';
-
-                        return (
-                          <div 
-                            key={m.id}
-                            onClick={() => !isPerUnit && handleModifierQuantity(m.id, isSelected ? -1 : 1)}
-                            className={`relative flex flex-col items-center justify-center text-center p-4 rounded-xl border transition-all cursor-pointer select-none
-                              ${isSelected ? 'bg-primary/5 border-primary shadow-sm' : 'bg-surface-container-lowest border-outline-variant/30 hover:border-primary/50'}
-                            `}
-                          >
-                            {isSelected && !isPerUnit && (
-                              <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-primary text-on-primary flex items-center justify-center">
-                                <Check className="w-2.5 h-2.5" strokeWidth={3} />
-                              </div>
-                            )}
-                            <span className={`text-xs font-semibold mb-1 ${isSelected ? 'text-primary' : 'text-on-surface'}`}>{m.name}</span>
-                            <span className="text-[10px] text-on-surface-variant font-medium">+${m.price_delta}</span>
-
-                            {isPerUnit && (
-                              <div className="flex items-center gap-2 mt-3 bg-background border border-outline-variant/30 rounded-full px-2 py-1" onClick={(e) => e.stopPropagation()}>
-                                <button onClick={() => handleModifierQuantity(m.id, -1)} className="w-6 h-6 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface">
-                                  <Minus className="w-3 h-3" />
-                                </button>
-                                <span className="text-xs font-bold w-4 text-center text-primary">{qty}</span>
-                                <button onClick={() => handleModifierQuantity(m.id, 1)} className="w-6 h-6 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-variant hover:text-on-surface">
-                                  <Plus className="w-3 h-3" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </motion.section>
-                )}
-              </AnimatePresence>
+              <DynamicServiceSelector
+                categories={categories}
+                variants={variants}
+                modifiers={modifiers}
+                selectedCategoryIds={selectedCategoryIds}
+                onChangeCategoryIds={setSelectedCategoryIds}
+                selectedVariants={selectedVariants}
+                onChangeVariants={setSelectedVariants}
+                selectedModifiers={selectedModifiers}
+                onChangeModifiers={setSelectedModifiers}
+              />
             </div>
 
             {/* DERECHA: Resumen Parcial (Sticky en desktop) */}
@@ -476,10 +326,10 @@ export default function ZenBookingJourney() {
                       setStep(2);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
-                    disabled={!selectedCategoryId}
+                    disabled={selectedCategoryIds.length === 0}
                     data-tour="next-step-btn"
                     className={`w-full flex items-center justify-center gap-3 py-4 rounded-full font-sans text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-md ${
-                      selectedCategoryId
+                      selectedCategoryIds.length > 0
                         ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5'
                         : 'bg-surface-variant text-on-surface-variant/50 cursor-not-allowed'
                     }`}

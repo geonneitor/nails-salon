@@ -6,9 +6,9 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navigation() {
-  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -18,6 +18,8 @@ export default function Navigation() {
 
   // Si ya estamos en la página de reserva, ocultamos el botón flotante para no estorbar
   if (pathname === '/reserva') return null;
+  // En la página de inicio delegamos el botón flotante a la propia página
+  if (pathname === '/') return null;
 
   return (
     <AnimatePresence>

@@ -59,18 +59,18 @@
   --surface-dim: #11140d;
   --surface-bright: #202619;
   --surface-container-lowest: #0c0f09;
-  --surface-container-low: #14190e;
-  --surface-container: #181d12;
-  --surface-container-high: #202619;
-  --surface-container-highest: #2c3225;
+  --surface-container-low: #181d12;
+  --surface-container: #1e2417; /* Brighter for contrast */
+  --surface-container-high: #272e1f;
+  --surface-container-highest: #333a28;
   --on-surface: #ffffff;
-  --on-surface-variant: #e2e5db;
+  --on-surface-variant: #f2f5ec; /* Lighter for readability when opacity is low */
   --inverse-surface: #f6fce8;
   --inverse-on-surface: #2c3225;
-  --outline: #a3a69f;
-  --outline-variant: #6b7066;
+  --outline: #b4b8b1; /* Lighter outline */
+  --outline-variant: #80867a; /* Lighter outline-variant */
   --surface-tint: #D4AF37;
-  --primary: #e6fcce;
+  --primary: #d4f2b1; /* Softer, brighter primary */
   --on-primary: #102002;
   --primary-container: #4b5e38;
   --on-primary-container: #d9f2bd;
@@ -83,17 +83,17 @@
   --on-tertiary: #303126;
   --tertiary-container: #47473C;
   --on-tertiary-container: #E4E3D5;
-  --background: #181d12;
+  --background: #12150e; /* Deeper background to make containers pop */
   --on-background: #ffffff;
-  --surface-variant: #3a4231;
+  --surface-variant: #4a543f; /* Much brighter for disabled buttons etc */
 
   /* Premium Gold & Botanical Palette */
-  --accent-gold-primary: #D4AF37;
+  --accent-gold-primary: #E5C158; /* Brighter gold for dark mode */
   --accent-gold-light: #FCE17A;
-  --accent-gold-dark: #B8960C;
+  --accent-gold-dark: #C9A418;
   --deep-botanical-1: #0A0A0A;
-  --deep-botanical-2: #181d12;
-  --deep-botanical-3: #202619;
+  --deep-botanical-2: #12150e;
+  --deep-botanical-3: #1e2417;
   --pearl-white: #ffffff;
 }
 

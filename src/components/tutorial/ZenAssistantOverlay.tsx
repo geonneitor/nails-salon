@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useZenAssistant } from '@/context/ZenAssistantContext';
-import { X, Flower2, ChevronRight } from 'lucide-react';
+import { X, ChevronRight } from 'lucide-react';
+import { LotusCharacter } from '@/components/tutorial/LotusCharacter';
 
 export function ZenAssistantOverlay() {
   const { isActive, currentStep, currentStepIndex, steps, closeTour, nextStep } = useZenAssistant();
@@ -94,9 +95,11 @@ export function ZenAssistantOverlay() {
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="flex gap-3 mb-2 items-center text-primary">
-              <Flower2 className="w-5 h-5 animate-pulse" />
-              <h4 className="font-serif font-bold text-lg leading-none">{currentStep.title}</h4>
+            <div className="flex gap-3 mb-3 items-center text-primary relative">
+              <div className="shrink-0 -ml-2 -mt-2">
+                <LotusCharacter />
+              </div>
+              <h4 className="font-serif font-bold text-lg leading-none mt-1">{currentStep.title}</h4>
             </div>
             <p className="text-sm text-on-surface-variant font-light mb-4">
               {currentStep.content}

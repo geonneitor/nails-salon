@@ -103,6 +103,15 @@ const config: Config = {
         xl: '1.5rem',
         full: '9999px',
       },
+      keyframes: {
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' }, // Assuming we duplicate the content
+        }
+      },
+      animation: {
+        marquee: 'marquee 25s linear infinite',
+      }
     },
   },
   plugins: [],

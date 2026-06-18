@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Instagram, MessageCircle, Music2, Flower2, Calendar } from 'lucide-react';
+import { ChevronDown, Instagram, MessageCircle, Music2, Calendar, Sparkles, Droplets, Leaf } from 'lucide-react';
 import PublicNavbar from '@/components/home/PublicNavbar';
 import { useZenAssistant } from '@/context/ZenAssistantContext';
 import { LotusCharacter } from '@/components/tutorial/LotusCharacter';
+import ZenBookingJourney from '@/components/home/ZenBookingJourney';
 
 function FAQAccordion({ faq }: { faq: {q: string, a: string} }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -46,154 +47,141 @@ export default function LandingPage() {
   const faqs = [
     {
       q: '¿Cómo agendar mi cita paso a paso?',
-      a: '¡Agendar es muy intuitivo y rápido!\n\n1. Da clic en "AGENDAR YA" en la parte inferior.\n2. Elige el servicio de tu preferencia (ej. Pedicura Spa).\n3. Selecciona el horario ideal.\n4. ¡Listo! Recibirás la confirmación de tu espacio.\n\nTambién puedes activar nuestro "Asistente Zen" tocando la flor de loto para un recorrido interactivo.'
+      a: '¡Agendar es muy intuitivo y rápido!\n\n1. Da clic en "AGENDAR YA" para ir a nuestra agenda interactiva abajo.\n2. Elige el servicio de uñas o pedicura de tu preferencia.\n3. Selecciona el horario ideal.\n4. ¡Listo! Recibirás la confirmación de tu espacio.\n\nTambién puedes activar nuestro "Asistente Zen" tocando la flor de loto para un recorrido interactivo.'
     },
     {
       q: '¿Cómo funciona la política de anticipo?',
       a: 'Para garantizar tu espacio exclusivo y brindarte un servicio impecable, solicitamos un anticipo mínimo al momento de agendar.\n\nEste proceso es totalmente seguro y nos ayuda a mantener la agenda fluida para todas nuestras clientas.'
     },
     {
-      q: '¿Qué pasa si llego tarde o necesito cancelar?',
-      a: 'Entendemos que el día a día puede ser impredecible. Cuentas con una tolerancia de gracia de 15 minutos.\n\nSi necesitas cancelar o reagendar tu ritual, te pedimos amablemente que nos notifiques con anticipación para que tu anticipo siga siendo válido y podamos ceder el espacio a otra clienta.'
+      q: '¿Ofrecen masajes de cuerpo completo?',
+      a: 'No. Zen es un estudio de belleza especializado exclusivamente en el diseño y arte de uñas (Acrílico, Gel) y en nuestro exclusivo servicio de Pedicura Spa relajante para pies. Todo nuestro enfoque está en la perfección de tus manos y pies.'
     }
   ];
 
+  const marqueeImages = [
+    '/images/spa_hero.png',
+    'spa_pedicure_station_1781818028853.png',
+    '/images/spa_detail.png',
+    'zen_salon_interior_1781818036692.png',
+    'nail_art_minimalist_1781818020367.png',
+  ];
+
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background text-on-background font-sans transition-colors duration-500 pb-40 md:pb-32 relative">
+    <div className="min-h-screen overflow-x-hidden bg-background text-on-background font-sans transition-colors duration-500 pb-40 md:pb-12 relative">
       <PublicNavbar />
 
-      {/* ── Bento Gallery Section (Hero Replacement) ── */}
-      <section className="px-4 md:px-12 pt-28 md:pt-40 pb-10 md:pb-16 max-w-[1400px] mx-auto relative z-10">
+      {/* ── Hero Section ── */}
+      <section className="px-4 md:px-12 pt-28 md:pt-40 pb-10 md:pb-16 max-w-[1400px] mx-auto relative z-10 text-center">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-12"
+          className="flex flex-col items-center justify-center max-w-4xl mx-auto"
         >
-          <div>
-            <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-on-surface-variant mb-3 block">
-              Bienvenida a la Calma
-            </span>
-            <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl text-on-surface leading-[1.1]">
-              Relajación profunda,<br />
-              belleza natural.
-            </h1>
-          </div>
-          <Link 
-            href="/reserva" 
-            className="text-[10px] uppercase tracking-[0.15em] font-bold text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 mt-5 md:mt-0 pb-2 border-b border-transparent hover:border-primary"
+          <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold text-primary mb-4 block">
+            Santuario de Uñas & Pedicura Spa
+          </span>
+          <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl text-on-surface leading-[1.1] mb-6">
+            El arte en tus manos.<br />
+            La calma en tus pies.
+          </h1>
+          <p className="text-lg text-on-surface-variant font-light mb-10 max-w-2xl mx-auto">
+            Descubre un concepto de salón diferente. Nos especializamos en diseño de uñas impecable y pedicura botánica, fusionando la higiene clínica con una atmósfera de paz absoluta. Sin prisas.
+          </p>
+          <button 
+            onClick={() => {
+              document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            data-tour="agendar-btn"
+            className="bg-primary text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-opacity-90 hover:-translate-y-1 transition-all"
           >
-            VER EXPERIENCIAS 
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
-          </Link>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6"
-        >
-          {/* Left Column: Tall image */}
-          <div className="relative h-[280px] md:h-[600px] rounded-[2rem] overflow-hidden group shadow-sm">
-            <img 
-              src="/images/spa_hero.png" 
-              alt="Ritual Pedicura Spa"
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <h3 className="absolute bottom-6 left-6 md:bottom-8 md:left-8 text-white font-serif text-xl md:text-3xl drop-shadow-md">
-              Ritual Pedicura Spa
-            </h3>
-          </div>
-
-          {/* Right Column: Two small images vertically */}
-          <div className="flex flex-col gap-4 md:gap-6 md:h-[600px]">
-            <div className="relative h-[200px] md:flex-1 rounded-[2rem] overflow-hidden group shadow-sm">
-              <img 
-                src="/images/spa_detail.png" 
-                alt="Detalle Botánico"
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105" 
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <h3 className="absolute bottom-4 left-5 md:bottom-6 md:left-6 text-white font-serif text-lg md:text-2xl drop-shadow-md">
-                Esencia Botánica
-              </h3>
-            </div>
-            
-            <div className="relative h-[200px] md:flex-1 rounded-[2rem] overflow-hidden group shadow-sm bg-surface-variant">
-              <img 
-                src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?q=80&w=800&auto=format&fit=crop" 
-                alt="Masaje Relajante"
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-90" 
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-              <h3 className="absolute bottom-4 left-5 md:bottom-6 md:left-6 text-white font-serif text-lg md:text-2xl drop-shadow-md">
-                Masaje Relajante
-              </h3>
-            </div>
-          </div>
+            <Calendar className="w-5 h-5" />
+            Reservar mi Espacio
+          </button>
         </motion.div>
       </section>
 
-      {/* ── Philosophy (About Us) ── */}
-      <section className="px-6 md:px-12 py-16 max-w-4xl mx-auto text-left relative z-10">
+      {/* ── Infinite Carousel (Marquee) ── */}
+      <section className="py-10 overflow-hidden relative">
+        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background to-transparent z-10" />
+        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background to-transparent z-10" />
+        
+        <div className="flex w-[200%] animate-marquee gap-6 px-4">
+          {[...marqueeImages, ...marqueeImages].map((src, i) => (
+            <div key={i} className="relative w-[60vw] md:w-[400px] h-[300px] md:h-[400px] flex-none rounded-[2rem] overflow-hidden shadow-md">
+              <img 
+                src={`/${src.replace(/^\//, '')}`} 
+                alt={`Zen Experience ${i}`}
+                className="w-full h-full object-cover" 
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Why Zen? ── */}
+      <section className="px-6 md:px-12 py-20 max-w-5xl mx-auto relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
         >
-          <h2 className="font-serif text-3xl md:text-4xl text-primary mb-6">Nuestra Esencia</h2>
-          <p className="text-lg md:text-xl text-on-surface-variant font-light leading-relaxed mb-12">
-            Cada masaje y tratamiento está diseñado a medida para nutrir tu cuerpo y mente. Inspirados en la estética zen y los elementos de la naturaleza, ofrecemos un refugio de paz donde puedes desconectar del mundo y reconectar contigo misma.
+          <h2 className="font-serif text-3xl md:text-5xl text-on-surface mb-6">¿Por qué Zen es diferente?</h2>
+          <p className="text-lg text-on-surface-variant max-w-2xl mx-auto">
+            No somos un spa de masajes corporales ni un salón de belleza ruidoso. Somos un santuario de especialidad enfocado en los detalles.
           </p>
         </motion.div>
-      </section>
 
-      {/* ── Signature Services ── */}
-      <section className="px-6 md:px-12 py-12 relative overflow-hidden">
-        <div className="absolute right-[-10%] top-0 w-[50vw] h-[50vw] bg-primary opacity-[0.03] dark:opacity-[0.1] rounded-full blur-[100px] pointer-events-none -z-10" />
-        
-        <motion.h2 
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="font-serif text-3xl md:text-4xl text-on-surface mb-12 max-w-4xl mx-auto"
-        >
-          Tratamientos Especiales
-        </motion.h2>
-
-        <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-8 pt-4 snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-8 md:overflow-visible md:px-0 md:pb-0 md:pt-0">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
-              title: 'Pedicura Spa Orgánica',
-              desc: 'Relajación profunda a través de un ritual botánico con esencias naturales, diseñado para revitalizar pies cansados y mejorar la circulación.',
+              icon: <Sparkles className="w-8 h-8 text-primary" />,
+              title: "Higiene Intransigente",
+              desc: "Esterilización de grado médico. Cada herramienta está sellada y los limadores son 100% desechables por clienta."
             },
             {
-              title: 'Manicura Zen',
-              desc: 'Una experiencia delicada que restaura la vitalidad natural de tus manos con masajes terapéuticos y un acabado impecable.',
+              icon: <Leaf className="w-8 h-8 text-primary" />,
+              title: "Productos Premium",
+              desc: "Utilizamos geles de alta pigmentación y productos botánicos orgánicos libres de toxinas dañinas."
             },
             {
-              title: 'Terapia Armónica',
-              desc: 'Tratamientos personalizados que alivian la tensión acumulada, dejando una sensación de ligereza y bienestar total.',
+              icon: <Droplets className="w-8 h-8 text-primary" />,
+              title: "Tiempos sin Prisas",
+              desc: "Tu cita está bloqueada exclusivamente para ti. No trabajamos contra reloj, trabajamos por la perfección."
             }
-          ].map((service, i) => (
+          ].map((feature, i) => (
             <motion.div
-              key={service.title}
+              key={i}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.15, duration: 0.6, type: "spring" }}
-              className="card-depth flex-none w-[85vw] md:w-[360px] snap-center p-8 rounded-3xl flex flex-col justify-between min-h-[260px] transition-transform duration-300 hover:-translate-y-2 cursor-pointer"
+              transition={{ delay: i * 0.1 }}
+              className="card-depth p-8 rounded-3xl text-center flex flex-col items-center"
             >
-              <div>
-                <h3 className="font-serif text-2xl text-on-surface mb-4 leading-snug">{service.title}</h3>
-                <div className="w-12 h-1 bg-primary/30 mb-6 rounded-full" />
-                <p className="font-sans text-on-surface-variant text-sm md:text-base leading-relaxed">{service.desc}</p>
+              <div className="w-16 h-16 rounded-full bg-surface-variant flex items-center justify-center mb-6">
+                {feature.icon}
               </div>
+              <h3 className="font-serif text-2xl text-on-surface mb-4">{feature.title}</h3>
+              <p className="font-sans text-on-surface-variant">{feature.desc}</p>
             </motion.div>
           ))}
+        </div>
+      </section>
+
+      {/* ── Embedded Booking Journey ── */}
+      <section id="booking-section" className="px-4 md:px-12 py-16 relative bg-surface-container-low rounded-t-[3rem] mt-10">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-3xl md:text-5xl text-on-surface mb-4">Reserva tu Ritual</h2>
+            <p className="text-on-surface-variant">Selecciona tus servicios y asegura tu cita en minutos.</p>
+          </div>
+          
+          <div className="bg-surface-container-lowest rounded-[2rem] shadow-xl overflow-hidden border border-outline-variant/30">
+            {/* Renderizamos el journey directamente */}
+            <ZenBookingJourney />
+          </div>
         </div>
       </section>
 
@@ -204,10 +192,9 @@ export default function LandingPage() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <div className="mb-10">
+          <div className="mb-10 text-center md:text-left">
             <span className="text-[10px] uppercase tracking-widest font-bold text-primary mb-2 block">Guía Rápida</span>
             <h2 className="font-serif text-3xl md:text-4xl text-on-surface">Tu Visita Paso a Paso</h2>
-            <p className="text-on-surface-variant mt-4 font-light">Resolvimos las dudas más comunes para que agendar tu experiencia sea tan relajante como el servicio mismo.</p>
           </div>
           
           <div className="flex flex-col">
@@ -219,7 +206,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="pt-16 pb-24 px-6 text-center mt-10">
+      <footer className="pt-16 pb-24 md:pb-12 px-6 text-center mt-10 bg-surface-container-lowest">
         <div className="flex justify-center gap-6 mb-8">
           <a href="https://instagram.com" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-colors">
             <Instagram className="w-5 h-5" />
@@ -258,16 +245,18 @@ export default function LandingPage() {
         </motion.button>
       )}
 
-      {/* ── Sticky Booking Button ── */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-background via-background/90 to-transparent z-40 pointer-events-none flex justify-center md:justify-end">
-        <Link
-          href="/reserva"
+      {/* ── Sticky Booking Button (Mobile Only) ── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/90 to-transparent z-40 pointer-events-none flex justify-center">
+        <button
+          onClick={() => {
+            document.getElementById('booking-section')?.scrollIntoView({ behavior: 'smooth' });
+          }}
           data-tour="agendar-btn"
-          className="pointer-events-auto bg-primary text-white w-full md:w-auto px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-opacity-90 hover:-translate-y-1 transition-all"
+          className="pointer-events-auto bg-primary text-white w-full px-8 py-4 rounded-full font-bold uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:bg-opacity-90 hover:-translate-y-1 transition-all"
         >
           <Calendar className="w-4 h-4" />
           Agendar Ya
-        </Link>
+        </button>
       </div>
 
     </div>

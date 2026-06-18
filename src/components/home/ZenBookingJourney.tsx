@@ -276,7 +276,7 @@ export default function ZenBookingJourney() {
             className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 md:gap-12 items-start"
           >
             {/* IZQUIERDA: Lista de Servicios (scroll natural) */}
-            <div className="flex flex-col gap-6 w-full">
+            <div className="flex flex-col gap-6 w-full" data-tour="service-menu">
               <DynamicServiceSelector
                 categories={categories}
                 variants={variants}

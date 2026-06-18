@@ -41,7 +41,25 @@ function FAQAccordion({ faq }: { faq: {q: string, a: string} }) {
 }
 
 export default function LandingPage() {
-  const { startTour, isActive } = useZenAssistant();
+  const { startTour, isActive, hasCompletedTour } = useZenAssistant();
+  const [pulseCta, setPulseCta] = useState(false);
+
+  // Periodic pulse reminder on the sticky CTA when the tour is closed.
+  // Drives attention to the highest-conversion button on the landing.
+  // Pulses every 9s for 1.4s, only while the tour is inactive.
+  useEffect(() => {
+    if (isActive) return;
+    let offTimer: ReturnType<typeof setTimeout> | null = null;
+    const interval = setInterval(() => {
+      if (offTimer) clearTimeout(offTimer);
+      setPulseCta(true);
+      offTimer = setTimeout(() => setPulseCta(false), 1400);
+    }, 9000);
+    return () => {
+      clearInterval(interval);
+      if (offTimer) clearTimeout(offTimer);
+    };
+  }, [isActive]);
 
   const faqs = [
     {
@@ -230,7 +248,9 @@ export default function LandingPage() {
         </p>
       </footer>
 
-      {/* ── Floating Zen Assistant Button ── */}
+      {/* ── Floating Zen Assistant Button ──
+          Full pill on first visit; minimized lotus only when tour was already completed.
+          A small hover tooltip invites them to repeat the walkthrough. */}
       {!isActive && (
         <motion.button
           initial={{ scale: 0, opacity: 0 }}
@@ -238,22 +258,28 @@ export default function LandingPage() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={startTour}
-          className="fixed bottom-24 left-6 md:bottom-8 md:left-8 z-50 bg-surface-container-lowest border-2 border-primary/30 shadow-2xl p-2 rounded-full flex items-center gap-3 pr-5 text-primary hover:border-primary transition-colors group"
-          title="Iniciar Asistente Zen"
+          className={`fixed bottom-24 left-6 md:bottom-8 md:left-8 z-50 bg-surface-container-lowest border-2 border-primary/30 shadow-2xl p-2 rounded-full flex items-center text-primary hover:border-primary transition-colors group ${
+            hasCompletedTour ? '' : 'gap-3 pr-5'
+          }`}
+          title={hasCompletedTour ? '¿Repetir recorrido?' : 'Iniciar Asistente Zen'}
+          aria-label={hasCompletedTour ? '¿Repetir recorrido?' : 'Iniciar Asistente Zen'}
         >
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 bg-primary rounded-full animate-ping opacity-20" />
             <LotusCharacter />
           </div>
-          <span className="font-serif text-sm font-bold tracking-wide">
-            Asistente Zen
-          </span>
+          {!hasCompletedTour && (
+            <span className="font-serif text-sm font-bold tracking-wide">
+              Asistente Zen
+            </span>
+          )}
         </motion.button>
       )}
 
-      {/* ── Sticky Booking Button (Global Design) ── */}
+      {/* ── Sticky Booking Button (Global Design) ──
+          The pulsing outer ring only animates when pulseCta is true (every ~9s). */}
       <AnimatePresence>
-        <motion.div 
+        <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
@@ -265,9 +291,17 @@ export default function LandingPage() {
             data-tour="agendar-btn"
             className="w-full relative group overflow-hidden bg-primary hover:bg-primary/90 text-on-primary shadow-[0_8px_30px_rgba(74,93,35,0.4)] hover:shadow-[0_12px_40px_rgba(74,93,35,0.5)] rounded-full px-6 py-3.5 transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-2"
           >
+            {/* Periodic attention pulse (outer ring) — only visible when pulseCta flips on */}
+            {pulseCta && (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -inset-1 rounded-full ring-2 ring-primary/70 animate-ping"
+              />
+            )}
+
             {/* Brillo animado pasando de fondo */}
             <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-            
+
             <Calendar className="w-5 h-5 shrink-0" />
             <span className="font-semibold text-sm uppercase tracking-wider text-center whitespace-nowrap">Reserva tu Cita</span>
           </Link>

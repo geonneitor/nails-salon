@@ -9,7 +9,10 @@ export type TourStep = {
   content: string;
   position?: 'top' | 'bottom' | 'left' | 'right';
   action?: 'click_target' | 'next'; // If 'click_target', it waits for the user to click the element. If 'next', it shows a next button.
+  tip?: string; // Optional upsell/suggestion shown below the main content
 };
+
+const TOUR_COMPLETED_KEY = 'zen-tour-completed';
 
 const TOUR_STEPS: TourStep[] = [
   {
@@ -27,6 +30,7 @@ const TOUR_STEPS: TourStep[] = [
     content: 'Tómate tu tiempo. Puedes explorar y seleccionar más de un ritual. Cuando termines, presiona Siguiente aquí abajo.',
     position: 'top',
     action: 'next',
+    tip: '💡 Tip: combina Manicura Gel + Diseño artístico para un acabado único.',
   },
   {
     id: 'step-3',
@@ -58,7 +62,7 @@ const TOUR_STEPS: TourStep[] = [
     title: 'Confirmar Cita',
     content: 'Llena tus datos y presiona Continuar a Pago para guardar tu lugar.',
     position: 'top',
-    action: 'next',
+    action: 'click_target',
   },
 ];
 
@@ -70,6 +74,8 @@ interface ZenAssistantContextType {
   nextStep: () => void;
   closeTour: () => void;
   currentStep: TourStep | null;
+  hasCompletedTour: boolean;
+  resetTour: () => void;
 }
 
 const ZenAssistantContext = createContext<ZenAssistantContextType | undefined>(undefined);
@@ -77,6 +83,20 @@ const ZenAssistantContext = createContext<ZenAssistantContextType | undefined>(u
 export function ZenAssistantProvider({ children }: { children: React.ReactNode }) {
   const [isActive, setIsActive] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [hasCompletedTour, setHasCompletedTour] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  // Read persisted state from localStorage on mount (client-only)
+  useEffect(() => {
+    try {
+      const completed = localStorage.getItem(TOUR_COMPLETED_KEY) === 'true';
+      setHasCompletedTour(completed);
+    } catch {
+      // localStorage unavailable (private mode, etc.) — default to false
+    } finally {
+      setHydrated(true);
+    }
+  }, []);
 
   const startTour = () => {
     setCurrentStepIndex(0);
@@ -88,17 +108,40 @@ export function ZenAssistantProvider({ children }: { children: React.ReactNode }
       setCurrentStepIndex(prev => prev + 1);
     } else {
       setIsActive(false);
+      // Mark as completed only when the user finishes the final step
+      try {
+        localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
+      } catch {
+        // ignore
+      }
+      setHasCompletedTour(true);
     }
   };
 
   const closeTour = () => {
     setIsActive(false);
+    // Closing early also counts as "completed" so we don't pester the user
+    try {
+      localStorage.setItem(TOUR_COMPLETED_KEY, 'true');
+    } catch {
+      // ignore
+    }
+    setHasCompletedTour(true);
+  };
+
+  const resetTour = () => {
+    try {
+      localStorage.removeItem(TOUR_COMPLETED_KEY);
+    } catch {
+      // ignore
+    }
+    setHasCompletedTour(false);
   };
 
   // Wait for the modal or element to appear if it's a click_target
   useEffect(() => {
     if (!isActive) return;
-    
+
     const step = TOUR_STEPS[currentStepIndex];
     if (step.action === 'click_target') {
       const handleGlobalClick = (e: MouseEvent) => {
@@ -110,7 +153,7 @@ export function ZenAssistantProvider({ children }: { children: React.ReactNode }
           }, 400);
         }
       };
-      
+
       document.addEventListener('click', handleGlobalClick, { capture: true });
       return () => document.removeEventListener('click', handleGlobalClick, { capture: true });
     }
@@ -124,6 +167,8 @@ export function ZenAssistantProvider({ children }: { children: React.ReactNode }
     nextStep,
     closeTour,
     currentStep: isActive ? TOUR_STEPS[currentStepIndex] : null,
+    hasCompletedTour: hydrated ? hasCompletedTour : false,
+    resetTour,
   };
 
   return (

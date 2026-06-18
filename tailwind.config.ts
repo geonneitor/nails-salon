@@ -107,10 +107,15 @@ const config: Config = {
         marquee: {
           '0%': { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(-50%)' }, // Assuming we duplicate the content
-        }
+        },
+        shimmer: {
+          '0%':   { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       animation: {
         marquee: 'marquee 25s linear infinite',
+        shimmer: 'shimmer 1.5s linear infinite',
       }
     },
   },

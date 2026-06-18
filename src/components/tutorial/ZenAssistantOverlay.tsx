@@ -16,25 +16,39 @@ export function ZenAssistantOverlay() {
       return;
     }
 
+    let cancelled = false;
+    let interval: ReturnType<typeof setInterval> | null = null;
+
     const updateRect = () => {
+      if (cancelled) return;
       const el = document.querySelector(currentStep.targetSelector);
       if (el) {
         setTargetRect(el.getBoundingClientRect());
-      } else {
-        // Element not found (maybe it's inside a modal that's animating in)
-        // We'll retry a few times
-        setTimeout(() => {
-          const retryEl = document.querySelector(currentStep.targetSelector);
-          if (retryEl) setTargetRect(retryEl.getBoundingClientRect());
-        }, 300);
+        // Bring the target into view smoothly if it's outside the viewport.
+        // We use 'nearest' to avoid aggressive scrolling when the target
+        // is already visible (e.g. just slightly off-screen).
+        try {
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        } catch {
+          // scrollIntoView with options is widely supported; ignore legacy browsers.
+        }
+        if (interval) {
+          clearInterval(interval);
+          interval = null;
+        }
       }
     };
 
     updateRect();
+    // Polling: keeps trying to find the target in case it's inside a modal
+    // or component that mounts after navigation.
+    interval = setInterval(updateRect, 250);
     window.addEventListener('resize', updateRect);
     window.addEventListener('scroll', updateRect, true); // true to capture scroll in any container
 
     return () => {
+      cancelled = true;
+      if (interval) clearInterval(interval);
       window.removeEventListener('resize', updateRect);
       window.removeEventListener('scroll', updateRect, true);
     };
@@ -71,22 +85,16 @@ export function ZenAssistantOverlay() {
         )}
       </AnimatePresence>
 
-      {/* The Tooltip Box */}
+      {/* The Tooltip Box — always shown while the tour is active so the user
+          is never stranded if a target can't be resolved. */}
       <AnimatePresence>
-        {targetRect && (
+        {isActive && currentStep && (
           <motion.div
+            key={currentStep.id}
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
-            className="absolute bg-surface-container-lowest border border-primary/30 p-5 rounded-2xl shadow-2xl max-w-xs pointer-events-auto"
-            style={{
-              // Position it below or above depending on the space
-              ...(currentStep.position === 'top' 
-                  ? { bottom: window.innerHeight - targetRect.top + 20 } 
-                  : { top: targetRect.bottom + 20 }),
-              // Center horizontally relative to target, bounded by screen width
-              left: Math.max(16, Math.min(window.innerWidth - 320 - 16, targetRect.left + (targetRect.width / 2) - 160)),
-            }}
+            className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 bg-surface-container-lowest border border-primary/30 p-5 rounded-2xl shadow-2xl max-w-xs pointer-events-auto z-[10000]"
           >
             <button
               onClick={closeTour}
@@ -101,16 +109,25 @@ export function ZenAssistantOverlay() {
               </div>
               <h4 className="font-serif font-bold text-lg leading-none mt-1 ml-12">{currentStep.title}</h4>
             </div>
-            <p className="text-sm text-on-surface-variant font-light mb-4">
+            <p className="text-sm text-on-surface-variant font-light mb-3">
               {currentStep.content}
             </p>
+            {currentStep.tip && (
+              <p className="text-xs text-primary/80 italic font-medium mb-3 px-3 py-2 rounded-lg bg-primary/5 border border-primary/15">
+                {currentStep.tip}
+              </p>
+            )}
             <div className="flex justify-between items-center mt-2">
               <span className="text-[10px] text-primary/60 font-semibold uppercase tracking-widest">
                 Paso {currentStepIndex + 1} de {steps.length}
               </span>
               {currentStep.action === 'click_target' ? (
                 <div className="text-[10px] text-primary font-bold uppercase tracking-widest flex items-center gap-1 animate-pulse">
-                  Toca el área resaltada <ChevronRight className="w-3 h-3" />
+                  {targetRect ? (
+                    <>Toca el área resaltada <ChevronRight className="w-3 h-3" /></>
+                  ) : (
+                    <>Cargando… <ChevronRight className="w-3 h-3" /></>
+                  )}
                 </div>
               ) : (
                 <button

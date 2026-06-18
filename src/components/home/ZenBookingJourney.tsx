@@ -601,6 +601,7 @@ export default function ZenBookingJourney() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               disabled={!selectedTimeSlot}
+              data-tour="completar-datos-btn"
               className={`w-full max-w-sm py-4 rounded-full font-sans text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-md flex items-center justify-center gap-3 ${
                 selectedTimeSlot
                   ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5'

@@ -95,11 +95,11 @@ export function ZenAssistantOverlay() {
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="flex gap-3 mb-3 items-center text-primary relative">
-              <div className="shrink-0 -ml-2 -mt-2">
+            <div className="flex gap-3 mb-3 items-center text-primary relative pt-4">
+              <div className="absolute -top-10 -left-6 shrink-0 scale-150 origin-bottom-left animate-[bounce_3s_infinite]">
                 <LotusCharacter />
               </div>
-              <h4 className="font-serif font-bold text-lg leading-none mt-1">{currentStep.title}</h4>
+              <h4 className="font-serif font-bold text-lg leading-none mt-1 ml-12">{currentStep.title}</h4>
             </div>
             <p className="text-sm text-on-surface-variant font-light mb-4">
               {currentStep.content}
@@ -115,7 +115,7 @@ export function ZenAssistantOverlay() {
               ) : (
                 <button
                   onClick={nextStep}
-                  className="bg-primary text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-opacity-90"
+                  className="bg-primary text-on-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-opacity-90"
                 >
                   Siguiente
                 </button>

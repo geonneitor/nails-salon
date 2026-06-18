@@ -258,18 +258,18 @@ export default function LandingPage() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-[320px]"
+          className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[300px]"
         >
           <Link
             href="/reserva"
             data-tour="agendar-btn"
-            className="w-full relative group overflow-hidden bg-primary hover:bg-primary/90 text-on-primary shadow-[0_8px_30px_rgba(74,93,35,0.4)] hover:shadow-[0_12px_40px_rgba(74,93,35,0.5)] rounded-full px-8 py-4 transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-3"
+            className="w-full relative group overflow-hidden bg-primary hover:bg-primary/90 text-on-primary shadow-[0_8px_30px_rgba(74,93,35,0.4)] hover:shadow-[0_12px_40px_rgba(74,93,35,0.5)] rounded-full px-6 py-3.5 transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-2"
           >
             {/* Brillo animado pasando de fondo */}
             <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
             
             <Calendar className="w-5 h-5 shrink-0" />
-            <span className="font-semibold text-sm uppercase tracking-widest">Reserva tu Cita</span>
+            <span className="font-semibold text-sm uppercase tracking-wider text-center whitespace-nowrap">Reserva tu Cita</span>
           </Link>
         </motion.div>
       </AnimatePresence>

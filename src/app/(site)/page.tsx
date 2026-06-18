@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Instagram, MessageCircle, Music2, Flower2, Calendar } from 'lucide-react';
 import PublicNavbar from '@/components/home/PublicNavbar';
 import { useZenAssistant } from '@/context/ZenAssistantContext';
+import { LotusCharacter } from '@/components/tutorial/LotusCharacter';
 
 function FAQAccordion({ faq }: { faq: {q: string, a: string} }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -244,12 +245,12 @@ export default function LandingPage() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={startTour}
-          className="fixed bottom-24 left-6 md:bottom-8 md:left-8 z-50 bg-surface-container-lowest border-2 border-primary/30 shadow-2xl p-3 rounded-full flex items-center gap-3 pr-5 text-primary hover:border-primary transition-colors group"
+          className="fixed bottom-24 left-6 md:bottom-8 md:left-8 z-50 bg-surface-container-lowest border-2 border-primary/30 shadow-2xl p-2 rounded-full flex items-center gap-3 pr-5 text-primary hover:border-primary transition-colors group"
           title="Iniciar Asistente Zen"
         >
           <div className="relative flex items-center justify-center">
             <div className="absolute inset-0 bg-primary rounded-full animate-ping opacity-20" />
-            <Flower2 className="w-6 h-6 animate-[spin_10s_linear_infinite]" />
+            <LotusCharacter />
           </div>
           <span className="font-serif text-sm font-bold tracking-wide">
             Asistente Zen

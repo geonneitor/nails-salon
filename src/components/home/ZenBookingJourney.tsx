@@ -323,7 +323,7 @@ export default function ZenBookingJourney() {
                   <Sparkles className="w-5 h-5 text-primary" />
                   <h2 className="font-serif text-2xl text-on-surface">Selecciona tu Servicio</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" data-tour="service-menu">
                   {activeCategories.map(c => {
                     const meta = getCategoryMeta(c.name);
                     const isSelected = selectedCategoryId === c.id;
@@ -477,6 +477,7 @@ export default function ZenBookingJourney() {
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                     disabled={!selectedCategoryId}
+                    data-tour="next-step-btn"
                     className={`w-full flex items-center justify-center gap-3 py-4 rounded-full font-sans text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-md ${
                       selectedCategoryId
                         ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5'
@@ -554,7 +555,7 @@ export default function ZenBookingJourney() {
               </div>
 
               {/* Horarios */}
-              <div className="w-full">
+              <div className="w-full" data-tour="calendar-slots">
                 <p className="text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-4">
                   Horarios Disponibles para {format(selectedDate, "d 'de' MMMM", { locale: es })}
                 </p>
@@ -713,6 +714,7 @@ export default function ZenBookingJourney() {
                   <button
                     onClick={handleCreateAppointment}
                     disabled={!isDataFormValid || isSubmitting}
+                    data-tour="confirm-btn"
                     className={`w-full py-4 rounded-full font-sans text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-md flex items-center justify-center gap-3 ${
                       isDataFormValid && !isSubmitting
                         ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5'

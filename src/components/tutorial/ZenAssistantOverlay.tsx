@@ -85,8 +85,10 @@ export function ZenAssistantOverlay() {
         )}
       </AnimatePresence>
 
-      {/* The Tooltip Box — always shown while the tour is active so the user
-          is never stranded if a target can't be resolved. */}
+      {/* The Tooltip Box — anchored to the target when we have one, with a
+          safe fallback to the bottom-center when the target is still resolving.
+          Anchoring to the target prevents the tooltip from sitting on top of
+          the target (e.g. when step-1's target IS the bottom CTA). */}
       <AnimatePresence>
         {isActive && currentStep && (
           <motion.div
@@ -94,7 +96,28 @@ export function ZenAssistantOverlay() {
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
-            className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 bg-surface-container-lowest border border-primary/30 p-5 rounded-2xl shadow-2xl max-w-xs pointer-events-auto z-[10000]"
+            className="absolute bg-surface-container-lowest border border-primary/30 p-5 rounded-2xl shadow-2xl w-[min(20rem,calc(100vw-2rem))] pointer-events-auto z-[10000]"
+            style={
+              targetRect
+                ? (() => {
+                    // Prefer placing the tooltip above the target when there's
+                    // room (the target itself is often the bottom CTA on step-1).
+                    // Fall back to below if above doesn't fit.
+                    const TOOLTIP_HEIGHT_ESTIMATE = 220; // px, conservative
+                    const GAP = 16;
+                    const spaceAbove = targetRect.top;
+                    const spaceBelow = window.innerHeight - targetRect.bottom;
+                    const placeAbove = spaceAbove >= TOOLTIP_HEIGHT_ESTIMATE + GAP || spaceAbove > spaceBelow;
+                    const top = placeAbove
+                      ? Math.max(GAP, targetRect.top - TOOLTIP_HEIGHT_ESTIMATE - GAP)
+                      : targetRect.bottom + GAP;
+                    // Center horizontally over the target, bounded by viewport
+                    const desiredLeft = targetRect.left + targetRect.width / 2 - 160; // 160 = half of 20rem
+                    const left = Math.max(16, Math.min(window.innerWidth - 336, desiredLeft));
+                    return { top, left };
+                  })()
+                : { bottom: 96, left: '50%', transform: 'translateX(-50%)' }
+            }
           >
             <button
               onClick={closeTour}

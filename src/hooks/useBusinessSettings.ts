@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { useProject } from '@/context/AppContext';
 
 export interface BusinessSettingsRecord {
   id: string;
@@ -15,18 +14,18 @@ export interface BusinessSettingsRecord {
   salon_address: string | null;
   salon_logo_url: string | null;
   advance_grace_period_hours: number;
+  cancel_grace_period_hours: number;
   bank_details: string | null;
 }
 
-export function useBusinessSettings() {
-  const { activeProject } = useProject();
+export function useBusinessSettings(projectId?: string | null) {
   const [settings, setSettings] = useState<BusinessSettingsRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchSettings() {
-      if (!activeProject?.id) {
+      if (!projectId) {
         setSettings(null);
         setLoading(false);
         return;
@@ -37,7 +36,7 @@ export function useBusinessSettings() {
         const { data, error: err } = await supabase
           .from('business_settings')
           .select('*')
-          .eq('project_id', activeProject.id)
+          .eq('project_id', projectId)
           .maybeSingle();
 
         if (err && err.code !== 'PGRST116') throw err;
@@ -50,7 +49,7 @@ export function useBusinessSettings() {
     }
 
     fetchSettings();
-  }, [activeProject]);
+  }, [projectId]);
 
-  return { settings, loading, error };
+  return { settings, loading, error, setSettings };
 }

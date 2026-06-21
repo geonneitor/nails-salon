@@ -7,8 +7,9 @@ import { es } from 'date-fns/locale';
 import { useBookingFlow } from '@/hooks/useBookingFlow';
 import { useDynamicServices } from '@/hooks/useDynamicServices';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useApp } from '@/context/AppContext';
 import { RebookActions } from '@/components/booking/RebookActions';
+import { useZenAssistant } from '@/context/ZenAssistantContext';
+import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabaseClient';
 import {
   Sparkles, CalendarDays, BookOpen, User, Phone, CheckCircle, ArrowRight,
@@ -25,6 +26,7 @@ export default function ZenBookingJourney() {
   const { categories, variants, modifiers, isLoading: isServicesLoading } = useDynamicServices();
   const { businessSettings, getDailySlots, submitBooking, markProofSent } = useBookingFlow();
   const { activeProject } = useApp();
+  const { closeTour, setContextMessage, isActive, startTour } = useZenAssistant();
 
   const [timeSlots, setTimeSlots] = useState<any[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(true);
@@ -47,8 +49,12 @@ export default function ZenBookingJourney() {
 
   // File Upload State
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofPreviewUrl, setProofPreviewUrl] = useState<string | null>(null);
   const [uploadingProof, setUploadingProof] = useState(false);
   const [proofSent, setProofSent] = useState(false);
+
+  const isDataFormValid = name.trim().length > 2 && contact.trim().length > 5;
 
   // Compute valid date options based on business settings
   const dateOptions = useMemo(() => {
@@ -149,6 +155,92 @@ export default function ZenBookingJourney() {
     return { price, duration, names };
   }, [selectedCategoryIds, selectedVariants, selectedModifiers, categories, variants, modifiers]);
 
+  // ============================================================
+  // ASISTENTE ZEN CONTEXTUAL
+  // ============================================================
+  useEffect(() => {
+    // Siempre activamos el asistente al entrar a la reserva
+    startTour();
+  }, [startTour]);
+
+  useEffect(() => {
+    if (!isActive) return;
+
+    if (step === 1) {
+      if (selectedCategoryIds.length === 0) {
+        setContextMessage({
+          title: '¡Bienvenida!',
+          content: 'Estoy aquí para acompañarte en tu reserva. Por favor, selecciona los servicios que deseas para hoy.',
+          tip: 'Puedes elegir más de un servicio a la vez.',
+          actionRequired: true,
+          targetSelector: '[data-tour="services-list"]'
+        });
+      } else {
+        setContextMessage({
+          title: '¡Excelente elección!',
+          content: `Tu total estimado es de $${currentTotal.price} MXN. Si ya no deseas agregar más servicios, presiona "Elegir Fecha" para continuar.`,
+          actionRequired: false,
+          targetSelector: '[data-tour="next-step-1"]'
+        });
+      }
+    } else if (step === 2) {
+      if (!selectedTimeSlot) {
+        setContextMessage({
+          title: 'Elige tu Horario',
+          content: 'Toca el día que prefieras en el calendario y luego selecciona una hora que te acomode.',
+          tip: 'Los bloques están mostrados según la disponibilidad real de nuestras especialistas.',
+          actionRequired: true,
+          targetSelector: '[data-tour="calendar-list"]'
+        });
+      } else {
+        setContextMessage({
+          title: 'Horario Reservado',
+          content: `Perfecto, apartaremos tu lugar a las ${selectedTimeSlot.label}. Presiona "Completar Datos" para avanzar al siguiente paso.`,
+          actionRequired: false,
+          targetSelector: '[data-tour="next-step-2"]'
+        });
+      }
+    } else if (step === 3) {
+      if (!isDataFormValid) {
+        setContextMessage({
+          title: 'Tus Datos',
+          content: 'Casi terminamos. Necesitamos tu nombre y número de WhatsApp para poder contactarte y confirmar tu cita.',
+          actionRequired: true,
+          targetSelector: '[data-tour="user-form"]'
+        });
+      } else {
+        setContextMessage({
+          title: 'Todo Listo',
+          content: 'Revisa tu resumen final a la derecha. Si todo es correcto, presiona "Continuar a Pago" para proteger tu lugar temporalmente.',
+          actionRequired: false,
+          targetSelector: '[data-tour="next-step-3"]'
+        });
+      }
+    } else if (step === 4) {
+      if (!proofSent) {
+        setContextMessage({
+          title: '¡Ya casi es tuyo!',
+          content: 'Tu lugar está bloqueado por unas horas. Por favor, realiza tu pago a los datos indicados y adjunta tu comprobante aquí.',
+          tip: 'Si lo prefieres, puedes enviarlo por WhatsApp.',
+          actionRequired: true,
+          targetSelector: '[data-tour="proof-upload"]'
+        });
+      } else {
+        const clientName = name.trim().split(' ')[0];
+        const titleName = clientName ? `, ${clientName}` : '';
+        setContextMessage({
+          title: `¡Nos vemos pronto${titleName}! 🌸`,
+          content: 'Ha sido un placer acompañarte en tu reserva. Validaremos tu comprobante en breve. ¡Que tengas un día muy zen!',
+          actionRequired: false,
+          targetSelector: '[data-tour="proof-upload"]',
+          isHappy: true
+        });
+      }
+    }
+
+    return () => setContextMessage(null);
+  }, [isActive, step, selectedCategoryIds.length, currentTotal.price, selectedTimeSlot, isDataFormValid, proofSent, setContextMessage]);
+
 
 
   const handleCreateAppointment = async () => {
@@ -177,6 +269,7 @@ export default function ZenBookingJourney() {
       });
       setCreatedAppointmentId(newId);
       setStep(4);
+      // Removed closeTour() so Lotito can stay and say goodbye on step 4
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e: any) {
       toast.error('Error', e.message);
@@ -185,18 +278,29 @@ export default function ZenBookingJourney() {
     }
   };
 
-  const handleProofUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !createdAppointmentId) return;
+    if (!file) return;
+
+    setProofFile(file);
+    if (file.type.startsWith('image/')) {
+      setProofPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setProofPreviewUrl(null); // No preview for PDF
+    }
+  };
+
+  const confirmUpload = async () => {
+    if (!proofFile || !createdAppointmentId) return;
 
     setUploadingProof(true);
     try {
-      const fileExt = file.name.split('.').pop();
+      const fileExt = proofFile.name.split('.').pop();
       const fileName = `${createdAppointmentId}-${Date.now()}.${fileExt}`;
       
       const { data, error } = await supabase.storage
         .from('payment-proofs')
-        .upload(fileName, file);
+        .upload(fileName, proofFile);
 
       if (error) throw error;
 
@@ -229,7 +333,6 @@ export default function ZenBookingJourney() {
     }
   };
 
-  const isDataFormValid = name.trim().length > 2 && contact.trim().length > 5;
   const progressPercentage = ((step - 1) / 3) * 100;
 
   if (isServicesLoading) {
@@ -276,7 +379,7 @@ export default function ZenBookingJourney() {
             className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 md:gap-12 items-start"
           >
             {/* IZQUIERDA: Lista de Servicios (scroll natural) */}
-            <div className="flex flex-col gap-6 w-full" data-tour="service-menu">
+            <div data-tour="services-list" className="flex flex-col gap-6 w-full">
               <DynamicServiceSelector
                 categories={categories}
                 variants={variants}
@@ -322,12 +425,12 @@ export default function ZenBookingJourney() {
                     </span>
                   </div>
                   <button
+                    data-tour="next-step-1"
                     onClick={() => {
                       setStep(2);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                     disabled={selectedCategoryIds.length === 0}
-                    data-tour="next-step-btn"
                     className={`w-full flex items-center justify-center gap-3 py-4 rounded-full font-sans text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-md ${
                       selectedCategoryIds.length > 0
                         ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5'
@@ -368,7 +471,7 @@ export default function ZenBookingJourney() {
               <div className="w-20"></div> {/* Spacer for balance */}
             </div>
 
-            <div className="w-full bg-surface-container-lowest p-6 md:p-8 rounded-[2rem] border border-outline-variant/30 shadow-sm mb-8">
+            <div data-tour="calendar-list" className="w-full bg-surface-container-lowest p-6 md:p-8 rounded-[2rem] border border-outline-variant/30 shadow-sm mb-8">
               {/* Fechas */}
               <div className="mb-8">
                 <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide px-1">
@@ -405,7 +508,7 @@ export default function ZenBookingJourney() {
               </div>
 
               {/* Horarios */}
-              <div className="w-full" data-tour="calendar-slots">
+              <div className="w-full">
                 <p className="text-xs uppercase tracking-widest font-bold text-on-surface-variant mb-4">
                   Horarios Disponibles para {format(selectedDate, "d 'de' MMMM", { locale: es })}
                 </p>
@@ -446,12 +549,12 @@ export default function ZenBookingJourney() {
             </div>
 
             <button
+              data-tour="next-step-2"
               onClick={() => {
                 setStep(3);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               disabled={!selectedTimeSlot}
-              data-tour="completar-datos-btn"
               className={`w-full max-w-sm py-4 rounded-full font-sans text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-md flex items-center justify-center gap-3 ${
                 selectedTimeSlot
                   ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5'
@@ -484,7 +587,7 @@ export default function ZenBookingJourney() {
                 &larr; Volver
               </button>
 
-              <section className="bg-surface-container-lowest p-6 md:p-8 rounded-[2rem] border border-outline-variant/30 shadow-sm">
+              <section data-tour="user-form" className="bg-surface-container-lowest p-6 md:p-8 rounded-[2rem] border border-outline-variant/30 shadow-sm">
                 <div className="flex items-center gap-3 mb-8">
                   <User className="w-6 h-6 text-primary" />
                   <h2 className="font-serif text-3xl text-on-surface">Tus Datos</h2>
@@ -563,9 +666,9 @@ export default function ZenBookingJourney() {
                     </span>
                   </div>
                   <button
+                    data-tour="next-step-3"
                     onClick={handleCreateAppointment}
                     disabled={!isDataFormValid || isSubmitting}
-                    data-tour="confirm-btn"
                     className={`w-full py-4 rounded-full font-sans text-sm font-bold uppercase tracking-widest transition-all duration-300 shadow-md flex items-center justify-center gap-3 ${
                       isDataFormValid && !isSubmitting
                         ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-xl hover:-translate-y-0.5'
@@ -615,12 +718,24 @@ export default function ZenBookingJourney() {
                 </div>
               </div>
 
-              <div className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-surface-container-lowest">
+              <div data-tour="proof-upload" className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-surface-container-lowest">
                 {proofSent ? (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                      <CheckCircle className="w-8 h-8 text-primary" />
-                    </div>
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                      className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6"
+                    >
+                      <svg className="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <motion.path
+                          d="M20 6L9 17l-5-5"
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: 1 }}
+                          transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+                        />
+                      </svg>
+                    </motion.div>
                     <h3 className="font-serif text-2xl text-on-surface mb-3">Comprobante Enviado</h3>
                     <p className="text-sm text-on-surface-variant mb-8">
                       Validaremos tu anticipo lo más pronto posible. Te enviaremos un mensaje de confirmación final.
@@ -634,7 +749,7 @@ export default function ZenBookingJourney() {
                       })()}
                       salonName={activeProject?.name ?? 'Zen'}
                       serviceLabel={currentTotal.names[0]}
-                      salonWhatsapp={businessSettings?.salon_whatsapp}
+                      salonWhatsapp={businessSettings?.salon_whatsapp ?? undefined}
                     />
 
                     <button
@@ -652,42 +767,80 @@ export default function ZenBookingJourney() {
                     </p>
 
                     <div className="space-y-4">
-                      {/* File Upload Button */}
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploadingProof}
-                        className="w-full flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border-2 border-dashed border-primary/30 hover:border-primary hover:bg-primary/5 transition-all text-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {uploadingProof ? (
-                          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <>
-                            <Upload className="w-6 h-6" />
-                            <span className="text-sm font-bold uppercase tracking-widest">Subir Imagen o PDF</span>
-                          </>
-                        )}
-                      </button>
+                      {/* Mostrar previsualización si existe archivo */}
+                      {proofFile ? (
+                        <div className="flex flex-col gap-4 border border-outline-variant/50 rounded-2xl p-4 bg-background">
+                          {proofPreviewUrl ? (
+                            <div className="relative w-full h-40 bg-surface-variant/20 rounded-xl overflow-hidden flex items-center justify-center">
+                              <img src={proofPreviewUrl} alt="Preview" className="object-contain w-full h-full" />
+                            </div>
+                          ) : (
+                            <div className="relative w-full h-24 bg-surface-variant/20 rounded-xl flex flex-col items-center justify-center text-primary">
+                              <FileText className="w-8 h-8 mb-2" />
+                              <span className="text-xs font-bold">{proofFile.name}</span>
+                            </div>
+                          )}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setProofFile(null);
+                                setProofPreviewUrl(null);
+                                if (fileInputRef.current) fileInputRef.current.value = '';
+                              }}
+                              disabled={uploadingProof}
+                              className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest border border-outline-variant/50 text-on-surface-variant hover:bg-surface-variant/30 transition-all"
+                            >
+                              Cambiar
+                            </button>
+                            <button
+                              onClick={confirmUpload}
+                              disabled={uploadingProof}
+                              className="flex-1 py-3 rounded-xl text-xs font-bold uppercase tracking-widest bg-primary text-on-primary hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-md"
+                            >
+                              {uploadingProof ? (
+                                <div className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <>Confirmar <Check className="w-4 h-4" /></>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploadingProof}
+                          className="w-full flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border-2 border-dashed border-primary/30 hover:border-primary hover:bg-primary/5 transition-all text-primary cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Upload className="w-6 h-6" />
+                          <span className="text-sm font-bold uppercase tracking-widest">Subir Imagen o PDF</span>
+                        </button>
+                      )}
+                      
                       <input 
                         type="file" 
                         ref={fileInputRef} 
                         className="hidden" 
                         accept="image/png, image/jpeg, application/pdf"
-                        onChange={handleProofUpload}
+                        onChange={handleFileSelect}
                       />
 
-                      <div className="flex items-center gap-4 py-2">
-                        <div className="h-px bg-outline-variant/30 flex-1"></div>
-                        <span className="text-[10px] uppercase font-bold text-on-surface-variant/50">O también</span>
-                        <div className="h-px bg-outline-variant/30 flex-1"></div>
-                      </div>
+                      {!proofFile && (
+                        <>
+                          <div className="flex items-center gap-4 py-2">
+                            <div className="h-px bg-outline-variant/30 flex-1"></div>
+                            <span className="text-[10px] uppercase font-bold text-on-surface-variant/50">O también</span>
+                            <div className="h-px bg-outline-variant/30 flex-1"></div>
+                          </div>
 
-                      <button
-                        onClick={handleWhatsappProof}
-                        disabled={uploadingProof}
-                        className="w-full py-4 rounded-xl font-sans text-sm font-bold uppercase tracking-widest transition-all duration-300 border border-primary text-primary hover:bg-primary hover:text-on-primary flex items-center justify-center gap-2"
-                      >
-                        Envié por WhatsApp <Phone className="w-4 h-4" />
-                      </button>
+                          <button
+                            onClick={handleWhatsappProof}
+                            disabled={uploadingProof}
+                            className="w-full py-4 rounded-xl font-sans text-sm font-bold uppercase tracking-widest transition-all duration-300 border border-primary text-primary hover:bg-primary hover:text-on-primary flex items-center justify-center gap-2"
+                          >
+                            Envié por WhatsApp <Phone className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </>
                 )}

@@ -72,6 +72,8 @@ interface AppointmentBlockProps {
   isSelected?: boolean;
   /** Si es true, oculta los botones inline y desactiva las mutaciones. */
   readOnly?: boolean;
+  /** Handler para arrastrar y soltar (Drag & Drop) */
+  onReschedule?: (id: string, newStart: Date, newEnd: Date, newEmployeeId: string) => void;
 }
 
 export function AppointmentBlock({
@@ -83,6 +85,7 @@ export function AppointmentBlock({
   onClick,
   isSelected = false,
   readOnly = false,
+  onReschedule,
 }: AppointmentBlockProps) {
   const { activeProject } = useApp();
   const [openReminder, setOpenReminder] = useState<AppointmentReminder | null>(null);
@@ -126,8 +129,34 @@ export function AppointmentBlock({
     textShadow: '0px 1px 3px rgba(0,0,0,0.4)',
   } : {};
 
+  const handleDragEnd = (e: any, info: any) => {
+    if (readOnly || !onReschedule) return;
+
+    // Localizar columna destino bajo el puntero
+    const elements = document.elementsFromPoint(info.point.x, info.point.y);
+    const dropzone = elements.find(el => el.classList.contains('day-col-dropzone'));
+    const newEmployeeId = dropzone?.getAttribute('data-employee-id') || appointment.employee_id;
+
+    // Calcular cambio de tiempo según desplazamiento Y (snap a 15 min)
+    const totalMinutesDelta = Math.round((info.offset.y / hourHeight) * 60);
+    const snappedMinutesDelta = Math.round(totalMinutesDelta / 15) * 15;
+
+    if (snappedMinutesDelta === 0 && newEmployeeId === appointment.employee_id) {
+      return; // No hubo cambio
+    }
+
+    const newStart = new Date(start.getTime() + snappedMinutesDelta * 60000);
+    const newEnd = new Date(end.getTime() + snappedMinutesDelta * 60000);
+
+    onReschedule(appointment.id, newStart, newEnd, newEmployeeId);
+  };
+
   return (
     <motion.div
+      drag={!readOnly && !!onReschedule}
+      dragSnapToOrigin={true}
+      dragMomentum={false}
+      onDragEnd={handleDragEnd}
       style={{
         top,
         height,
@@ -161,29 +190,40 @@ export function AppointmentBlock({
         className="w-full h-full px-2 py-1.5 hover:brightness-105 transition-all text-left overflow-hidden flex flex-col justify-start"
         aria-label={`Cita de ${appointment.customer.name} a las ${format(start, 'h:mm a')}`}
       >
-        <div className="flex flex-col gap-0.5 h-full w-full overflow-hidden">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] opacity-90 leading-tight truncate w-full">
-            {format(start, 'h:mm a')}
-            {height >= 70 && <span className="opacity-60"> · {currentStyle.label}</span>}
-          </span>
-          <span className={`text-xs font-serif font-medium leading-tight ${height < 70 ? 'truncate' : 'line-clamp-2'} w-full`}>
-            {serviceName}
-          </span>
-          {height >= 60 && (
-            <span className="text-[10px] opacity-80 leading-tight truncate italic w-full">
-              {appointment.customer.name}
-            </span>
-          )}
-          {height >= 85 && appointment.employee && (
-            <span className={`mt-auto text-[9px] ${currentStyle.pill} rounded-full px-1.5 py-0.5 self-start uppercase tracking-[0.15em] truncate max-w-full`}>
-              {appointment.employee.name}
-            </span>
+        <div className="flex flex-col h-full w-full overflow-hidden">
+          {height < 45 ? (
+            // Vista muy compacta (ej. 30min en zoom compacto = 30px)
+            <div className="flex items-baseline gap-2 truncate w-full">
+              <span className="text-[10px] font-bold uppercase tracking-wider">{format(start, 'HH:mm')}</span>
+              <span className="text-[10px] font-medium truncate">{serviceName}</span>
+            </div>
+          ) : (
+            // Vista normal (>= 45px)
+            <>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] opacity-90 leading-tight truncate w-full">
+                {format(start, 'h:mm a')}
+                {height >= 80 && <span className="opacity-60"> · {currentStyle.label}</span>}
+              </span>
+              <span className={`text-xs font-serif font-medium leading-tight ${height < 70 ? 'truncate' : 'line-clamp-2'} w-full`}>
+                {serviceName}
+              </span>
+              {height >= 70 && (
+                <span className="text-[10px] opacity-80 leading-tight truncate italic w-full">
+                  {appointment.customer.name}
+                </span>
+              )}
+              {height >= 100 && appointment.employee && (
+                <span className={`mt-auto text-[9px] ${currentStyle.pill} rounded-full px-1.5 py-0.5 self-start uppercase tracking-[0.15em] truncate max-w-full`}>
+                  {appointment.employee.name}
+                </span>
+              )}
+            </>
           )}
         </div>
       </button>
 
-      {/* Acciones inline — sólo si hay espacio suficiente (>= 64px) y no es readOnly */}
-      {!readOnly && height >= 64 && (
+      {/* Acciones inline — sólo si hay espacio suficiente (>= 90px) y no es readOnly */}
+      {!readOnly && height >= 90 && (
         <InlineStatusRow
           appointmentId={appointment.id}
           status={appointment.status}
@@ -225,7 +265,9 @@ function InlineStatusRow({
   status: AppointmentStatus;
   isInProgress: boolean;
 }) {
-  const { updateAppointment } = useAppointments();
+  // Pasar projectId evita crear un canal Realtime zombie sin proyecto.
+  const { activeProject } = useApp();
+  const { updateAppointment } = useAppointments({ projectId: activeProject?.id ?? null });
   const toast = useToast();
 
   const change = async (next: AppointmentStatus) => {

@@ -2,16 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { Moon, Sun } from 'lucide-react';
+import { useApp } from '@/context/AppContext';
 
 export default function ThemeToggle() {
+  const { preferences, updatePreference, user } = useApp();
   const [isDark, setIsDark] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Initialize theme based on localStorage
+    // Initialize theme based on localStorage or user preferences
     const savedTheme = localStorage.getItem('theme');
-    const isDarkMode = savedTheme === 'dark';
+    const isDarkMode = preferences?.theme === 'zen-dark' || savedTheme === 'dark';
     
     if (isDarkMode) {
       setIsDark(true);
@@ -20,17 +22,19 @@ export default function ThemeToggle() {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
     }
-  }, []);
+  }, [preferences?.theme]);
 
   const toggleTheme = () => {
     if (isDark) {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
       setIsDark(false);
+      if (user) updatePreference({ theme: 'zen-light' });
     } else {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
       setIsDark(true);
+      if (user) updatePreference({ theme: 'zen-dark' });
     }
   };
 

@@ -4,8 +4,7 @@
 // Lista de clientas con búsqueda, edición y eliminación.
 // ============================================================
 import { useState } from 'react';
-import { Search, Users } from 'lucide-react';
-import { CustomerCard } from './CustomerCard';
+import { Search, Users, Pencil, Trash2 } from 'lucide-react';
 import { CustomerDetailModal } from './CustomerDetailModal';
 import { CustomerFormModal } from './CustomerFormModal';
 import { useCustomers } from '@/hooks/useCustomers';
@@ -13,6 +12,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import type { Customer } from '@/types/supabase';
 import { useApp } from '@/context/AppContext';
+import { DataTable, Column } from '@/components/ui/DataTable';
 
 export function CustomerList() {
   const { preferences } = useApp();
@@ -21,7 +21,6 @@ export function CustomerList() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<'name' | 'visits'>('visits');
 
   const isCompact = preferences?.density === 'compact';
 
@@ -29,21 +28,24 @@ export function CustomerList() {
     c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (c.phone && c.phone.includes(searchTerm)) ||
     (c.email && c.email.toLowerCase().includes(searchTerm.toLowerCase()))
-  ).sort((a, b) => {
-    if (sortBy === 'visits') {
-      return (b.visit_count || 0) - (a.visit_count || 0);
-    }
-    return a.name.localeCompare(b.name);
-  });
+  );
 
   const handleOpenCreateForm = () => {
     setEditingCustomer(null);
     setIsFormOpen(true);
   };
 
-  const handleOpenEditForm = (customer: Customer) => {
+  const handleOpenEditForm = (customer: Customer, e: React.MouseEvent) => {
+    e.stopPropagation();
     setEditingCustomer(customer);
     setIsFormOpen(true);
+  };
+
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if(confirm('¿Estás segura de eliminar a esta clienta?')) {
+      deleteCustomer(id);
+    }
   };
 
   const handleFormSubmit = async (payload: any) => {
@@ -53,6 +55,43 @@ export function CustomerList() {
       return await createCustomer(payload);
     }
   };
+
+  const columns: Column<Customer>[] = [
+    {
+      header: 'Nombre',
+      accessor: 'name',
+      sortKey: 'name',
+      className: 'font-semibold',
+    },
+    {
+      header: 'Contacto',
+      accessor: (row) => (
+        <div className="flex flex-col text-xs text-primario-zen/70">
+          {row.phone ? <span>{row.phone}</span> : <span className="opacity-50 italic">Sin teléfono</span>}
+          {row.email && <span className="opacity-70">{row.email}</span>}
+        </div>
+      )
+    },
+    {
+      header: 'Visitas Totales',
+      accessor: 'visit_count',
+      sortKey: 'visit_count',
+      className: 'text-center'
+    },
+    {
+      header: 'Acciones',
+      accessor: (row) => (
+        <div className="flex items-center justify-end gap-2">
+          <button onClick={(e) => handleOpenEditForm(row, e)} className="p-2 text-primario-zen/60 hover:text-primario-zen hover:bg-secundario-zen/20 rounded-full transition-colors">
+            <Pencil className="w-4 h-4" />
+          </button>
+          <button onClick={(e) => handleDelete(row.id, e)} className="p-2 text-on-surface-variant/50 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      )
+    }
+  ];
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -70,16 +109,6 @@ export function CustomerList() {
           />
         </div>
         
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as 'name' | 'visits')}
-          className="bg-surface-container-lowest border border-secundario-zen/50 rounded-2xl px-4 py-3 text-primario-zen text-sm focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all shadow-sm hidden md:block"
-        >
-          <option value="visits">Más visitas</option>
-          <option value="name">Alfabético</option>
-        </select>
-
-        {/* FIXED: copy unificado → "+ Nueva Clienta" */}
         <button
           onClick={handleOpenCreateForm}
           className="bg-primario-zen text-fondo-zen px-6 py-3 rounded-2xl uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm whitespace-nowrap"
@@ -95,29 +124,24 @@ export function CustomerList() {
       )}
 
       {isLoading ? (
-        /* Skeleton en lugar de spinner Loader2 */
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${isCompact ? 'gap-2' : 'gap-4'}`}>
-          {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+        <div className="flex flex-col gap-2">
+          <SkeletonCard />
+          <SkeletonCard />
         </div>
       ) : filteredCustomers.length > 0 ? (
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${isCompact ? 'gap-2' : 'gap-4'}`}>
-          {filteredCustomers.map(customer => (
-            <CustomerCard
-              key={customer.id}
-              customer={customer}
-              onClick={() => setSelectedCustomer(customer)}
-            />
-          ))}
-        </div>
+        <DataTable 
+          data={filteredCustomers} 
+          columns={columns} 
+          onRowClick={(c) => setSelectedCustomer(c)} 
+          itemsPerPage={8}
+        />
       ) : searchTerm ? (
-        /* Sin resultados de búsqueda */
         <div className="text-center py-10 bg-secundario-zen/20 rounded-2xl border border-dashed border-secundario-zen/60">
           <p className="text-primario-zen/60 text-sm italic">
             No se encontraron clientas con esa búsqueda.
           </p>
         </div>
       ) : (
-        /* Empty state de primer uso */
         <EmptyState
           icon={Users}
           title="Agrega tu primera clienta"
@@ -130,7 +154,7 @@ export function CustomerList() {
         customer={selectedCustomer}
         isOpen={!!selectedCustomer}
         onClose={() => setSelectedCustomer(null)}
-        onEdit={() => handleOpenEditForm(selectedCustomer!)}
+        onEdit={() => handleOpenEditForm(selectedCustomer!, { stopPropagation: () => {} } as any)}
         onDelete={() => deleteCustomer(selectedCustomer!.id)}
       />
 

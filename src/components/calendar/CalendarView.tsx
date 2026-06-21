@@ -7,7 +7,7 @@
 // Soporta propiedades opcionales de lectura y filtrado por cliente.
 // ============================================================
 
-import { useMemo, useState, useEffect, useCallback } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { addDays, format, startOfWeek, subDays, addWeeks, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -45,6 +45,9 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   const [selectedDate, setSelectedDate] = useState<Date>(() => startOfLocalDay(new Date()));
   const [isMounted, setIsMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState(() => new Date());
+  
+  // Ref para trackear dirección del slide
+  const slideDirection = useRef(1);
 
   useEffect(() => {
     setIsMounted(true);
@@ -96,6 +99,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
 
   // Navegación temporal adaptativa
   const handlePrev = () => {
+    slideDirection.current = -1;
     if (view === 'day') setAnchorDate((d) => subDays(d, 1));
     if (view === 'week') {
       const s = startOfWeek(anchorDate, { weekStartsOn: 1 });
@@ -108,6 +112,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   };
 
   const handleNext = () => {
+    slideDirection.current = 1;
     if (view === 'day') setAnchorDate((d) => addDays(d, 1));
     if (view === 'week') {
       const s = startOfWeek(anchorDate, { weekStartsOn: 1 });
@@ -121,6 +126,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
 
   const handleToday = () => {
     const today = startOfLocalDay(new Date());
+    slideDirection.current = today > anchorDate ? 1 : -1;
     setAnchorDate(today);
     setSelectedDate(today);
   };
@@ -143,6 +149,21 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
       toast.success('Cita actualizada', `Ahora: ${labels[newStatus] ?? newStatus}`);
     } else {
       toast.error('No se pudo actualizar', 'Intenta de nuevo en un momento.');
+    }
+  };
+
+  const handleReschedule = async (id: string, newStart: Date, newEnd: Date, newEmployeeId: string) => {
+    if (readOnly) return;
+    const success = await updateAppointment(id, {
+      start_time: newStart.toISOString(),
+      end_time: newEnd.toISOString(),
+      employee_id: newEmployeeId,
+    });
+    if (success) {
+      refetch();
+      toast.success('Cita reprogramada', `Movida a las ${format(newStart, 'h:mm a')}`);
+    } else {
+      toast.error('Error al reprogramar', 'Intenta de nuevo.');
     }
   };
 
@@ -222,28 +243,32 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
 
   return (
     <div className="flex flex-col h-full bg-fondo-zen">
-      {/* Barra de Controles Premium */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-secundario-zen/40 pb-5 mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-light tracking-wide text-primario-zen capitalize select-none min-w-[200px]">
+      {/* Barra de Controles — 2 filas en móvil, 1 en desktop */}
+      <div className="flex flex-col gap-3 border-b border-secundario-zen/40 pb-4 mb-5">
+        {/* Fila 1: Título + Navegación */}
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="text-base md:text-xl font-light tracking-wide text-primario-zen capitalize select-none truncate flex-1 min-w-0">
             {headerTitle}
           </h1>
+          <div className="flex items-center gap-2 shrink-0">
           <div className="flex bg-secundario-zen/20 border border-secundario-zen/40 rounded-full p-0.5">
             <button
               onClick={handlePrev}
-              className="p-2 hover:bg-fondo-zen rounded-full text-primario-zen/70 hover:text-primario-zen transition-all"
+              className="p-1.5 md:p-2 hover:bg-fondo-zen rounded-full text-primario-zen/70 hover:text-primario-zen transition-all"
+              aria-label="Período anterior"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={handleToday}
-              className="px-4 py-1 text-[10px] uppercase tracking-widest font-semibold text-primario-zen/70 hover:text-primario-zen transition-all rounded-full hover:bg-fondo-zen"
+              className="px-3 py-1 text-[9px] md:text-[10px] uppercase tracking-widest font-semibold text-primario-zen/70 hover:text-primario-zen transition-all rounded-full hover:bg-fondo-zen"
             >
               Hoy
             </button>
             <button
               onClick={handleNext}
-              className="p-2 hover:bg-fondo-zen rounded-full text-primario-zen/70 hover:text-primario-zen transition-all"
+              className="p-1.5 md:p-2 hover:bg-fondo-zen rounded-full text-primario-zen/70 hover:text-primario-zen transition-all"
+              aria-label="Período siguiente"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -252,53 +277,14 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
           <button
             onClick={() => refetch()}
             disabled={isLoading}
-            className="p-2 border border-secundario-zen/40 rounded-full text-primario-zen/50 hover:text-primario-zen hover:bg-secundario-zen/10 transition-all disabled:opacity-40"
-            title="Sincronizar base de datos"
+            className="p-1.5 md:p-2 border border-secundario-zen/40 rounded-full text-primario-zen/50 hover:text-primario-zen hover:bg-secundario-zen/10 transition-all disabled:opacity-40"
+            title="Sincronizar"
+            aria-label="Sincronizar citas"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
-        </div>
 
-        <div className="flex items-center gap-4">
-          {/* Selector de Filtro de Empleados */}
-          <div className="flex items-center gap-2 bg-secundario-zen/10 border border-secundario-zen/40 rounded-full px-3.5 py-1.5">
-            <Filter className="w-3 h-3 text-primario-zen/40" />
-            <select
-              value={effectiveEmployeeId}
-              onChange={(e) => setSelectedEmployeeId(e.target.value)}
-              disabled={role === 'employee'}
-              className="bg-transparent text-xs text-primario-zen/70 focus:outline-none pr-2 font-medium cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {role !== 'employee' && <option value="all">Todos los Especialistas</option>}
-              {employees.map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <ZoomControls value={zoom} onChange={setZoom} />
-          <ViewSwitcher value={view} onChange={setView} />
-
-          {/* Atajos premium: tipografía editorial, como un pie de revista. */}
-          {!readOnly && (
-            <div
-              className="hidden xl:flex items-baseline gap-2 text-[10px] text-primario-zen/50 font-serif italic select-none"
-              title="Atajos: N nueva · ← → día · ↑ ↓ semana · T hoy · 1 confirmar · 2 cobrada · 3 no-show · 4 cancelar · Esc cerrar"
-            >
-              <Sparkles className="w-3 h-3 text-gold-primary" strokeWidth={1.5} />
-              <span>
-                <KeyCap>N</KeyCap> nueva
-                <span className="mx-1.5 text-gold-primary/60">·</span>
-                <KeyCap>1</KeyCap>–<KeyCap>4</KeyCap> estado
-                <span className="mx-1.5 text-gold-primary/60">·</span>
-                <KeyCap>Esc</KeyCap> cerrar
-              </span>
-            </div>
-          )}
-
-          {/* Botón Nueva Cita: Visible solo en pantallas medianas hacia arriba */}
+          {/* Nueva Cita solo desktop */}
           {!readOnly && (
             <button
               onClick={() => handleOpenNewModal()}
@@ -307,6 +293,50 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
               <Plus className="w-3.5 h-3.5 stroke-[2.5]" /> Nueva Cita
             </button>
           )}
+          </div>
+        </div>
+
+        {/* Fila 2: Filtro empleada + ViewSwitcher + Zoom */}
+        <div className="flex items-center justify-between gap-3">
+          {/* Selector de Empleada */}
+          <div className="flex items-center gap-2 bg-secundario-zen/10 border border-secundario-zen/40 rounded-full px-3.5 py-1.5 flex-1 min-w-0 max-w-[220px]">
+            <Filter className="w-3 h-3 text-primario-zen/40 shrink-0" />
+            <select
+              value={effectiveEmployeeId}
+              onChange={(e) => setSelectedEmployeeId(e.target.value)}
+              disabled={role === 'employee'}
+              className="bg-transparent text-xs text-primario-zen/70 focus:outline-none font-medium cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed truncate w-full"
+            >
+              {role !== 'employee' && <option value="all">Todas las especialistas</option>}
+              {employees.map((emp) => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <ZoomControls value={zoom} onChange={setZoom} />
+            <ViewSwitcher value={view} onChange={setView} />
+
+            {/* Atajos de teclado — solo desktop XL */}
+            {!readOnly && (
+              <div
+                className="hidden xl:flex items-baseline gap-2 text-[10px] text-primario-zen/50 font-serif italic select-none"
+                title="Atajos: N nueva · ← → día · ↑ ↓ semana · T hoy · 1 confirmar · 2 cobrada · 3 no-show · 4 cancelar · Esc cerrar"
+              >
+                <Sparkles className="w-3 h-3 text-gold-primary" strokeWidth={1.5} />
+                <span>
+                  <KeyCap>N</KeyCap> nueva
+                  <span className="mx-1.5 text-gold-primary/60">·</span>
+                  <KeyCap>1</KeyCap>–<KeyCap>4</KeyCap> estado
+                  <span className="mx-1.5 text-gold-primary/60">·</span>
+                  <KeyCap>Esc</KeyCap> cerrar
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -331,13 +361,19 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
 
       {/* Contenedor de la Grilla de Vistas Animada */}
       <div className="relative flex-1 min-h-0">
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" custom={slideDirection.current}>
           <motion.div
             key={`${view}-${anchorDate.toISOString()}`}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.15, ease: 'easeOut' }}
+            custom={slideDirection.current}
+            variants={{
+              enter: (d: number) => ({ opacity: 0, x: 25 * d }),
+              center: { opacity: 1, x: 0 },
+              exit: (d: number) => ({ opacity: 0, x: -25 * d })
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.25, ease: 'easeOut' }}
             className="h-full w-full bg-fondo-zen rounded-2xl border border-secundario-zen/30 shadow-sm overflow-hidden"
           >
           {view === 'day' && (
@@ -354,6 +390,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
                 clickedDate.setHours(hour, minute, 0, 0);
                 handleOpenNewModal(clickedDate, empId);
               }}
+              onReschedule={handleReschedule}
               selectedAppointmentId={selectedAppointmentId}
               employees={employees}
               currentTime={currentTime}

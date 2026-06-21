@@ -52,9 +52,9 @@ export function MonthView({ date, appointments, onDayClick, selectedDate }: Mont
   }, [appointments]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 h-full min-h-0">
       {/* Encabezado del mes */}
-      <div className="flex items-baseline justify-between px-1">
+      <div className="flex items-baseline justify-between px-1 shrink-0">
         <h3 className="font-serif text-primario-zen text-xl capitalize">
           {format(date, 'MMMM yyyy', { locale: es })}
         </h3>
@@ -66,7 +66,7 @@ export function MonthView({ date, appointments, onDayClick, selectedDate }: Mont
       </div>
 
       {/* Labels de días de la semana */}
-      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-primario-zen/40 uppercase tracking-widest">
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-semibold text-primario-zen/40 uppercase tracking-widest shrink-0">
         {WEEK_DAY_LABELS.map((label) => (
           <div key={label} className="py-1">
             {label}
@@ -75,7 +75,7 @@ export function MonthView({ date, appointments, onDayClick, selectedDate }: Mont
       </div>
 
       {/* Grid de celdas */}
-      <div className="grid grid-cols-7 gap-1 bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm p-2">
+      <div className="grid grid-cols-7 gap-1 bg-fondo-zen rounded-2xl border border-secundario-zen/50 shadow-sm p-2 flex-1 min-h-0">
         {days.map((day) => {
           const inMonth = isSameMonth(day, monthStart);
           const isToday = isSameDay(day, new Date());
@@ -91,7 +91,7 @@ export function MonthView({ date, appointments, onDayClick, selectedDate }: Mont
               type="button"
               onClick={() => onDayClick(day)}
               aria-label={`${format(day, 'd MMMM')}${count > 0 ? `, ${count} citas` : ''}`}
-              className={`relative aspect-square flex flex-col items-center justify-center rounded-xl transition-all ${
+              className={`relative w-full h-full min-h-[60px] flex flex-col items-center justify-center rounded-xl transition-all ${
                 isSelected
                   ? 'bg-primario-zen text-fondo-zen'
                   : isToday

@@ -6,7 +6,7 @@
 import { useState, useRef } from 'react';
 import { useDynamicServices } from '@/hooks/useDynamicServices';
 import { SkeletonCard } from '@/components/ui/Skeleton';
-import { Edit2, Check, X, Tag, Plus, Trash2, GripVertical } from 'lucide-react';
+import { Edit2, Check, X, Tag, Plus, Trash2, GripVertical, ChevronDown, ChevronRight } from 'lucide-react';
 
 export function ServiceList({
   onVariantEdited,
@@ -27,6 +27,13 @@ export function ServiceList({
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editPrice, setEditPrice] = useState(0);
+
+  // Estado de acordeones (colapsar categorías)
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+
+  const toggleCollapse = (id: string) => {
+    setCollapsedCategories(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   // Estado de drag-and-drop de categorías
   const draggedCatId = useRef<string | null>(null);
@@ -205,7 +212,7 @@ export function ServiceList({
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => handleCatDrop(category.id)}
           >
-            <div className="flex justify-between items-start mb-6 border-b border-secundario-zen/30 pb-4">
+            <div className="flex justify-between items-start mb-2 border-b border-secundario-zen/30 pb-4">
               {editingItemId === `cat_${category.id}` ? (
                 <div className="flex items-center gap-2 flex-1 mr-4">
                   <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="p-2 border rounded-lg flex-1 text-sm font-serif" autoFocus />
@@ -213,23 +220,35 @@ export function ServiceList({
                   <button onClick={() => setEditingItemId(null)} className="p-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"><X className="w-4 h-4" /></button>
                 </div>
               ) : (
-                <h3 className="font-serif text-xl text-primario-zen flex items-center gap-3">
-                  <GripVertical className="w-4 h-4 text-primario-zen/25 shrink-0" />
-                  <Tag className="w-5 h-5 text-accent-gold" />
-                  {category.name}
-                  <span className="text-xs uppercase font-sans tracking-wider text-primario-zen/40 bg-secundario-zen/20 px-2 py-1 rounded-full">{category.selection_type}</span>
-                  <button onClick={() => startEditCategory(category.id, category.name)} className="text-primario-zen/30 hover:text-primario-zen transition-colors ml-2"><Edit2 className="w-3 h-3" /></button>
-                </h3>
+                <div 
+                  className="flex items-center gap-3 cursor-pointer select-none flex-1"
+                  onClick={() => toggleCollapse(category.id)}
+                >
+                  <GripVertical className="w-4 h-4 text-primario-zen/25 shrink-0 hover:text-primario-zen cursor-grab active:cursor-grabbing" 
+                    onMouseDown={(e) => e.stopPropagation()} 
+                  />
+                  {collapsedCategories[category.id] ? <ChevronRight className="w-5 h-5 text-primario-zen/50" /> : <ChevronDown className="w-5 h-5 text-primario-zen/50" />}
+                  <h3 className="font-serif text-xl text-primario-zen flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-accent-gold" />
+                    {category.name}
+                    <span className="text-[10px] uppercase font-sans tracking-wider text-primario-zen/40 bg-secundario-zen/20 px-2 py-0.5 rounded-full hidden sm:inline-block ml-1">{category.selection_type}</span>
+                  </h3>
+                  <button onClick={(e) => { e.stopPropagation(); startEditCategory(category.id, category.name); }} className="text-primario-zen/30 hover:text-primario-zen transition-colors ml-2 p-1"><Edit2 className="w-3 h-3" /></button>
+                </div>
               )}
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 shrink-0">
                 <label className="flex items-center gap-2 text-xs font-sans text-primario-zen/60 cursor-pointer">
                   <input type="checkbox" checked={category.is_active} onChange={(e) => toggleCategoryActive(category.id, e.target.checked)} className="w-4 h-4 accent-primario-zen" />
-                  {category.is_active ? 'Visible' : 'Oculto'}
+                  <span className="hidden sm:inline">{category.is_active ? 'Visible' : 'Oculto'}</span>
                 </label>
                 <button onClick={() => handleDeleteCategory(category.id)} className="text-red-400 hover:text-red-600 p-1"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
+
+            {/* COLLAPSIBLE CONTENT */}
+            {!collapsedCategories[category.id] && (
+              <div className="mt-6 animate-in fade-in slide-in-from-top-2 duration-300">
 
             {/* VARIANTS */}
             <div className="mb-6">
@@ -329,6 +348,8 @@ export function ServiceList({
                 )}
               </div>
             </div>
+            </div>
+            )}
 
           </div>
         );

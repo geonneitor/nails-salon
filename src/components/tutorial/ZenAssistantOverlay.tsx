@@ -1,168 +1,238 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useZenAssistant } from '@/context/ZenAssistantContext';
-import { X, ChevronRight } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import { LotusCharacter } from '@/components/tutorial/LotusCharacter';
 
 export function ZenAssistantOverlay() {
-  const { isActive, currentStep, currentStepIndex, steps, closeTour, nextStep } = useZenAssistant();
-  const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const { isActive, message, closeTour } = useZenAssistant();
+  const [targetPos, setTargetPos] = useState<{ top: number; left: number; right: number; bottom: number } | null>(null);
+  const [displayedContent, setDisplayedContent] = useState("");
+  const audioPlayedRef = useRef(false);
+
+  // Typewriter effect
+  useEffect(() => {
+    if (!message?.content) {
+      setDisplayedContent("");
+      return;
+    }
+    
+    setDisplayedContent("");
+    let i = 0;
+    
+    const interval = setInterval(() => {
+      i += 2; // Speed up by typing 2 chars at a time
+      setDisplayedContent(message.content.substring(0, i));
+      if (i >= message.content.length) {
+        clearInterval(interval);
+      }
+    }, 25);
+    
+    return () => clearInterval(interval);
+  }, [message?.content]);
+
+  // Zen Sound effect on first active
+  useEffect(() => {
+    if (isActive && message && !audioPlayedRef.current) {
+      audioPlayedRef.current = true;
+      try {
+        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        
+        // Bell sound profile
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+        oscillator.frequency.exponentialRampToValueAtTime(440, audioCtx.currentTime + 1.5);
+        
+        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 0.05); // Soft attack
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.0); // Long decay
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 2.0);
+      } catch (e) {
+        // Browser might block audio if no prior interaction
+      }
+    } else if (!isActive) {
+      audioPlayedRef.current = false;
+    }
+  }, [isActive, message]);
 
   useEffect(() => {
-    if (!isActive || !currentStep) {
-      setTargetRect(null);
+    if (!isActive || !message?.targetSelector) {
+      setTargetPos(null);
       return;
     }
 
-    let cancelled = false;
-    let interval: ReturnType<typeof setInterval> | null = null;
-
-    const updateRect = () => {
-      if (cancelled) return;
-      const el = document.querySelector(currentStep.targetSelector);
+    const updatePos = () => {
+      const el = document.querySelector(message.targetSelector!);
       if (el) {
-        setTargetRect(el.getBoundingClientRect());
-        // Bring the target into view smoothly if it's outside the viewport.
-        // We use 'nearest' to avoid aggressive scrolling when the target
-        // is already visible (e.g. just slightly off-screen).
-        try {
-          el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-        } catch {
-          // scrollIntoView with options is widely supported; ignore legacy browsers.
-        }
-        if (interval) {
-          clearInterval(interval);
-          interval = null;
-        }
+        setTargetPos(el.getBoundingClientRect());
+      } else {
+        setTargetPos(null);
       }
     };
 
-    updateRect();
-    // Polling: keeps trying to find the target in case it's inside a modal
-    // or component that mounts after navigation.
-    interval = setInterval(updateRect, 250);
-    window.addEventListener('resize', updateRect);
-    window.addEventListener('scroll', updateRect, true); // true to capture scroll in any container
+    updatePos();
+    window.addEventListener('scroll', updatePos, true);
+    window.addEventListener('resize', updatePos);
+    
+    const observer = new MutationObserver(updatePos);
+    observer.observe(document.body, { childList: true, subtree: true });
 
     return () => {
-      cancelled = true;
-      if (interval) clearInterval(interval);
-      window.removeEventListener('resize', updateRect);
-      window.removeEventListener('scroll', updateRect, true);
+      window.removeEventListener('scroll', updatePos, true);
+      window.removeEventListener('resize', updatePos);
+      observer.disconnect();
     };
-  }, [isActive, currentStep]);
+  }, [isActive, message?.targetSelector]);
 
-  if (!isActive || !currentStep) return null;
+  // If the assistant is not active or there's no message, we don't render it
+  if (!isActive || !message) return null;
+
+  let positionStyles: React.CSSProperties = {
+    bottom: '1.5rem',
+    right: '1.5rem',
+  };
+
+  if (targetPos) {
+    const actualOverlayWidth = Math.min(352, window.innerWidth - 48); // max-w-[22rem] o 100vw-3rem
+    const overlayHeight = 220; // height buffer
+    const spaceRight = window.innerWidth - targetPos.right;
+    const spaceLeft = targetPos.left;
+    const spaceTop = targetPos.top;
+    
+    // En móviles casi nunca hay espacio a los lados, así que caerá en los else if (arriba o abajo)
+    if (spaceRight > actualOverlayWidth + 20) {
+      positionStyles = {
+        top: Math.min(Math.max(20, targetPos.top - 20), window.innerHeight - overlayHeight - 20),
+        left: targetPos.right + 20,
+      };
+    } else if (spaceLeft > actualOverlayWidth + 20) {
+      positionStyles = {
+        top: Math.min(Math.max(20, targetPos.top - 20), window.innerHeight - overlayHeight - 20),
+        right: window.innerWidth - targetPos.left + 20,
+      };
+    } else if (spaceTop > overlayHeight + 20) {
+      // Posición arriba (Mobile friendly)
+      let calcBottom = window.innerHeight - targetPos.top + 20;
+      if (calcBottom > window.innerHeight - overlayHeight - 20) {
+        calcBottom = window.innerHeight - overlayHeight - 20;
+      }
+      positionStyles = {
+        bottom: calcBottom,
+        // Math.max(32, ...) garantiza que la cabeza de Lotito (-left-6) no se corte en el borde izquierdo de la pantalla
+        left: Math.min(Math.max(32, targetPos.left + (targetPos.right - targetPos.left)/2 - actualOverlayWidth/2), window.innerWidth - actualOverlayWidth - 20),
+      };
+    } else {
+      // Posición abajo (Mobile friendly)
+      let calcTop = targetPos.bottom + 20;
+      if (calcTop > window.innerHeight - overlayHeight - 20) {
+        calcTop = window.innerHeight - overlayHeight - 20;
+      }
+      positionStyles = {
+        top: calcTop,
+        left: Math.min(Math.max(32, targetPos.left + (targetPos.right - targetPos.left)/2 - actualOverlayWidth/2), window.innerWidth - actualOverlayWidth - 20),
+      };
+    }
+  }
 
   return (
-    <div className="fixed inset-0 z-[9999] pointer-events-none flex">
-      {/* 
-        We use a highly elevated overlay but we don't want to block clicks to the target.
-        So this main container is pointer-events-none.
-        The cutout uses box-shadow on a div exactly over the target.
-      */}
-      <AnimatePresence>
-        {targetRect && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute rounded-xl pointer-events-none transition-all duration-300 ease-out"
-            style={{
-              top: targetRect.top - 8,
-              left: targetRect.left - 8,
-              width: targetRect.width + 16,
-              height: targetRect.height + 16,
-              boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.75)',
-            }}
-          >
-            {/* The pulsing ring around the target */}
-            <div className="absolute inset-0 border-2 border-primary rounded-xl animate-ping opacity-50" />
-            <div className="absolute inset-0 border-2 border-primary rounded-xl" />
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className="fixed inset-0 z-[9999] pointer-events-none">
+      <AnimatePresence mode="wait">
+        <motion.div
+          layout
+          key={message.title + message.content}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ type: "spring", stiffness: 250, damping: 25 }}
+          style={{ position: 'absolute', ...positionStyles }}
+          className="pointer-events-auto w-[min(22rem,calc(100vw-3rem))] origin-center"
+        >
+          {/* Personaje Lotito asomándose sutilmente */}
+          <div className="absolute -top-12 -left-6 shrink-0 scale-[1.3] origin-bottom-left z-20 drop-shadow-xl">
+            <LotusCharacter isHappy={message.isHappy} />
+          </div>
 
-      {/* The Tooltip Box — anchored to the target when we have one, with a
-          safe fallback to the bottom-center when the target is still resolving.
-          Anchoring to the target prevents the tooltip from sitting on top of
-          the target (e.g. when step-1's target IS the bottom CTA). */}
-      <AnimatePresence>
-        {isActive && currentStep && (
-          <motion.div
-            key={currentStep.id}
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.9 }}
-            className="absolute bg-surface-container-lowest border border-primary/30 p-5 rounded-2xl shadow-2xl w-[min(20rem,calc(100vw-2rem))] pointer-events-auto z-[10000]"
-            style={
-              targetRect
-                ? (() => {
-                    // Prefer placing the tooltip above the target when there's
-                    // room (the target itself is often the bottom CTA on step-1).
-                    // Fall back to below if above doesn't fit.
-                    const TOOLTIP_HEIGHT_ESTIMATE = 220; // px, conservative
-                    const GAP = 16;
-                    const spaceAbove = targetRect.top;
-                    const spaceBelow = window.innerHeight - targetRect.bottom;
-                    const placeAbove = spaceAbove >= TOOLTIP_HEIGHT_ESTIMATE + GAP || spaceAbove > spaceBelow;
-                    const top = placeAbove
-                      ? Math.max(GAP, targetRect.top - TOOLTIP_HEIGHT_ESTIMATE - GAP)
-                      : targetRect.bottom + GAP;
-                    // Center horizontally over the target, bounded by viewport
-                    const desiredLeft = targetRect.left + targetRect.width / 2 - 160; // 160 = half of 20rem
-                    const left = Math.max(16, Math.min(window.innerWidth - 336, desiredLeft));
-                    return { top, left };
-                  })()
-                : { bottom: 96, left: '50%', transform: 'translateX(-50%)' }
-            }
-          >
+          {/* Contenedor principal estilo Glassmorphism */}
+          <div className="relative backdrop-blur-3xl bg-surface-container-lowest/90 border border-primary/20 dark:border-primary/10 p-5 rounded-3xl shadow-2xl overflow-hidden mt-8">
+            
+            {/* Ambient glow inside the glass box */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+            
             <button
               onClick={closeTour}
-              className="absolute top-3 right-3 text-on-surface-variant hover:text-on-surface"
+              className="absolute top-3 right-3 text-on-surface-variant hover:text-on-surface transition-colors bg-surface-variant/30 hover:bg-surface-variant/50 p-1.5 rounded-full z-10"
               aria-label="Cerrar asistente"
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="flex gap-3 mb-3 items-center text-primary relative pt-4">
-              <div className="absolute -top-10 -left-6 shrink-0 scale-150 origin-bottom-left animate-[bounce_3s_infinite]">
-                <LotusCharacter />
-              </div>
-              <h4 className="font-serif font-bold text-lg leading-none mt-1 ml-12">{currentStep.title}</h4>
+            
+            <div className="flex gap-4 mb-2 items-center relative pt-1">
+              <h4 className="font-serif font-bold text-lg text-primary dark:text-primary-container leading-tight ml-12 drop-shadow-sm flex items-center gap-2">
+                {message.title}
+              </h4>
             </div>
-            <p className="text-sm text-on-surface-variant font-light mb-3">
-              {currentStep.content}
-            </p>
-            {currentStep.tip && (
-              <p className="text-xs text-primary/80 italic font-medium mb-3 px-3 py-2 rounded-lg bg-primary/5 border border-primary/15">
-                {currentStep.tip}
-              </p>
-            )}
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-[10px] text-primary/60 font-semibold uppercase tracking-widest">
-                Paso {currentStepIndex + 1} de {steps.length}
-              </span>
-              {currentStep.action === 'click_target' ? (
-                <div className="text-[10px] text-primary font-bold uppercase tracking-widest flex items-center gap-1 animate-pulse">
-                  {targetRect ? (
-                    <>Toca el área resaltada <ChevronRight className="w-3 h-3" /></>
-                  ) : (
-                    <>Cargando… <ChevronRight className="w-3 h-3" /></>
-                  )}
-                </div>
-              ) : (
-                <button
-                  onClick={nextStep}
-                  className="bg-primary text-on-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-opacity-90"
-                >
-                  Siguiente
-                </button>
+            
+            <p className="text-[14px] text-on-surface-variant font-medium leading-relaxed mb-4 ml-1 min-h-[42px]">
+              {displayedContent}
+              {displayedContent.length < message.content.length && (
+                <motion.span 
+                  animate={{ opacity: [1, 0] }} 
+                  transition={{ repeat: Infinity, duration: 0.6 }}
+                  className="inline-block w-1.5 h-3.5 bg-primary ml-1 align-middle"
+                />
               )}
-            </div>
-          </motion.div>
-        )}
+            </p>
+            
+            {message.tip && displayedContent.length === message.content.length && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xs text-primary-dark dark:text-primary-light italic font-semibold px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 shadow-inner flex gap-2 items-start mb-4"
+              >
+                <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{message.tip}</span>
+              </motion.div>
+            )}
+
+            {/* Opciones (Botones de acción) */}
+            {message.options && message.options.length > 0 && displayedContent.length === message.content.length && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col gap-2 mt-2"
+              >
+                {message.options.map((opt, i) => (
+                  <button
+                    key={i}
+                    onClick={opt.onClick}
+                    className={`text-sm font-semibold rounded-xl py-2.5 px-4 transition-all duration-200 w-full text-center ${
+                      opt.primary 
+                        ? 'bg-primary text-on-primary hover:bg-primary/90 shadow-sm hover:shadow-md hover:-translate-y-0.5' 
+                        : 'bg-surface-variant/30 text-primary border border-primary/20 hover:bg-primary/10'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+
+            {message.actionRequired && !message.options && (
+              <div className="mt-4 flex justify-end">
+                <div className="w-2 h-2 bg-primary rounded-full animate-ping"></div>
+              </div>
+            )}
+          </div>
+        </motion.div>
       </AnimatePresence>
     </div>
   );

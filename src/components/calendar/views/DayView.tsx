@@ -18,12 +18,36 @@ import { EmptyDay } from '../EmptyDay';
 interface DayViewProps {
   date: Date;
   appointments: AppointmentWithRelations[];
-  employees: Employee[]; // Added employees
+  employees: Employee[];
   hourHeight: number;
   currentTime: Date;
   onAppointmentClick: (a: AppointmentWithRelations) => void;
   onSlotClick?: (date: Date, hour: number, minute: number, employeeId: string) => void;
+  onReschedule?: (id: string, newStart: Date, newEnd: Date, newEmployeeId: string) => void;
   selectedAppointmentId?: string | null;
+}
+
+function getCollisions(appointments: AppointmentWithRelations[]) {
+  const sorted = [...appointments].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  const columns: AppointmentWithRelations[][] = [];
+
+  sorted.forEach((appt) => {
+    let placed = false;
+    for (let i = 0; i < columns.length; i++) {
+      const col = columns[i];
+      const lastAppt = col[col.length - 1];
+      if (new Date(lastAppt.end_time) <= new Date(appt.start_time)) {
+        col.push(appt);
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      columns.push([appt]);
+    }
+  });
+
+  return columns;
 }
 
 export function DayView({
@@ -34,11 +58,11 @@ export function DayView({
   currentTime,
   onAppointmentClick,
   onSlotClick,
+  onReschedule,
   selectedAppointmentId,
 }: DayViewProps) {
   const hourSlots = useMemo(() => buildHourSlots('es'), []);
 
-  // Filtramos citas del día y aseguramos que tengan start_time válido para evitar crashes
   const dayAppointments = useMemo(
     () => appointments.filter((a) => a.start_time && isSameLocalDay(new Date(a.start_time), date)),
     [appointments, date]
@@ -48,7 +72,6 @@ export function DayView({
   const showTimeLine = isToday;
   const totalHeight = GRID_HOURS * hourHeight;
 
-  // Mapeamos citas a sus respectivos empleados
   const appointmentsByEmployee = useMemo(() => {
     const map: Record<string, AppointmentWithRelations[]> = {};
     employees.forEach(emp => {
@@ -99,7 +122,8 @@ export function DayView({
             employees.map((emp) => (
               <div
                 key={emp.id}
-                className="flex-1 min-w-[160px] border-r last:border-r-0 border-secundario-zen/30 relative group"
+                data-employee-id={emp.id}
+                className="flex-1 min-w-[160px] border-r last:border-r-0 border-secundario-zen/30 relative group day-col-dropzone"
                 style={{ height: totalHeight }}
               >
                 {/* Nombre de la empleada (Header) */}
@@ -125,19 +149,28 @@ export function DayView({
                   />
                 ))}
 
-                {/* Citas de esta empleada */}
-                {(appointmentsByEmployee[emp.id] || []).map((appt) => (
-                  <AppointmentBlock
-                    key={appt.id}
-                    appointment={appt}
-                    hourHeight={hourHeight}
-                    currentTime={currentTime}
-                    columnIndex={0} // Ahora es 0 porque cada empleada tiene su propia columna
-                    columnCount={1}
-                    isSelected={selectedAppointmentId === appt.id}
-                    onClick={() => onAppointmentClick(appt)}
-                  />
-                ))}
+                {/* Citas de esta empleada (con superposiciones) */}
+                {(() => {
+                  const empAppts = appointmentsByEmployee[emp.id] || [];
+                  const columns = getCollisions(empAppts);
+                  const columnCount = columns.length;
+                  
+                  return columns.flatMap((col, colIndex) => 
+                    col.map((appt) => (
+                      <AppointmentBlock
+                        key={appt.id}
+                        appointment={appt}
+                        hourHeight={hourHeight}
+                        currentTime={currentTime}
+                        columnIndex={colIndex}
+                        columnCount={columnCount}
+                        isSelected={selectedAppointmentId === appt.id}
+                        onClick={() => onAppointmentClick(appt)}
+                        onReschedule={onReschedule}
+                      />
+                    ))
+                  );
+                })()}
               </div>
             ))
           )}

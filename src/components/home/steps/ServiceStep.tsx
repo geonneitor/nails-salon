@@ -289,9 +289,11 @@ export default function ServiceStep({ data, onSelect }: { data: any, onSelect: (
                       {catVariants.map(v => {
                         const isSelected = selectedVariantId === v.id;
                         return (
-                          <button
+                          <motion.button
                             key={v.id}
                             onClick={() => setSelectedVariantId(v.id)}
+                            whileHover={{ y: -2 }}
+                            whileTap={{ scale: 0.98 }}
                             className={`w-full p-4 rounded-2xl border text-left transition-all flex justify-between items-center ${
                               isSelected 
                                 ? 'bg-primary text-white border-primary shadow-md' 
@@ -299,11 +301,14 @@ export default function ServiceStep({ data, onSelect }: { data: any, onSelect: (
                             }`}
                           >
                             <div className="flex items-center gap-3">
-                              <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                                isSelected ? 'bg-white border-white text-primary' : 'border-outline-variant text-transparent'
-                              }`}>
+                              <motion.div 
+                                animate={{ rotate: isSelected ? 4 : 0 }}
+                                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
+                                  isSelected ? 'bg-white border-white text-primary' : 'border-outline-variant text-transparent'
+                                }`}
+                              >
                                 <Check className="w-3.5 h-3.5" strokeWidth={3} />
-                              </div>
+                              </motion.div>
                               <span className={`font-semibold text-sm ${isSelected ? 'text-white' : 'text-on-surface'}`}>
                                 {v.name}
                               </span>
@@ -318,11 +323,17 @@ export default function ServiceStep({ data, onSelect }: { data: any, onSelect: (
                                   {v.base_duration_minutes}m
                                 </span>
                               )}
-                              <span className={`font-serif text-sm ${isSelected ? 'text-white' : 'text-on-surface-variant'}`}>
+                              <motion.span 
+                                key={isSelected ? 'selected' : 'unselected'}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                                className={`font-serif text-sm ${isSelected ? 'text-white' : 'text-on-surface-variant'}`}
+                              >
                                 ${v.base_price}
-                              </span>
+                              </motion.span>
                             </div>
-                          </button>
+                          </motion.button>
                         );
                       })}
                     </div>

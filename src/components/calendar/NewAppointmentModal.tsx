@@ -14,7 +14,6 @@ import { useCustomers } from '@/hooks/useCustomers';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useDynamicServices } from '@/hooks/useDynamicServices';
 import { DynamicServiceSelector } from '@/components/booking/DynamicServiceSelector';
-import { CustomerFormModal } from '@/components/customers/CustomerFormModal';
 import { useApp } from '@/context/AppContext';
 import { supabase } from '@/lib/supabaseClient';
 import type { CreateAppointmentPayload, TicketDetails } from '@/types/supabase';
@@ -70,6 +69,8 @@ export function NewAppointmentModal({
   const [customerId, setCustomerId] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
   const [isAddingCustomer, setIsAddingCustomer] = useState(false);
+  const [quickName, setQuickName] = useState('');
+  const [quickPhone, setQuickPhone] = useState('');
   
   const [employeeId, setEmployeeId] = useState('');
   
@@ -96,6 +97,8 @@ export function NewAppointmentModal({
       setSelectedModifiers({});
       setBookingColor(BOOKING_COLORS[0]);
       setError(null);
+      setQuickName('');
+      setQuickPhone('');
     }
   }, [isOpen, defaultEmployeeId]);
 
@@ -150,6 +153,34 @@ export function NewAppointmentModal({
 
     return { price, duration, names };
   }, [selectedCategoryIds, selectedVariants, selectedModifiers, categories, variants, modifiers]);
+
+  const handleQuickAddCustomer = async () => {
+    if (!quickName.trim() || !quickPhone.trim()) {
+      setError('Por favor ingresa nombre y WhatsApp para el alta rápida.');
+      return;
+    }
+    setSubmitting(true);
+    const newCustomer = await createCustomer({
+      name: quickName.trim(),
+      phone: quickPhone.trim(),
+      email: null,
+      service_notes: null,
+      birthday: null,
+      allergies: null,
+      color_formulas: null,
+    });
+    setSubmitting(false);
+
+    if (newCustomer) {
+      setCustomerId(newCustomer.id);
+      setCustomerSearch(newCustomer.name);
+      setIsAddingCustomer(false);
+      setQuickName('');
+      setQuickPhone('');
+    } else {
+      setError('No se pudo guardar la clienta rápida.');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,15 +249,15 @@ export function NewAppointmentModal({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="relative w-full md:max-w-xl bg-surface-container-lowest rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-6 md:p-8 max-h-[95vh] flex flex-col overflow-hidden"
+            className="relative w-full md:max-w-lg bg-surface-container-lowest rounded-t-2xl md:rounded-2xl shadow-2xl border border-secundario-zen/50 p-5 md:p-6 max-h-[90vh] flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="flex justify-between items-start mb-6 shrink-0">
+            <div className="flex justify-between items-start mb-4 shrink-0">
               <div>
-                <p className="text-[10px] uppercase tracking-widest text-primario-zen/40 font-semibold mb-1">
+                <p className="text-[10px] uppercase tracking-widest text-primario-zen/50 font-semibold mb-0.5">
                   {format(defaultDate, "EEEE, d 'de' MMMM · h:mm a", { locale: es })}
                 </p>
-                <h2 className="font-serif text-primario-zen text-2xl tracking-wide">
+                <h2 className="font-serif text-primario-zen text-xl tracking-wide">
                   Nueva Cita
                 </h2>
               </div>
@@ -289,9 +320,9 @@ export function NewAppointmentModal({
                         data-tour="next-step-btn"
                         onClick={() => setStep(2)}
                         disabled={selectedCategoryIds.length === 0}
-                        className="bg-primario-zen text-fondo-zen px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-opacity-90 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="bg-primario-zen text-fondo-zen px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-opacity-90 transition-all flex items-center gap-1.5 shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
                       >
-                        Siguiente paso <ChevronRight className="w-4 h-4" />
+                        Siguiente paso <ChevronRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
@@ -374,29 +405,85 @@ export function NewAppointmentModal({
                             </p>
                           )}
                         </div>
+
+                        <AnimatePresence>
+                          {isAddingCustomer && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="flex flex-col gap-3 p-4 rounded-xl bg-secundario-zen/20 border border-secundario-zen/50 overflow-hidden"
+                            >
+                              <p className="text-[10px] uppercase tracking-widest text-primario-zen/60 font-bold">Alta Rápida</p>
+                              <input
+                                type="text"
+                                placeholder="Nombre completo"
+                                className="w-full bg-fondo-zen border border-secundario-zen/40 text-primario-zen text-xs rounded-lg px-3 py-2.5 focus:outline-none focus:border-primario-zen/40 transition-colors"
+                                value={quickName}
+                                onChange={e => setQuickName(e.target.value)}
+                              />
+                              <input
+                                type="tel"
+                                placeholder="WhatsApp (10 dígitos)"
+                                className="w-full bg-fondo-zen border border-secundario-zen/40 text-primario-zen text-xs rounded-lg px-3 py-2.5 focus:outline-none focus:border-primario-zen/40 transition-colors"
+                                value={quickPhone}
+                                onChange={e => setQuickPhone(e.target.value)}
+                              />
+                              <div className="flex justify-end gap-2 mt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setIsAddingCustomer(false)}
+                                  className="px-4 py-2 rounded-lg text-[10px] uppercase tracking-widest font-bold text-primario-zen/60 hover:text-primario-zen hover:bg-secundario-zen/30 transition-all"
+                                >
+                                  Cancelar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleQuickAddCustomer}
+                                  disabled={submitting}
+                                  className="px-4 py-2 rounded-lg text-[10px] uppercase tracking-widest font-bold bg-primario-zen text-fondo-zen hover:bg-opacity-90 transition-all disabled:opacity-50"
+                                >
+                                  {submitting ? 'Guardando...' : 'Guardar y Usar'}
+                                </button>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
                     </div>
 
                     {/* Empleado */}
-                    <Field label="Empleada">
-                      <select
-                        id="new-appt-employee"
-                        value={employeeId}
-                        onChange={(e) => setEmployeeId(e.target.value)}
-                        className={SELECT_CLASS}
-                        required
-                      >
-                        <option value="">Selecciona una empleada…</option>
-                        {employees.map((emp) => (
-                          <option key={emp.id} value={emp.id}>{emp.name}</option>
-                        ))}
-                      </select>
-                      {employees.length === 0 && (
-                        <p className="text-xs text-primario-zen/50 mt-0.5">
-                          Primero agrega empleadas en Settings.
-                        </p>
-                      )}
-                    </Field>
+                    {defaultEmployeeId ? (
+                      <div className="flex flex-col gap-1.5 font-sans">
+                        <label className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/50">
+                          Especialista
+                        </label>
+                        <div className="w-full bg-secundario-zen/10 border border-secundario-zen/30 text-primario-zen text-sm rounded-xl px-4 py-2.5 font-medium flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-primario-zen/50"></div>
+                          {employees.find(e => e.id === employeeId)?.name || 'Especialista'}
+                        </div>
+                      </div>
+                    ) : (
+                      <Field label="Empleada">
+                        <select
+                          id="new-appt-employee"
+                          value={employeeId}
+                          onChange={(e) => setEmployeeId(e.target.value)}
+                          className={SELECT_CLASS}
+                          required
+                        >
+                          <option value="">Selecciona una empleada…</option>
+                          {employees.map((emp) => (
+                            <option key={emp.id} value={emp.id}>{emp.name}</option>
+                          ))}
+                        </select>
+                        {employees.length === 0 && (
+                          <p className="text-xs text-primario-zen/50 mt-0.5">
+                            Primero agrega empleadas en Settings.
+                          </p>
+                        )}
+                      </Field>
+                    )}
 
                     {/* Selector de Color */}
                     <div className="flex flex-col gap-2 font-sans mb-2">
@@ -428,13 +515,13 @@ export function NewAppointmentModal({
                       </p>
                     )}
 
-                    <div className="flex justify-between items-center mt-2 pt-4 border-t border-secundario-zen/40">
+                    <div className="flex justify-between items-center mt-2 pt-4 border-t border-secundario-zen/40 shrink-0">
                       <button
                         type="button"
                         onClick={() => setStep(1)}
-                        className="border border-primario-zen/40 text-primario-zen px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-secundario-zen/20 transition-all flex items-center gap-1.5"
+                        className="border border-primario-zen/40 text-primario-zen px-5 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-secundario-zen/20 transition-all flex items-center gap-1.5"
                       >
-                        <ChevronLeft className="w-4 h-4" /> Atrás
+                        <ChevronLeft className="w-3.5 h-3.5" /> Atrás
                       </button>
 
                       <button
@@ -442,10 +529,10 @@ export function NewAppointmentModal({
                         type="submit"
                         data-tour="confirm-btn"
                         disabled={submitting || !customerId || !employeeId}
-                        className="bg-primario-zen text-fondo-zen px-6 py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 font-sans"
+                        className="bg-primario-zen text-fondo-zen px-5 py-2.5 rounded-full uppercase tracking-widest text-[10px] font-bold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-1.5 font-sans"
                       >
                         {submitting ? (
-                          <><Loader2 className="w-4 h-4 animate-spin" /> Agendando…</>
+                          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Agendando…</>
                         ) : (
                           'Confirmar Cita'
                         )}
@@ -457,20 +544,6 @@ export function NewAppointmentModal({
               </form>
             )}
           </motion.div>
-          
-          {/* Modal secundario para creación de cliente */}
-          <CustomerFormModal
-            isOpen={isAddingCustomer}
-            onClose={() => setIsAddingCustomer(false)}
-            onSubmit={async (payload) => {
-              const newCustomer = await createCustomer(payload);
-              if (newCustomer) {
-                setCustomerId(newCustomer.id);
-                setCustomerSearch(newCustomer.name);
-              }
-              return newCustomer;
-            }}
-          />
         </div>
       )}
     </AnimatePresence>

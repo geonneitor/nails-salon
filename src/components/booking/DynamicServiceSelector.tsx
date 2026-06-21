@@ -194,6 +194,7 @@ export function DynamicServiceSelector({
                 const qty = selectedModifiers[m.id] || 0;
                 const isSelected = qty > 0;
                 const isPerUnit = m.modifier_type === 'per_unit';
+                const parentCat = categories.find(c => c.id === m.category_id);
 
                 return (
                   <div 
@@ -208,8 +209,13 @@ export function DynamicServiceSelector({
                         <Check className="w-2.5 h-2.5" strokeWidth={3} />
                       </div>
                     )}
-                    <span className={`text-xs font-semibold mb-1 ${isSelected ? 'text-primary' : 'text-on-surface'}`}>{m.name}</span>
-                    <span className="text-[10px] text-on-surface-variant font-medium">+${m.price_delta}</span>
+                    <span className={`text-xs font-semibold mb-0.5 ${isSelected ? 'text-primary' : 'text-on-surface'}`}>{m.name}</span>
+                    {selectedCategoryIds.length > 1 && parentCat && (
+                      <span className="text-[9px] uppercase tracking-wider text-on-surface-variant/70 mb-1">
+                        Para {parentCat.name}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-on-surface-variant font-medium mt-1">+${m.price_delta}</span>
 
                     {isPerUnit && (
                       <div className="flex items-center gap-2 mt-3 bg-background border border-outline-variant/30 rounded-full px-2 py-1" onClick={(e) => e.stopPropagation()}>

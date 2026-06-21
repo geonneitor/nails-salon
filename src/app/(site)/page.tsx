@@ -7,6 +7,10 @@ import { ChevronDown, Instagram, MessageCircle, Music2, Calendar, Sparkles, Drop
 import PublicNavbar from '@/components/home/PublicNavbar';
 import { useZenAssistant } from '@/context/ZenAssistantContext';
 import { LotusCharacter } from '@/components/tutorial/LotusCharacter';
+import ZenManifesto from '@/components/home/ZenManifesto';
+import FeaturedServices from '@/components/home/FeaturedServices';
+import ZenGallery from '@/components/home/ZenGallery';
+import SmartBookingFeature from '@/components/home/SmartBookingFeature';
 
 function FAQAccordion({ faq }: { faq: {q: string, a: string} }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,8 +45,119 @@ function FAQAccordion({ faq }: { faq: {q: string, a: string} }) {
 }
 
 export default function LandingPage() {
-  const { startTour, isActive, hasCompletedTour } = useZenAssistant();
+  const { startTour, isActive, hasCompletedTour, setContextMessage } = useZenAssistant();
   const [pulseCta, setPulseCta] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
+
+  // Mensaje del Asistente Zen para la Landing Page
+  useEffect(() => {
+    if (!isActive) {
+      setTourStep(0);
+      return;
+    }
+
+    if (tourStep === 0) {
+      setContextMessage({
+        title: '¡Hola! Soy Lotito 🪷',
+        content: 'Soy tu Asistente Zen. ¿En qué te puedo ayudar hoy?',
+        isHappy: true,
+        options: [
+          {
+            label: 'Quiero agendar mi cita',
+            primary: true,
+            onClick: () => setTourStep(1)
+          },
+          {
+            label: 'Demos un recorrido',
+            onClick: () => setTourStep(2)
+          },
+          {
+            label: 'Tengo dudas (FAQ)',
+            onClick: () => setTourStep(3)
+          },
+          {
+            label: 'Contactar por WhatsApp',
+            onClick: () => {
+              window.open("https://wa.me/5211234567890?text=Hola,%20me%20gustaría%20más%20información", "_blank");
+            }
+          }
+        ]
+      });
+    } else if (tourStep === 1) {
+      setContextMessage({
+        title: '¡Vamos a Agendar!',
+        content: 'Da clic en el botón "Reserva tu Cita" aquí abajo para comenzar con tu ritual.',
+        targetSelector: '[data-tour="agendar-btn"]',
+        actionRequired: true
+      });
+    } else if (tourStep === 2) {
+      const el = document.querySelector('[data-tour="manifesto"]');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      setContextMessage({
+        title: 'Nuestra Filosofía',
+        content: 'Elegimos la pausa. Zen es un refugio diseñado para que te relajes y disfrutes del momento presente.',
+        targetSelector: '[data-tour="manifesto"] h2',
+        options: [
+          {
+            label: 'Siguiente: El Menú',
+            primary: true,
+            onClick: () => setTourStep(21)
+          }
+        ]
+      });
+    } else if (tourStep === 21) {
+      const el = document.querySelector('[data-tour="featured"]');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      setContextMessage({
+        title: 'Servicios Destacados',
+        content: 'Desde pedicuras botánicas inmersivas hasta uñas esculpidas con geles de alta gama. Lo mejor de lo mejor.',
+        targetSelector: '[data-tour="featured"] h2',
+        options: [
+          {
+            label: 'Siguiente: Tecnología',
+            primary: true,
+            onClick: () => setTourStep(22)
+          }
+        ]
+      });
+    } else if (tourStep === 22) {
+      const el = document.querySelector('[data-tour="smart-booking"]');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      setContextMessage({
+        title: 'Tu Agenda Inteligente',
+        content: 'Olvídate de los mensajes largos. Agenda en segundos, ve la disponibilidad en tiempo real y recibe confirmación al instante.',
+        targetSelector: '[data-tour="smart-booking"] h2',
+        options: [
+          {
+            label: 'Siguiente: FAQ',
+            primary: true,
+            onClick: () => setTourStep(3)
+          }
+        ]
+      });
+    } else if (tourStep === 3) {
+      const el = document.querySelector('[data-tour="faq"]');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      setContextMessage({
+        title: 'Preguntas Frecuentes',
+        content: 'Aquí puedes resolver tus dudas sobre la política de anticipo o cómo agendar. Si ya estás lista, ¡agenda abajo!',
+        targetSelector: '[data-tour="faq"] h2',
+        options: [
+          {
+            label: '¡Agendar ahora!',
+            primary: true,
+            onClick: () => setTourStep(1)
+          }
+        ]
+      });
+    }
+
+    return () => setContextMessage(null);
+  }, [isActive, tourStep, setContextMessage]);
 
   // Periodic pulse reminder on the sticky CTA when the tour is closed.
   // Drives attention to the highest-conversion button on the landing.
@@ -89,25 +204,54 @@ export default function LandingPage() {
       <PublicNavbar />
 
       {/* ── Hero Section ── */}
-      <section className="px-4 md:px-12 pt-28 md:pt-40 pb-10 md:pb-16 max-w-[1400px] mx-auto relative z-10 text-center">
+      <section className="relative w-full min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <motion.img 
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 10, ease: "easeOut" }}
+            src="/images/zen_waterfall_bg.png" 
+            alt="Zen Waterfall" 
+            className="w-full h-full object-cover"
+          />
+          {/* Overlays para garantizar legibilidad perfecta */}
+          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-black/20 to-black/60"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-transparent to-background/90"></div>
+        </div>
+
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col items-center justify-center max-w-4xl mx-auto"
+          transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+          className="relative z-10 flex flex-col items-center justify-center px-6 md:px-12 max-w-6xl mx-auto text-center md:text-left w-full"
         >
-          <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold text-primary mb-4 block">
+          <span className="text-xs md:text-sm uppercase tracking-[0.5em] font-bold text-primary drop-shadow-lg mb-8 block w-full text-center">
             Santuario de Uñas & Pedicura Spa
           </span>
-          <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl text-on-surface leading-[1.1] mb-6">
-            El arte en tus manos.<br />
-            La calma en tus pies.
+          
+          <h1 className="font-serif text-6xl md:text-8xl lg:text-[8rem] text-white leading-[0.9] mb-12 drop-shadow-[0_10px_40px_rgba(0,0,0,0.9)] tracking-tight w-full flex flex-col items-center md:items-start">
+            <span>El arte en tus manos.</span>
+            <span className="italic text-primary/90 font-light md:ml-32 mt-2 md:mt-4 text-5xl md:text-7xl lg:text-[7rem]">La calma en tus pies.</span>
           </h1>
-          <p className="text-lg text-on-surface-variant font-light mb-10 max-w-2xl mx-auto">
-            Descubre un concepto de salón diferente. Nos especializamos en diseño de uñas impecable y pedicura botánica, fusionando la higiene clínica con una atmósfera de paz absoluta. Sin prisas.
+          
+          <p className="text-xl md:text-3xl text-white/95 font-light mb-16 max-w-4xl drop-shadow-[0_5px_20px_rgba(0,0,0,0.9)] leading-[1.6] text-center md:text-left self-center md:self-start">
+            Descubre un concepto de salón diferente. Nos especializamos en diseño de uñas impecable y pedicura botánica, fusionando la higiene clínica con una atmósfera de paz absoluta. <strong className="text-white font-normal">Sin prisas.</strong>
           </p>
+          
+          {/* Indicador de scroll */}
+          <motion.div
+            animate={{ y: [0, 15, 0] }}
+            transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+            className="mt-16 opacity-60"
+          >
+            <div className="w-px h-24 bg-gradient-to-b from-primary to-transparent mx-auto"></div>
+          </motion.div>
         </motion.div>
       </section>
+
+      <ZenManifesto />
 
       {/* ── Infinite Carousel (Marquee) ── */}
       <section className="py-10 overflow-hidden relative">
@@ -127,90 +271,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── Why Zen? ── */}
-      <section className="px-6 md:px-12 py-20 max-w-5xl mx-auto relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="font-serif text-3xl md:text-5xl text-on-surface mb-6">¿Por qué Zen es diferente?</h2>
-          <p className="text-lg text-on-surface-variant max-w-2xl mx-auto">
-            No somos un spa de masajes corporales ni un salón de belleza ruidoso. Somos un santuario de especialidad enfocado en los detalles.
-          </p>
-        </motion.div>
+      <FeaturedServices />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: <Sparkles className="w-8 h-8 text-primary" />,
-              title: "Higiene Intransigente",
-              desc: "Esterilización de grado médico. Cada herramienta está sellada y los limadores son 100% desechables por clienta."
-            },
-            {
-              icon: <Leaf className="w-8 h-8 text-primary" />,
-              title: "Productos Premium",
-              desc: "Utilizamos geles de alta pigmentación y productos botánicos orgánicos libres de toxinas dañinas."
-            },
-            {
-              icon: <Droplets className="w-8 h-8 text-primary" />,
-              title: "Tiempos sin Prisas",
-              desc: "Tu cita está bloqueada exclusivamente para ti. No trabajamos contra reloj, trabajamos por la perfección."
-            }
-          ].map((feature, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="card-depth p-8 rounded-3xl text-center flex flex-col items-center"
-            >
-              <div className="w-16 h-16 rounded-full bg-surface-variant flex items-center justify-center mb-6">
-                {feature.icon}
-              </div>
-              <h3 className="font-serif text-2xl text-on-surface mb-4">{feature.title}</h3>
-              <p className="font-sans text-on-surface-variant">{feature.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Beneficios de los Rituales ── */}
-      <section className="px-4 md:px-12 py-16 relative bg-surface-container-low rounded-t-[3rem] mt-10">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <span className="text-[10px] uppercase tracking-widest font-bold text-primary mb-2 block">Bienestar Holístico</span>
-            <h2 className="font-serif text-3xl md:text-5xl text-on-surface mb-4">Beneficios de Nuestros Rituales</h2>
-            <p className="text-on-surface-variant max-w-2xl mx-auto">Más allá de la estética, cada servicio está diseñado para aportarte beneficios terapéuticos y un momento de auténtica desconexión.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm border border-outline-variant/30 flex flex-col items-start text-left">
-              <h3 className="font-serif text-2xl text-on-surface mb-3">Pedicura Spa Botánica</h3>
-              <ul className="space-y-3 font-light text-on-surface-variant">
-                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Mejora la Circulación:</strong> Los baños calientes y exfoliaciones estimulan el flujo sanguíneo, aliviando la pesadez.</li>
-                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Prevención Clínica:</strong> Mantenemos la salud de las uñas y detectamos a tiempo problemas como uñas encarnadas o sequedad extrema.</li>
-                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Exfoliación Profunda:</strong> Elimina células muertas, previniendo durezas y dejando la piel suave y renovada.</li>
-                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Alivio del Estrés:</strong> El contacto con el agua tibia y las esencias botánicas actúan como aromaterapia relajante.</li>
-              </ul>
-            </div>
-            <div className="bg-surface-container-lowest p-8 rounded-[2rem] shadow-sm border border-outline-variant/30 flex flex-col items-start text-left">
-              <h3 className="font-serif text-2xl text-on-surface mb-3">Manicura Zen y Uñas</h3>
-              <ul className="space-y-3 font-light text-on-surface-variant">
-                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Salud Cuticular:</strong> Hidratación y remoción cuidadosa de cutículas que evitan infecciones y padrastros.</li>
-                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Fortalecimiento:</strong> Aplicación de bases nutritivas y geles de alta gama que protegen tus uñas naturales del quiebre.</li>
-                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Arte que Empodera:</strong> Diseños minimalistas y elegantes que elevan tu autoestima y reflejan tu personalidad.</li>
-                <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" /> <strong>Masaje Focalizado:</strong> El masaje final de manos alivia la tensión de las articulaciones provocada por dispositivos y trabajo de escritorio.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ZenGallery />
+      
+      <SmartBookingFeature />
 
       {/* ── Manual / FAQ Section ── */}
-      <section className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
+      <section data-tour="faq" className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

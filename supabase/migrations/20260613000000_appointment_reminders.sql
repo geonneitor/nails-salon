@@ -139,7 +139,7 @@ BEGIN
         RETURN NEW;
     END IF;
 
-    IF settings_row.id IS NULL THEN
+    IF settings_row.project_id IS NULL THEN
         settings_row.hours_before := 24;
         settings_row.send_window_start := '08:00:00'::TIME;
         settings_row.send_window_end := '21:00:00'::TIME;

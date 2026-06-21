@@ -5,11 +5,13 @@ import { supabase } from '@/lib/supabaseClient';
 import { useProject } from '@/context/AppContext';
 import { Clock, Users, Calendar as CalIcon } from 'lucide-react';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useBusinessSettings } from '@/hooks/useBusinessSettings';
 
 export function BusinessSettings() {
   const { activeProject } = useProject();
   const toast = useToast();
-  const [loading, setLoading] = useState(true);
+  const { settings: fetchedSettings, loading, setSettings: setFetchedSettings } = useBusinessSettings(activeProject?.id);
+
   const [settings, setSettings] = useState({
     max_employees: 1,
     opening_hour: '09:00',
@@ -26,25 +28,19 @@ export function BusinessSettings() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    async function fetchSettings() {
-      if (!activeProject?.id) return;
-      try {
-        const { data, error } = await supabase
-          .from('business_settings')
-          .select('*')
-          .eq('project_id', activeProject.id)
-          .maybeSingle();
-
-        if (error && error.code !== 'PGRST116') throw error;
-        if (data) setSettings(data);
-      } catch (e) {
-        console.error('Error loading business settings:', e);
-      } finally {
-        setLoading(false);
-      }
+    if (fetchedSettings) {
+      setSettings(prev => ({ 
+        ...prev, 
+        ...fetchedSettings,
+        salon_name: fetchedSettings.salon_name || '',
+        salon_phone: fetchedSettings.salon_phone || '',
+        salon_whatsapp: fetchedSettings.salon_whatsapp || '',
+        salon_address: fetchedSettings.salon_address || '',
+        salon_logo_url: fetchedSettings.salon_logo_url || '',
+        bank_details: fetchedSettings.bank_details || ''
+      }));
     }
-    fetchSettings();
-  }, [activeProject]);
+  }, [fetchedSettings]);
 
   async function handleSave() {
     setSaving(true);

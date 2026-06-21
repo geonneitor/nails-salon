@@ -12,6 +12,7 @@
 
 import { useMemo, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Calendar, Wallet, AlertCircle, TrendingDown, Sparkles, Cake } from 'lucide-react';
 import { format, addDays, isWithinInterval, startOfDay, endOfDay } from 'date-fns';
@@ -33,13 +34,35 @@ export default function DashboardPage() {
   const { activeProject } = useProject();
   const projectId = activeProject?.id ?? null;
   const toast = useToast();
+  const router = useRouter();
   const { customers } = useCustomers();
 
-  // Traemos un rango de 7 días para poder calcular "no-shows esta semana".
+  // dateRange con refresco a medianoche: evita el bug de "hoy congelado"
+  // si la pestaña queda abierta entre días.
+  const [today, setToday] = useState<Date>(() => startOfLocalDay(new Date()));
   const dateRange = useMemo(() => {
-    const from = startOfLocalDay(new Date());
+    const from = today;
     const to = addDays(from, 7);
     return { from: from.toISOString(), to: to.toISOString() };
+  }, [today]);
+
+  useEffect(() => {
+    // Calcular ms hasta la próxima medianoche y refrescar el rango.
+    function msUntilMidnight() {
+      const now = new Date();
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0, 0);
+      return midnight.getTime() - now.getTime();
+    }
+    let timeout: ReturnType<typeof setTimeout>;
+    function scheduleRefresh() {
+      timeout = setTimeout(() => {
+        setToday(startOfLocalDay(new Date()));
+        scheduleRefresh();
+      }, msUntilMidnight());
+    }
+    scheduleRefresh();
+    return () => clearTimeout(timeout);
   }, []);
 
   const { appointments, isLoading, updateAppointment, refetch } = useAppointments({
@@ -48,7 +71,6 @@ export default function DashboardPage() {
   });
 
   // ── Cálculos memoizados para KPIs ───────────────────────────────
-  const today = startOfLocalDay(new Date());
   const todayAppts = useMemo(
     () => appointments.filter((a) => isWithinInterval(new Date(a.start_time), {
       start: startOfDay(today),
@@ -168,9 +190,8 @@ export default function DashboardPage() {
     }
   };
   const handleSelect = (_appt: AppointmentWithRelations) => {
-    // En esta primera versión sólo se delega a la página de calendario.
-    // Una versión futura abre un popover in-place con los detalles.
-    window.location.href = '/calendar';
+    // Navegar sin recargar la página completa.
+    router.push('/calendar');
   };
 
   return (

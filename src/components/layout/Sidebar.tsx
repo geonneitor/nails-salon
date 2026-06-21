@@ -24,11 +24,11 @@ export function Sidebar() {
   const isCollapsed = preferences?.sidebar_collapsed ?? false;
 
   return (
-    <aside className={`h-screen bg-fondo-zen border-r border-secundario-zen/50 hidden md:flex flex-col justify-between py-8 px-6 sticky top-0 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
+    <aside className={`h-screen bg-fondo-zen border-r border-secundario-zen/50 hidden md:flex flex-col py-8 px-6 sticky top-0 transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
 
-      <div className="flex flex-col gap-8">
+      <div className="flex-1 flex flex-col gap-8 overflow-y-auto pb-4 scrollbar-hide">
         {/* Brand Logo */}
-        <div className="flex flex-col items-center mb-6 group relative px-2">
+        <div className="flex flex-col items-center mb-2 group relative px-2 shrink-0">
           <div className={`relative transition-all duration-500 ${isCollapsed ? 'w-10' : 'w-36'} group-hover:scale-110 transition-transform`}>
             <img
               src="/zen-logo.svg"
@@ -46,19 +46,39 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Active Project Display */}
+        {/* Active Project Display / Switcher */}
         {activeProject && (
-          <div className={`flex items-center justify-between px-4 py-3 rounded-2xl bg-secundario-zen/30 text-primario-zen text-xs font-medium border border-secundario-zen/60 shadow-sm ${isCollapsed ? 'justify-center px-0' : ''}`}>
-            {!isCollapsed && (
-              <span className="truncate text-center w-full">
-                {activeProject.name}
-              </span>
+          <div className={`flex flex-col gap-1 px-4 py-3 rounded-2xl bg-secundario-zen/30 text-primario-zen text-xs font-medium border border-secundario-zen/60 shadow-sm shrink-0 ${isCollapsed ? 'justify-center items-center px-0' : ''}`}>
+            {isCollapsed ? (
+              <span className="font-bold text-center w-full uppercase tracking-widest">{activeProject.name.substring(0, 1)}</span>
+            ) : (
+              <>
+                <span className="text-[9px] uppercase tracking-widest opacity-60">Sucursal</span>
+                {projects.length > 1 ? (
+                  <select
+                    value={activeProject.id}
+                    onChange={(e) => {
+                      const proj = projects.find(p => p.id === e.target.value);
+                      if (proj) setActiveProject(proj);
+                    }}
+                    className="w-full bg-transparent border-none text-primario-zen font-semibold outline-none cursor-pointer p-0 m-0 truncate appearance-none"
+                  >
+                    {projects.map(p => (
+                      <option key={p.id} value={p.id} className="bg-fondo-zen">{p.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="truncate w-full font-semibold">
+                    {activeProject.name}
+                  </span>
+                )}
+              </>
             )}
           </div>
         )}
 
         {/* Navigation Links */}
-        <nav className="flex flex-col gap-3">
+        <nav className="flex flex-col gap-3 shrink-0">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname.startsWith(item.href);
             const Icon = item.icon;
@@ -73,7 +93,7 @@ export function Sidebar() {
                     : 'text-primario-zen/60 hover:bg-secundario-zen/30 hover:text-primario-zen'
                 } ${isCollapsed ? 'justify-center px-0' : ''}`}
               >
-                <Icon strokeWidth={isActive ? 2.5 : 2} className="w-5 h-5" />
+                <Icon strokeWidth={isActive ? 2.5 : 2} className="w-5 h-5 shrink-0" />
                 {!isCollapsed && (
                   <span className={`text-sm tracking-wide ${isActive ? 'font-semibold' : 'font-medium'}`}>
                     {item.label}
@@ -86,7 +106,7 @@ export function Sidebar() {
       </div>
 
       {/* Footer — Cerrar Sesión: hover usa paleta del sistema, no rojo externo */}
-      <div className="mt-8 pt-6 border-t border-secundario-zen/50">
+      <div className="mt-auto pt-6 border-t border-secundario-zen/50 shrink-0">
         <button
           onClick={async () => {
             await supabase.auth.signOut();

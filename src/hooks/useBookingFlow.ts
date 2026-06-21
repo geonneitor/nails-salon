@@ -4,30 +4,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { format } from 'date-fns';
 
+import { useBusinessSettings } from './useBusinessSettings';
+
 const PROJECT_ID = process.env.NEXT_PUBLIC_PROJECT_ID || '489e898d-3b2a-4775-b784-93a0e1a473e0';
 
 export function useBookingFlow() {
-  const [businessSettings, setBusinessSettings] = useState<any>(null);
-  const [loadingSettings, setLoadingSettings] = useState(true);
-
-  useEffect(() => {
-    async function fetchSettings() {
-      try {
-        const { data, error } = await supabase
-          .from('business_settings')
-          .select('*')
-          .eq('project_id', PROJECT_ID)
-          .maybeSingle();
-        if (error && error.code !== 'PGRST116') throw error;
-        if (data) setBusinessSettings(data);
-      } catch (e) {
-        console.error('Error fetching settings:', e);
-      } finally {
-        setLoadingSettings(false);
-      }
-    }
-    fetchSettings();
-  }, []);
+  const { settings: businessSettings, loading: loadingSettings } = useBusinessSettings(PROJECT_ID);
 
   /**
    * Obtiene los slots de tiempo y los marca como ocupados si chocan con citas existentes.

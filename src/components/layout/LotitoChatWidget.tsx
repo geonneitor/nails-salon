@@ -118,9 +118,9 @@ export function LotitoChatWidget() {
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             style={{
-              bottom: fabPos.bottom + 80,
-              right: fabPos.isRight ? '2rem' : 'auto',
-              left: fabPos.isRight ? 'auto' : '2rem'
+              bottom: '5rem',
+              right: fabPos.isRight ? '1.5rem' : 'auto',
+              left: fabPos.isRight ? 'auto' : '1.5rem'
             }}
             className="fixed z-50 w-[calc(100vw-3rem)] md:w-96 max-h-[600px] h-[70vh] bg-surface-container-lowest/95 backdrop-blur-2xl border border-primary/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col"
           >

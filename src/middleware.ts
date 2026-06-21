@@ -29,34 +29,14 @@ export async function middleware(request: NextRequest) {
     ? null
     : createServerClient(supabaseUrl as string, supabaseAnonKey as string, {
         cookies: {
-          get(cookieName: string) {
-            return request.cookies.get(cookieName)?.value;
+          getAll() {
+            return request.cookies.getAll();
           },
-          set(cookieName: string, value: string, options: CookieOptions) {
-            request.cookies.set({
-              name: cookieName,
-              value,
-              ...options,
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set({ name, value, ...options });
+              response.cookies.set({ name, value, ...options });
             });
-            response = NextResponse.next({
-              request: {
-                headers: request.headers,
-              },
-            });
-            response.cookies.set(cookieName, value, options);
-          },
-          remove(cookieName: string, options: CookieOptions) {
-            request.cookies.set({
-              name: cookieName,
-              value: '',
-              ...options,
-            });
-            response = NextResponse.next({
-              request: {
-                headers: request.headers,
-              },
-            });
-            response.cookies.set(cookieName, '', options);
           },
         },
       });

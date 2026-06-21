@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation, useMotionValue } from 'framer-motion';
 import { useLotitoAgent } from '@/context/LotitoAgentContext';
 import { LotusCharacter } from '@/components/tutorial/LotusCharacter';
 import { X, Send, Sparkles, Calendar, Bell, Scissors } from 'lucide-react';
@@ -13,6 +13,36 @@ export function LotitoChatWidget() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  // Lógica de arrastre magnético para Lotito
+  const dragControls = useAnimation();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const [fabPos, setFabPos] = useState({ isRight: true, bottom: 32 });
+
+  useEffect(() => {
+    dragControls.start({ scale: 1, opacity: 1 });
+  }, [dragControls]);
+
+  const handleDragEnd = (e: any, info: any) => {
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const isRight = info.point.x > windowWidth / 2;
+    const newBottom = Math.min(
+      windowHeight - 100,
+      Math.max(32, windowHeight - info.point.y - 32)
+    );
+
+    setFabPos({ isRight, bottom: newBottom });
+    x.set(0);
+    y.set(0);
+
+    dragControls.start({
+      rotate: isRight ? [0, 360] : [0, -360],
+      scale: [1, 0.8, 1.2, 1],
+      transition: { duration: 0.5, type: "spring", stiffness: 300 }
+    });
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -49,9 +79,20 @@ export function LotitoChatWidget() {
   return (
     <>
       {/* Botón flotante permanente */}
-      <button
+      <motion.button
+        drag
+        dragMomentum={false}
+        style={{
+          x,
+          y,
+          bottom: fabPos.bottom,
+          right: fabPos.isRight ? '2rem' : 'auto',
+          left: fabPos.isRight ? 'auto' : '2rem'
+        }}
+        animate={dragControls}
+        onDragEnd={handleDragEnd}
         onClick={toggleChat}
-        className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 bg-surface-container-lowest border border-primary/20 shadow-[0_8px_30px_rgba(212,175,55,0.15)] rounded-full p-1.5 hover:scale-105 transition-transform group"
+        className="fixed z-50 bg-surface-container-lowest border border-primary/20 shadow-[0_8px_30px_rgba(212,175,55,0.15)] rounded-full p-1.5 transition-colors group cursor-grab active:cursor-grabbing"
         aria-label="Abrir asistente Lotito"
       >
         <div className="relative w-14 h-14 bg-surface-container rounded-full flex items-center justify-center overflow-hidden">
@@ -66,7 +107,7 @@ export function LotitoChatWidget() {
             <span className="relative inline-flex rounded-full h-4 w-4 bg-accent-gold-primary border-2 border-surface-container-lowest"></span>
           </span>
         )}
-      </button>
+      </motion.button>
 
       {/* Panel del Chat */}
       <AnimatePresence>
@@ -76,7 +117,12 @@ export function LotitoChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-24 right-6 md:bottom-28 md:right-8 z-50 w-[calc(100vw-3rem)] md:w-96 max-h-[600px] h-[70vh] bg-surface-container-lowest/95 backdrop-blur-2xl border border-primary/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col"
+            style={{
+              bottom: fabPos.bottom + 80,
+              right: fabPos.isRight ? '2rem' : 'auto',
+              left: fabPos.isRight ? 'auto' : '2rem'
+            }}
+            className="fixed z-50 w-[calc(100vw-3rem)] md:w-96 max-h-[600px] h-[70vh] bg-surface-container-lowest/95 backdrop-blur-2xl border border-primary/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col"
           >
             {/* Header */}
             <div className="bg-surface-variant/30 border-b border-primary/10 p-4 flex items-center justify-between shrink-0">

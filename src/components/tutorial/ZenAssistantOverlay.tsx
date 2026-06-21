@@ -148,6 +148,8 @@ export function ZenAssistantOverlay() {
       <AnimatePresence mode="wait">
         <motion.div
           layout
+          drag
+          dragMomentum={false}
           key={message.title + message.content}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}

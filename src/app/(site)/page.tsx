@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useAnimation, useMotionValue } from 'framer-motion';
 import { ChevronDown, Instagram, MessageCircle, Music2, Calendar, Sparkles, Droplets, Leaf } from 'lucide-react';
 import PublicNavbar from '@/components/home/PublicNavbar';
 import { useZenAssistant } from '@/context/ZenAssistantContext';
@@ -48,6 +48,44 @@ export default function LandingPage() {
   const { startTour, isActive, hasCompletedTour, setContextMessage } = useZenAssistant();
   const [pulseCta, setPulseCta] = useState(false);
   const [tourStep, setTourStep] = useState(0);
+
+  // Lógica de arrastre magnético para Lotito
+  const controls = useAnimation();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const [fabPos, setFabPos] = useState({ isLeft: true, bottom: 96 }); // bottom: 96px (aprox bottom-24)
+
+  useEffect(() => {
+    controls.start({ scale: 1, opacity: 1 });
+  }, [controls]);
+
+  const handleDragEnd = (e: any, info: any) => {
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    
+    // Determinar si soltamos más cerca de la izquierda o la derecha
+    const isLeft = info.point.x < windowWidth / 2;
+    
+    // Calcular el nuevo bottom (sin salir de los márgenes superior/inferior)
+    const newBottom = Math.min(
+      windowHeight - 80, // No muy arriba
+      Math.max(32, windowHeight - info.point.y - 32) // No muy abajo
+    );
+
+    // 1. Cambiar estado CSS para que salte al borde
+    setFabPos({ isLeft, bottom: newBottom });
+    
+    // 2. Resetear las transformaciones de arrastre de inmediato
+    x.set(0);
+    y.set(0);
+
+    // 3. Animación de "dash" (giro rápido) al acomodarse
+    controls.start({
+      rotate: isLeft ? [0, -360] : [0, 360],
+      scale: [1, 0.8, 1.2, 1],
+      transition: { duration: 0.5, type: "spring", stiffness: 300 }
+    });
+  };
 
   // Mensaje del Asistente Zen para la Landing Page
   useEffect(() => {
@@ -321,12 +359,22 @@ export default function LandingPage() {
           A small hover tooltip invites them to repeat the walkthrough. */}
       {!isActive && (
         <motion.button
+          drag
+          dragMomentum={false}
+          style={{ 
+            x, 
+            y, 
+            bottom: fabPos.bottom, 
+            left: fabPos.isLeft ? '1.5rem' : 'auto', 
+            right: fabPos.isLeft ? 'auto' : '1.5rem' 
+          }}
           initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
+          animate={controls}
+          onDragEnd={handleDragEnd}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={startTour}
-          className={`fixed bottom-24 left-6 md:bottom-8 md:left-8 z-50 bg-surface-container-lowest border-2 border-primary/30 shadow-2xl p-2 rounded-full flex items-center text-primary hover:border-primary transition-colors group ${
+          className={`fixed z-50 bg-surface-container-lowest border-2 border-primary/30 shadow-2xl p-2 rounded-full flex items-center text-primary hover:border-primary transition-colors group ${
             hasCompletedTour ? '' : 'gap-3 pr-5'
           }`}
           title={hasCompletedTour ? '¿Repetir recorrido?' : 'Iniciar Asistente Zen'}

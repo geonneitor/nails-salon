@@ -47,7 +47,7 @@ const INITIAL_MESSAGES: ChatMessage[] = [
 ];
 
 export function LotitoAgentProvider({ children }: { children: ReactNode }) {
-  const { user } = useApp();
+  const { user, activeProject } = useApp();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [isTyping, setIsTyping] = useState(false);
@@ -133,7 +133,10 @@ export function LotitoAgentProvider({ children }: { children: ReactNode }) {
         const response = await fetch('/api/lotito', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: chatHistory }),
+          body: JSON.stringify({ 
+            messages: chatHistory,
+            projectId: activeProject?.id 
+          }),
         });
 
         if (!response.ok) {

@@ -17,6 +17,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { Skeleton, SkeletonText } from '@/components/ui/Skeleton';
 import { sendWhatsAppReminder } from '@/lib/whatsapp';
 import { useApp } from '@/context/AppContext';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 interface AppointmentDetailModalProps {
   appointment: AppointmentWithRelations | null;
@@ -96,6 +97,7 @@ export function AppointmentDetailModal({
   const [isEditingEmployee, setIsEditingEmployee] = useState(false);
   const { updateAppointment, error: updateError } = useAppointments({ projectId: activeProject?.id ?? null });
   const { employees, isLoading: employeesLoading } = useEmployees();
+  const confirm = useConfirm();
 
   if (!isOpen) return null;
 
@@ -158,6 +160,14 @@ export function AppointmentDetailModal({
   const price = appointment.total_price ?? 0;
 
   const handleEmployeeChange = async (employeeId: string) => {
+    const emp = employees.find(e => e.id === employeeId);
+    const ok = await confirm({
+      title: 'Cambiar especialista',
+      message: `¿Seguro que quieres reasignar esta cita a ${emp?.name}?`,
+      confirmLabel: 'Sí, reasignar'
+    });
+    if (!ok) return;
+
     const success = await updateAppointment(appointment.id, { employee_id: employeeId });
     if (success) {
       setIsEditingEmployee(false);
@@ -175,6 +185,14 @@ export function AppointmentDetailModal({
 
   /** Marca no-show y abre WhatsApp con el mensaje de política de inasistencia. */
   const handleNoShow = async () => {
+    const ok = await confirm({
+      title: 'Marcar como No Show',
+      message: '¿Confirmas que la clienta no se presentó? Se marcará como No Show.',
+      danger: true,
+      confirmLabel: 'Sí, marcar No Show'
+    });
+    if (!ok) return;
+
     if (!onStatusChange) return;
     onStatusChange(appointment.id, 'no_show');
     if (appointment.customer.phone) {
@@ -182,6 +200,37 @@ export function AppointmentDetailModal({
     } else {
       toast.warning('Sin teléfono', 'La clienta no tiene teléfono registrado; el mensaje no pudo enviarse.');
     }
+  };
+
+  const handleStatusChangeSafe = async (status: AppointmentStatus) => {
+    if (!onStatusChange) return;
+
+    let title = '';
+    let message = '';
+    let danger = false;
+    let confirmLabel = 'Confirmar';
+
+    if (status === 'cancelled') {
+      title = 'Cancelar cita';
+      message = '¿Seguro que quieres cancelar esta cita? Esta acción no se puede deshacer.';
+      danger = true;
+      confirmLabel = 'Sí, cancelar';
+    } else if (status === 'completed') {
+      title = 'Cobrar cita';
+      message = '¿Confirmas que el servicio finalizó y fue cobrado?';
+      confirmLabel = 'Sí, cobrar';
+    } else if (status === 'confirmed_advance') {
+      title = 'Validar anticipo';
+      message = '¿Confirmas que recibiste el anticipo para esta cita?';
+      confirmLabel = 'Sí, validar';
+    }
+
+    if (title) {
+      const ok = await confirm({ title, message, danger, confirmLabel });
+      if (!ok) return;
+    }
+
+    onStatusChange(appointment.id, status);
   };
 
   const renderTicketDetailsBreakdown = () => {
@@ -362,7 +411,7 @@ export function AppointmentDetailModal({
               
               {onStatusChange && appointment.status !== 'confirmed_advance' && appointment.status !== 'completed' && appointment.status !== 'cancelled' && appointment.status !== 'no_show' && (
                 <button
-                  onClick={() => onStatusChange(appointment.id, 'confirmed_advance')}
+                  onClick={() => handleStatusChangeSafe('confirmed_advance')}
                   className="w-full bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm font-sans"
                 >
                   Validar Anticipo
@@ -371,7 +420,7 @@ export function AppointmentDetailModal({
 
               {onStatusChange && appointment.status === 'confirmed_advance' && (
                 <button
-                  onClick={() => onStatusChange(appointment.id, 'completed')}
+                  onClick={() => handleStatusChangeSafe('completed')}
                   className="w-full bg-gold-primary text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-gold-dark transition-all shadow-sm font-sans"
                 >
                   Cobrar Cita
@@ -381,7 +430,7 @@ export function AppointmentDetailModal({
               {onStatusChange && appointment.status !== 'cancelled' && appointment.status !== 'no_show' && appointment.status !== 'completed' && (
                 <div className="flex gap-2 mt-2 pt-4 border-t border-secundario-zen/30">
                   <button
-                    onClick={() => onStatusChange(appointment.id, 'cancelled')}
+                    onClick={() => handleStatusChangeSafe('cancelled')}
                     className="flex-1 px-4 py-2 rounded-xl border border-red-200 text-red-600 uppercase tracking-widest text-[10px] font-bold hover:bg-red-50 transition-all"
                   >
                     Cancelar

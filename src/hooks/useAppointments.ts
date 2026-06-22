@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
+import { bellEvents } from '@/lib/notifications/bellEvents';
 import type {
   Appointment,
   AppointmentWithRelations,
@@ -124,8 +125,27 @@ export function useAppointments({
           table: 'appointments',
           filter: `project_id=eq.${projectId}`,
         },
-        () => {
+        (payload) => {
           fetchAppointments();
+
+          // Emitir evento de nueva cita SOLO en INSERT (no en UPDATE/DELETE).
+          if (payload.eventType === 'INSERT' && payload.new) {
+            const newRow = payload.new as Partial<AppointmentWithRelations> & {
+              customer?: { name?: string };
+            };
+            bellEvents.emit({
+              type: 'new_appointment',
+              payload: {
+                title: 'Nueva cita agendada',
+                appointmentId: newRow.id,
+                customerName:
+                  (newRow.customer as any)?.name ??
+                  (newRow as any).customer_name ??
+                  undefined,
+                url: '/calendar',
+              },
+            });
+          }
         }
       )
       .subscribe();

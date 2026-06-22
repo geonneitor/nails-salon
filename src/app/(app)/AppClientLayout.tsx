@@ -4,6 +4,7 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 
 import { LotitoAgentProvider } from '@/context/LotitoAgentContext';
 import { LotitoChatWidget } from '@/components/layout/LotitoChatWidget';
+import { NotificationOptIn } from '@/components/notifications/NotificationOptIn';
 
 export default function AppLayout({
   children,
@@ -18,6 +19,7 @@ export default function AppLayout({
         {children}
       </DashboardLayout>
       <LotitoChatWidget />
+      <NotificationOptIn />
     </LotitoAgentProvider>
   );
 }

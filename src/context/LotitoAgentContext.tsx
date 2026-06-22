@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { useRouter } from 'next/navigation';
+import { bellEvents } from '@/lib/notifications/bellEvents';
 
 export interface ChatMessage {
   id: string;
@@ -188,6 +189,17 @@ export function LotitoAgentProvider({ children }: { children: ReactNode }) {
             icon: '/icon.png'
           });
         }
+
+        // Emitir evento al bus de bellEvents (lo consume useNotificationBell).
+        bellEvents.emit({
+          type: 'lotito_reply',
+          payload: {
+            title: 'Lotito respondió',
+            body:
+              data.reply.length > 80 ? data.reply.substring(0, 80) + '...' : data.reply,
+            url: '/dashboard',
+          },
+        });
         
       } catch (error) {
         console.error('Error fetching Lotito API:', error);

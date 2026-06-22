@@ -6,9 +6,11 @@ import { useLotitoAgent } from '@/context/LotitoAgentContext';
 import { LotusCharacter } from '@/components/tutorial/LotusCharacter';
 import { X, Send, Sparkles, Calendar, Bell, Scissors } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
+import { useNotificationBell } from '@/lib/notifications/useNotificationBell';
 
 export function LotitoChatWidget() {
   const { isOpen, closeChat, toggleChat, messages, sendMessage, isTyping } = useLotitoAgent();
+  const { pendingCount, clearNotifications } = useNotificationBell();
   const [inputText, setInputText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -76,6 +78,14 @@ export function LotitoChatWidget() {
     }, 1500);
   };
 
+  const handleToggleWithClear = () => {
+    if (!isOpen) {
+      // Al abrir Lotito, limpiamos el contador de la campanita.
+      clearNotifications();
+    }
+    toggleChat();
+  };
+
   return (
     <>
       {/* Botón flotante permanente */}
@@ -91,9 +101,9 @@ export function LotitoChatWidget() {
         }}
         animate={dragControls}
         onDragEnd={handleDragEnd}
-        onClick={toggleChat}
+        onClick={handleToggleWithClear}
         className="fixed z-50 bg-surface-container-lowest border border-primary/20 shadow-[0_8px_30px_rgba(212,175,55,0.15)] rounded-full p-1.5 transition-colors group cursor-grab active:cursor-grabbing"
-        aria-label="Abrir asistente Lotito"
+        aria-label={pendingCount > 0 ? `Abrir Lotito · ${pendingCount} notificación(es) nueva(s)` : 'Abrir asistente Lotito'}
       >
         <div className="relative w-14 h-14 bg-surface-container rounded-full flex items-center justify-center overflow-hidden">
           <div className="scale-[0.8] mt-4">
@@ -101,9 +111,32 @@ export function LotitoChatWidget() {
           </div>
           <div className="absolute inset-0 bg-gradient-to-tr from-accent-gold-primary/10 to-transparent rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
-        {!isOpen && (
+
+        {/* Campanita con badge — solo cuando hay notificaciones pendientes y el chat está cerrado. */}
+        {!isOpen && pendingCount > 0 && (
+          <motion.span
+            key="bell-badge"
+            initial={{ opacity: 0, scale: 0.4 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.4 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+            className="absolute -top-1 -right-1 inline-flex"
+            aria-hidden="true"
+          >
+            {/* Fondo blanco para destacar el badge contra el botón oscuro */}
+            <span className="relative w-6 h-6 rounded-full bg-white shadow-md border border-red-500/30 flex items-center justify-center">
+              <Bell className="w-3 h-3 text-red-600 fill-red-500" strokeWidth={2.5} />
+              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none border-2 border-surface-container-lowest">
+                {pendingCount > 9 ? '9+' : pendingCount}
+              </span>
+            </span>
+          </motion.span>
+        )}
+
+        {/* Indicador de idle (sin notificaciones) — pulso dorado sutil, opcional. */}
+        {!isOpen && pendingCount === 0 && (
           <span className="absolute -top-1 -right-1 flex h-4 w-4">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-gold-primary opacity-75"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-gold-primary opacity-60"></span>
             <span className="relative inline-flex rounded-full h-4 w-4 bg-accent-gold-primary border-2 border-surface-container-lowest"></span>
           </span>
         )}

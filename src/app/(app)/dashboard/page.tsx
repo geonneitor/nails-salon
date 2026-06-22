@@ -10,7 +10,7 @@
 //   4) Alerts strip abajo (AlertList) — recordatorios, cumpleaños, etc.
 // ============================================================
 
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -23,6 +23,7 @@ import { useAppointments } from '@/hooks/useAppointments';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useCustomers } from '@/hooks/useCustomers';
 import { startOfLocalDay } from '@/lib/calendarGrid';
+import { bellEvents } from '@/lib/notifications/bellEvents';
 
 import { KpiCard } from '@/components/dashboard/KpiCard';
 import { TodayTimeline } from '@/components/dashboard/TodayTimeline';
@@ -102,6 +103,7 @@ export default function DashboardPage() {
 
   // ── Alertas (recordatorios pendientes, cumpleaños, no-shows) ─────
   const [remindersPending, setRemindersPending] = useState(0);
+  const prevRemindersRef = useRef(0);
   useEffect(() => {
     if (!projectId) return;
     let cancelled = false;
@@ -110,7 +112,23 @@ export default function DashboardPage() {
         const res = await fetch(`/api/admin/reminders?status=pending`);
         if (!res.ok) return;
         const json = await res.json();
-        if (!cancelled) setRemindersPending(json.reminders?.length ?? 0);
+        const next = json.reminders?.length ?? 0;
+        if (!cancelled) {
+          setRemindersPending((prev) => {
+            // Solo emitir si SUBE el contador (nuevo recordatorio entra).
+            if (next > prev && prev > 0) {
+              bellEvents.emit({
+                type: 'reminder_sent',
+                payload: {
+                  title: 'Recordatorio listo',
+                  body: `${next} recordatorio(s) listo(s) para enviar.`,
+                  url: '/settings',
+                },
+              });
+            }
+            return next;
+          });
+        }
       } catch {
         /* silencioso: el badge no debe romper el dashboard */
       }

@@ -25,6 +25,7 @@ import { useEmployees } from '@/hooks/useEmployees';
 import { useCalendarView } from '@/hooks/useCalendarView';
 import { useCalendarShortcuts } from '@/hooks/useCalendarShortcuts';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { useApp } from '@/context/AppContext';
 import { GRID_END_HOUR, GRID_HOURS, GRID_START_HOUR, startOfLocalDay } from '@/lib/calendarGrid';
 import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supabase';
@@ -39,6 +40,7 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   const { activeProject, role, user } = useApp();
   const projectId = activeProject?.id ?? null;
   const toast = useToast();
+  const confirm = useConfirm();
 
   // Estado de fecha de referencia central
   const [anchorDate, setAnchorDate] = useState<Date>(() => startOfLocalDay(new Date()));
@@ -67,9 +69,23 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
 
   // Filtros de Empleados
   const { employees } = useEmployees();
-  // Si es empleada, forzamos su ID
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>(role === 'employee' && user ? user.id : 'all');
-  const effectiveEmployeeId = role === 'employee' && user ? user.id : selectedEmployeeId;
+
+  // FIX P0 (employee ve 0 citas): cuando el rol es 'employee', su
+  // `user.id` es el auth user UUID, NO el id de la fila en `employees`.
+  // La cita guarda `employee_id` = employees.id, enlazado por
+  // `employees.auth_user_id` = user.id. Filtrar por user.id matchea
+  // cero citas. Resolvemos el employee row aquí y usamos su id.
+  const meAsEmployee = useMemo(() => {
+    if (role !== 'employee' || !user) return null;
+    return employees.find((e) => e.auth_user_id === user.id) ?? null;
+  }, [employees, role, user]);
+
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('all');
+  // Si por alguna razón no encontramos el row (caso edge: empleado
+  // invitado pero todavía sin fila en `employees`), usamos 'none' para
+  // no filtrar de más. Mejor mostrar todo que nada.
+  const effectiveEmployeeId =
+    role === 'employee' ? (meAsEmployee?.id ?? 'none') : selectedEmployeeId;
 
   // Consultas de datos concurrentes vinculadas al proyecto pasando el string | null esperado
   const { appointments, isLoading, refetch, createAppointment, updateAppointment } = useAppointments({ projectId });
@@ -79,7 +95,10 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
   const filteredAppointments = useMemo(() => {
     let result = appointments;
 
-    if (effectiveEmployeeId !== 'all') {
+    // Aplicar el filtro sólo cuando tenemos un id válido. 'all' = ver
+    // todas; 'none' = empleada sin fila en `employees`, no filtrar
+    // (mostrar todo) para que la pantalla no quede vacía.
+    if (effectiveEmployeeId !== 'all' && effectiveEmployeeId !== 'none') {
       result = result.filter((a) => a.employee_id === effectiveEmployeeId);
     }
 
@@ -154,6 +173,15 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
 
   const handleReschedule = async (id: string, newStart: Date, newEnd: Date, newEmployeeId: string) => {
     if (readOnly) return;
+    
+    const ok = await confirm({
+      title: 'Reprogramar cita',
+      message: `¿Seguro que quieres mover esta cita a las ${format(newStart, 'h:mm a')}?`,
+      confirmLabel: 'Sí, mover',
+    });
+    
+    if (!ok) return;
+
     const success = await updateAppointment(id, {
       start_time: newStart.toISOString(),
       end_time: newEnd.toISOString(),
@@ -308,6 +336,9 @@ export function CalendarView({ readOnly = false, customerFilterId }: CalendarVie
               className="bg-transparent text-xs text-primario-zen/70 focus:outline-none font-medium cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed truncate w-full"
             >
               {role !== 'employee' && <option value="all">Todas las especialistas</option>}
+              {role === 'employee' && !meAsEmployee && (
+                <option value="none">(Sin fila de empleada vinculada)</option>
+              )}
               {employees.map((emp) => (
                 <option key={emp.id} value={emp.id}>
                   {emp.name}

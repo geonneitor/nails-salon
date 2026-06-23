@@ -2,198 +2,387 @@
 
 // ============================================================
 // src/components/services/ServiceFormModal.tsx
-// Formulario premium para crear o editar un servicio.
+// Panel de configuración de servicio — UX inspirada en DIKIDI
 // ============================================================
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2 } from 'lucide-react';
-import type { Service } from '@/types/supabase';
+import { ChevronRight, Clock, Coffee, Wifi, Plus } from 'lucide-react';
+import type { ServiceVariant, ServiceCategory } from '@/types/supabase';
 import { useToast } from '@/components/ui/ToastProvider';
 
-interface ServiceFormModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (payload: any) => Promise<unknown>;
-  initialData?: Service | null;
+// ── Opciones de duración ──────────────────────────────────────
+const DURATION_OPTIONS = [
+  { label: '15 min', value: 15 },
+  { label: '30 min', value: 30 },
+  { label: '45 min', value: 45 },
+  { label: '1 hr', value: 60 },
+  { label: '1h 30m', value: 90 },
+  { label: '2 hr', value: 120 },
+  { label: '2h 30m', value: 150 },
+  { label: '3 hr', value: 180 },
+];
+
+const BREAK_OPTIONS = [
+  { label: 'No', value: 0 },
+  { label: '5 min', value: 5 },
+  { label: '10 min', value: 10 },
+  { label: '15 min', value: 15 },
+  { label: '30 min', value: 30 },
+];
+
+/** Formatea minutos → string legible: 60 → "1 hr", 90 → "1h 30m" */
+function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h} hr`;
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+// ── Toggle reutilizable ───────────────────────────────────────
+function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/50">
-        {label}
-      </label>
-      {children}
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primario-zen/40 ${
+        checked ? 'bg-green-500' : 'bg-secundario-zen/40'
+      }`}
+    >
+      <span
+        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-300 ${
+          checked ? 'translate-x-6' : 'translate-x-0'
+        }`}
+      />
+    </button>
+  );
+}
+
+// ── Chip selector inline ──────────────────────────────────────
+function ChipPicker<T extends number>({
+  options,
+  value,
+  onChange,
+  helperText,
+}: {
+  options: { label: string; value: T }[];
+  value: T;
+  onChange: (v: T) => void;
+  helperText?: string;
+}) {
+  return (
+    <div className="px-4 py-3 flex flex-wrap gap-2 bg-secundario-zen/5 border-t border-secundario-zen/20">
+      {options.map(opt => (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => onChange(opt.value)}
+          className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+            value === opt.value
+              ? 'bg-primario-zen text-fondo-zen shadow-sm'
+              : 'bg-secundario-zen/30 text-primario-zen/70 hover:bg-secundario-zen/50'
+          }`}
+        >
+          {opt.label}
+        </button>
+      ))}
+      {helperText && (
+        <p className="w-full text-[10px] text-primario-zen/35 mt-1 leading-relaxed">
+          {helperText}
+        </p>
+      )}
     </div>
   );
 }
 
-const INPUT_CLASS =
-  'w-full bg-secundario-zen/20 border border-secundario-zen/60 text-primario-zen text-sm rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primario-zen/30 transition-all placeholder:text-primario-zen/30';
+// ── Props ─────────────────────────────────────────────────────
+export interface ServiceFormModalSavePayload {
+  name: string;
+  base_price: number;
+  base_duration_minutes: number;
+  is_active: boolean;
+}
 
-export function ServiceFormModal({ isOpen, onClose, onSubmit, initialData }: ServiceFormModalProps) {
-  const [name, setName] = useState('');
-  const [duration, setDuration] = useState('60');
-  const [price, setPrice] = useState('');
+export interface ServiceFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  /** null = modo creación, ServiceVariant = modo edición */
+  variant?: ServiceVariant | null;
+  /** Categoría padre del servicio */
+  category: ServiceCategory;
+  /**
+   * Callback al guardar. Debe retornar true si la operación fue exitosa.
+   * @param payload Datos del servicio a guardar
+   */
+  onSave: (payload: ServiceFormModalSavePayload) => Promise<boolean>;
+}
+
+// ── Componente principal ──────────────────────────────────────
+export function ServiceFormModal({
+  isOpen,
+  onClose,
+  variant,
+  category,
+  onSave,
+}: ServiceFormModalProps) {
   const toast = useToast();
+
+  const [name, setName] = useState('');
+  const [isFree, setIsFree] = useState(false);
+  const [price, setPrice] = useState('');
+  const [duration, setDuration] = useState<number>(60);
+  const [breakMinutes, setBreakMinutes] = useState<number>(0); // UI-only (Opción A)
+  const [availableOnline, setAvailableOnline] = useState(true);
+  const [showDurationPicker, setShowDurationPicker] = useState(false);
+  const [showBreakPicker, setShowBreakPicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
+  // Poblar campos al abrir
   useEffect(() => {
-    if (isOpen) {
-      if (initialData) {
-        setName(initialData.name);
-        setDuration(initialData.duration_minutes.toString());
-        setPrice(initialData.price.toString());
-      } else {
-        setName('');
-        setDuration('60');
-        setPrice('');
-      }
-      setError(null);
+    if (!isOpen) return;
+    if (variant) {
+      setName(variant.name);
+      const free = variant.base_price === 0;
+      setIsFree(free);
+      setPrice(free ? '' : variant.base_price.toString());
+      setDuration(variant.base_duration_minutes || 60);
+      setAvailableOnline(variant.is_active);
+    } else {
+      setName('');
+      setIsFree(false);
+      setPrice('');
+      setDuration(60);
+      setAvailableOnline(true);
     }
-  }, [isOpen, initialData]);
+    setBreakMinutes(0);
+    setShowDurationPicker(false);
+    setShowBreakPicker(false);
+  }, [isOpen, variant]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    if (!name.trim() || !duration || !price) {
-      setError('Todos los campos son obligatorios.');
-      return;
-    }
-
+  const handleSave = async () => {
+    if (!name.trim() || submitting) return;
     setSubmitting(true);
-    const payload = {
-      ...(initialData ? { id: initialData.id } : {}),
+    const ok = await onSave({
       name: name.trim(),
-      duration_minutes: parseInt(duration, 10),
-      price: parseFloat(price),
-    };
+      base_price: isFree ? 0 : parseFloat(price) || 0,
+      base_duration_minutes: duration,
+      is_active: availableOnline,
+    });
+    setSubmitting(false);
+    if (ok) {
+      toast.success(
+        variant ? 'Servicio actualizado' : 'Servicio creado',
+        variant ? 'Los cambios fueron guardados.' : 'El servicio fue agregado al catálogo.'
+      );
+      onClose();
+    } else {
+      toast.error('Error al guardar', 'Intenta de nuevo.');
+    }
+  };
 
-    const result = await onSubmit(payload);
-   setSubmitting(false);
-   if (result) {
-     toast.success(
-       initialData ? 'Servicio actualizado' : 'Servicio creado',
-       initialData ? 'Los cambios fueron guardados.' : 'El servicio fue agregado correctamente.'
-     );
-     onClose();
-   } else {
-     const msg = initialData
-       ? 'Hubo un problema al actualizar el servicio.'
-       : 'Hubo un problema al crear el servicio.';
-     setError(msg);
-     toast.error('Error al guardar', msg);
-   }  
+  const toggleDurationPicker = () => {
+    setShowDurationPicker(p => !p);
+    setShowBreakPicker(false);
+  };
+
+  const toggleBreakPicker = () => {
+    setShowBreakPicker(p => !p);
+    setShowDurationPicker(false);
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center md:items-center">
+        <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center">
+          {/* Backdrop */}
           <motion.div
-            key="cb-backdrop"
+            key="sfm-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-primario-zen/20 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
           />
 
+          {/* Sheet / Modal */}
           <motion.div
-            key="cb-panel"
-            initial={{ opacity: 0, y: 50, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.97 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-            className="relative w-full md:max-w-md bg-surface-container-lowest rounded-t-3xl md:rounded-3xl shadow-2xl border border-secundario-zen/50 p-8 max-h-[90vh] overflow-y-auto"
+            key="sfm-panel"
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+            className="relative w-full md:max-w-md bg-surface-container-lowest rounded-t-3xl md:rounded-3xl shadow-2xl max-h-[92vh] flex flex-col overflow-hidden"
           >
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-primario-zen/40 font-semibold mb-1">
-                  {initialData ? 'Edición' : 'Catálogo'}
-                </p>
-                <h2 className="font-serif text-primario-zen text-2xl tracking-wide">
-                  {initialData ? 'Editar Servicio' : 'Nuevo Servicio'}
-                </h2>
-              </div>
+            {/* ── Header iOS ── */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-secundario-zen/20 bg-surface-container-lowest shrink-0">
               <button
+                type="button"
                 onClick={onClose}
-                aria-label="Cerrar formulario"
-                className="p-2 rounded-full text-primario-zen/40 hover:text-primario-zen hover:bg-secundario-zen/40 transition-all"
+                className="text-sm font-medium text-primario-zen/50 hover:text-primario-zen transition-colors w-20 text-left"
               >
-                <X className="w-5 h-5" />
+                Cancelar
+              </button>
+              <span className="text-sm font-semibold text-primario-zen tracking-wide">
+                Servicio
+              </span>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={!name.trim() || submitting}
+                className="text-sm font-semibold text-primario-zen disabled:opacity-30 transition-opacity w-20 text-right"
+              >
+                {submitting ? '...' : 'Guardar'}
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-              <Field label="Nombre del Servicio *">
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={INPUT_CLASS}
-                  placeholder="Ej. Manicure Gel"
-                  required
-                />
-              </Field>
+            {/* ── Scroll body ── */}
+            <div className="overflow-y-auto overscroll-contain flex-1">
+              <div className="p-5 flex flex-col gap-5 pb-10">
 
-              <Field label="Duración (minutos) *">
-                <select
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
-                  className={INPUT_CLASS}
-                  required
-                >
-                  <option value="15">15 min</option>
-                  <option value="30">30 min</option>
-                  <option value="45">45 min</option>
-                  <option value="60">60 min (1 hora)</option>
-                  <option value="90">90 min (1 hora 30 min)</option>
-                  <option value="120">120 min (2 horas)</option>
-                  <option value="150">150 min (2 horas 30 min)</option>
-                  <option value="180">180 min (3 horas)</option>
-                </select>
-              </Field>
-
-              <Field label="Precio ($) *">
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <span className="text-primario-zen/40 font-medium">$</span>
+                {/* NOMBRE DEL SERVICIO */}
+                <section>
+                  <p className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/40 mb-2 px-1">
+                    Nombre del servicio
+                  </p>
+                  <div className="bg-secundario-zen/10 rounded-2xl overflow-hidden border border-secundario-zen/30">
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={e => setName(e.target.value)}
+                      placeholder="Nombre del servicio"
+                      autoFocus
+                      className="w-full bg-transparent px-4 py-3.5 text-sm text-primario-zen placeholder:text-primario-zen/30 focus:outline-none border-b border-secundario-zen/20"
+                    />
+                    {/* Categoría (display-only) */}
+                    <div className="flex items-center justify-between px-4 py-3.5">
+                      <span className="text-sm text-primario-zen/50">{category.name}</span>
+                      <ChevronRight className="w-4 h-4 text-primario-zen/25" />
+                    </div>
                   </div>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    className={`${INPUT_CLASS} pl-8`}
-                    placeholder="0.00"
-                    required
-                  />
+                </section>
+
+                {/* COSTO */}
+                <section>
+                  <p className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/40 mb-2 px-1">
+                    Costo
+                  </p>
+                  <div className="bg-secundario-zen/10 rounded-2xl overflow-hidden border border-secundario-zen/30">
+                    {/* Fila Gratis */}
+                    <div className="flex items-center justify-between px-4 py-3.5 border-b border-secundario-zen/20">
+                      <span className="text-sm font-medium text-primario-zen">Gratis</span>
+                      <Toggle checked={isFree} onChange={setIsFree} />
+                    </div>
+                    {/* Fila precio */}
+                    <div
+                      className={`flex items-center gap-3 px-4 py-3.5 transition-opacity duration-200 ${
+                        isFree ? 'opacity-30 pointer-events-none select-none' : 'opacity-100'
+                      }`}
+                    >
+                      <span className="text-xs font-semibold text-primario-zen/50 bg-secundario-zen/40 px-2 py-0.5 rounded-md shrink-0">
+                        desde
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={price}
+                        onChange={e => setPrice(e.target.value)}
+                        placeholder="0.00"
+                        disabled={isFree}
+                        className="flex-1 bg-transparent text-sm text-primario-zen placeholder:text-primario-zen/30 focus:outline-none"
+                      />
+                      <span className="text-sm font-semibold text-primario-zen/50 shrink-0">MX$</span>
+                    </div>
+                  </div>
+                </section>
+
+                {/* DURACIÓN + DESCANSO */}
+                <div className="bg-secundario-zen/10 rounded-2xl overflow-hidden border border-secundario-zen/30">
+                  {/* Duración */}
+                  <button
+                    type="button"
+                    onClick={toggleDurationPicker}
+                    className="w-full flex items-center justify-between px-4 py-3.5 border-b border-secundario-zen/20 hover:bg-secundario-zen/20 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-4 h-4 text-primario-zen/40" />
+                      <span className="text-sm font-medium text-primario-zen">Duración</span>
+                    </div>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--accent-gold, #b59a5b)' }}>
+                      {formatDuration(duration)}
+                    </span>
+                  </button>
+                  {showDurationPicker && (
+                    <ChipPicker
+                      options={DURATION_OPTIONS}
+                      value={duration}
+                      onChange={v => { setDuration(v); setShowDurationPicker(false); }}
+                    />
+                  )}
+
+                  {/* Descanso */}
+                  <button
+                    type="button"
+                    onClick={toggleBreakPicker}
+                    className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-secundario-zen/20 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Coffee className="w-4 h-4 text-primario-zen/40" />
+                      <span className="text-sm font-medium text-primario-zen">Descanso después de la cita</span>
+                    </div>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--accent-gold, #b59a5b)' }}>
+                      {breakMinutes === 0 ? 'No' : `${breakMinutes} min`}
+                    </span>
+                  </button>
+                  {showBreakPicker && (
+                    <ChipPicker
+                      options={BREAK_OPTIONS}
+                      value={breakMinutes}
+                      onChange={v => { setBreakMinutes(v); setShowBreakPicker(false); }}
+                      helperText="El descanso se sumará a la duración de la cita"
+                    />
+                  )}
                 </div>
-              </Field>
 
-              {error && (
-                <p className="text-red-600 text-xs bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                  {error}
-                </p>
-              )}
+                {/* STAFF — placeholder visual */}
+                <section>
+                  <p className="text-[10px] uppercase tracking-widest font-semibold text-primario-zen/40 mb-2 px-1">
+                    Staff
+                  </p>
+                  <div className="bg-secundario-zen/10 rounded-2xl overflow-hidden border border-secundario-zen/30">
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-secundario-zen/20 transition-colors"
+                    >
+                      <span className="w-7 h-7 rounded-full bg-primario-zen flex items-center justify-center shrink-0">
+                        <Plus className="w-3.5 h-3.5 text-fondo-zen" />
+                      </span>
+                      <span className="text-sm text-primario-zen/60">Añadir empleada</span>
+                      <ChevronRight className="w-4 h-4 text-primario-zen/25 ml-auto" />
+                    </button>
+                  </div>
+                </section>
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full bg-primario-zen text-fondo-zen py-3.5 rounded-full uppercase tracking-widest text-xs font-semibold hover:bg-opacity-90 transition-all shadow-sm disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
-              >
-                {submitting ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Guardando...</>
-                ) : (
-                  initialData ? 'Guardar Cambios' : 'Guardar Servicio'
-                )}
-              </button>
-            </form>
+                {/* DISPONIBLE EN LÍNEA */}
+                <section>
+                  <div className="bg-secundario-zen/10 rounded-2xl overflow-hidden border border-secundario-zen/30">
+                    <div className="flex items-center justify-between px-4 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <Wifi className="w-4 h-4 text-primario-zen/40" />
+                        <span className="text-sm font-medium text-primario-zen">Disponible en línea</span>
+                      </div>
+                      <Toggle checked={availableOnline} onChange={setAvailableOnline} />
+                    </div>
+                    <p className="px-4 pb-4 text-[11px] text-primario-zen/35 leading-relaxed">
+                      El enlace a la reserva en línea estará disponible al guardar el servicio
+                    </p>
+                  </div>
+                </section>
+
+              </div>
+            </div>
           </motion.div>
         </div>
       )}

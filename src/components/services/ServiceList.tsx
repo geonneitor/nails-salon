@@ -8,6 +8,8 @@ import { useDynamicServices } from '@/hooks/useDynamicServices';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { Edit2, Check, X, Tag, Plus, Trash2, GripVertical, ChevronDown, ChevronRight } from 'lucide-react';
 import { useConfirm } from '@/components/ui/ConfirmDialog';
+import { ServiceFormModal } from '@/components/services/ServiceFormModal';
+import type { ServiceVariant, ServiceCategory } from '@/types/supabase';
 
 export function ServiceList({
   onVariantEdited,
@@ -25,10 +27,47 @@ export function ServiceList({
   } = useDynamicServices();
   const confirm = useConfirm();
 
-  // Estados de edición general
+  // Estados de edición general (modifiers + categories)
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editPrice, setEditPrice] = useState(0);
+
+  // ── Modal DIKIDI para variants ────────────────────────────
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalVariant, setModalVariant] = useState<ServiceVariant | null>(null);
+  const [modalCategory, setModalCategory] = useState<ServiceCategory | null>(null);
+
+  const openVariantModal = (cat: ServiceCategory, v?: ServiceVariant) => {
+    setModalCategory(cat);
+    setModalVariant(v ?? null);
+    setModalOpen(true);
+  };
+
+  const handleModalSave = async (payload: {
+    name: string;
+    base_price: number;
+    base_duration_minutes: number;
+    is_active: boolean;
+  }): Promise<boolean> => {
+    if (!modalCategory) return false;
+    try {
+      if (modalVariant) {
+        await updateVariant(modalVariant.id, payload);
+        onVariantEdited?.(modalCategory.id);
+      } else {
+        await createVariant(
+          modalCategory.id,
+          payload.name,
+          payload.base_price,
+          { base_duration_minutes: payload.base_duration_minutes, is_active: payload.is_active }
+        );
+        onVariantEdited?.(modalCategory.id);
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   // Estado de acordeones (colapsar categorías)
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
@@ -274,45 +313,44 @@ export function ServiceList({
             <div className="mb-6">
               <div className="flex justify-between items-center mb-3">
                 <h4 className="text-[10px] uppercase tracking-widest font-bold text-primario-zen/70">Opciones Base</h4>
-                <button onClick={() => { setAddingToCatId(category.id); setAddType('variant'); setNewItemName(''); setNewItemPrice(0); setIsCreatingCat(false); }} className="text-[10px] uppercase font-bold text-accent-gold hover:text-gold-dark flex items-center gap-1"><Plus className="w-3 h-3" /> Añadir Opción</button>
+                <button onClick={() => { setIsCreatingCat(false); openVariantModal(category); }} className="text-[10px] uppercase font-bold text-accent-gold hover:text-gold-dark flex items-center gap-1"><Plus className="w-3 h-3" /> Añadir Opción</button>
               </div>
               
               <div className="flex flex-col gap-2">
                 {catVariants.map(v => (
-                  <div key={v.id} className={`flex items-center justify-between p-3 rounded-2xl border transition-colors ${v.is_active ? 'bg-fondo-zen border-secundario-zen/50' : 'bg-gray-50 border-gray-200 opacity-60'}`}>
-                    {editingItemId === `var_${v.id}` ? (
-                      <div className="flex items-center gap-2 w-full">
-                        <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="p-1.5 text-sm border rounded-lg flex-1" autoFocus />
-                        <span className="text-sm text-primario-zen/50">$</span>
-                        <input type="number" value={editPrice} onChange={(e) => setEditPrice(Number(e.target.value))} className="w-20 text-sm p-1.5 border rounded-lg" />
-                        <button onClick={() => handleSaveEditVariant(v.id, v.category_id)} className="p-1.5 bg-green-100 text-green-700 rounded-lg"><Check className="w-4 h-4" /></button>
-                        <button onClick={() => setEditingItemId(null)} className="p-1.5 bg-gray-100 text-gray-700 rounded-lg"><X className="w-4 h-4" /></button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <input type="checkbox" checked={v.is_active} onChange={(e) => toggleVariantActive(v.id, e.target.checked)} className="w-4 h-4 accent-primario-zen rounded shrink-0" />
-                          <span className="text-sm font-medium text-primario-zen truncate">{v.name}</span>
-                        </div>
-                        <div className="flex items-center gap-3 shrink-0">
-                          <span className="text-sm font-semibold text-primario-zen">${v.base_price}</span>
-                          <button onClick={() => startEditVariant(v.id, v.name, v.base_price)} className="p-1 text-primario-zen/40 hover:text-primario-zen"><Edit2 className="w-4 h-4" /></button>
-                          <button onClick={() => handleDeleteVariant(v.id, v.category_id)} className="p-1 text-red-300 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
-                        </div>
-                      </>
-                    )}
+                  <div
+                    key={v.id}
+                    className={`flex items-center justify-between p-3 rounded-2xl border transition-colors ${v.is_active ? 'bg-fondo-zen border-secundario-zen/50' : 'bg-gray-50 border-gray-200 opacity-60'}`}
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <input
+                        type="checkbox"
+                        checked={v.is_active}
+                        onChange={(e) => toggleVariantActive(v.id, e.target.checked)}
+                        className="w-4 h-4 accent-primario-zen rounded shrink-0"
+                      />
+                      <span className="text-sm font-medium text-primario-zen truncate">{v.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-sm font-semibold text-primario-zen">
+                        {v.base_price === 0 ? 'Gratis' : `$${v.base_price}`}
+                      </span>
+                      <button
+                        onClick={() => openVariantModal(category, v)}
+                        className="p-1 text-primario-zen/40 hover:text-primario-zen"
+                        title="Editar servicio"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteVariant(v.id, v.category_id)}
+                        className="p-1 text-red-300 hover:text-red-500"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
-
-                {addingToCatId === category.id && addType === 'variant' && (
-                  <div className="flex items-center gap-2 p-3 rounded-2xl bg-secundario-zen/10 border border-primario-zen/30">
-                    <input type="text" placeholder="Nombre" value={newItemName} onChange={(e) => setNewItemName(e.target.value)} className="p-1.5 text-sm border rounded-lg flex-1" autoFocus />
-                    <span className="text-sm text-primario-zen/50">$</span>
-                    <input type="number" placeholder="Precio" value={newItemPrice || ''} onChange={(e) => setNewItemPrice(Number(e.target.value))} className="w-20 text-sm p-1.5 border rounded-lg" />
-                    <button onClick={handleSaveNewItem} className="p-1.5 bg-primario-zen text-fondo-zen rounded-lg"><Check className="w-4 h-4" /></button>
-                    <button onClick={() => setAddingToCatId(null)} className="p-1.5 bg-gray-200 text-gray-700 rounded-lg"><X className="w-4 h-4" /></button>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -374,6 +412,17 @@ export function ServiceList({
           </div>
         );
       })}
+
+      {/* Modal DIKIDI para crear/editar variants */}
+      {modalCategory && (
+        <ServiceFormModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          variant={modalVariant}
+          category={modalCategory}
+          onSave={handleModalSave}
+        />
+      )}
     </div>
   );
 }

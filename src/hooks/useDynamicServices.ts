@@ -126,15 +126,22 @@ export function useDynamicServices(explicitProjectId?: string) {
   };
 
   // --- VARIANTS CRUD ---
-  const createVariant = async (category_id: string, name: string, base_price: number) => {
+  const createVariant = async (
+    category_id: string,
+    name: string,
+    base_price: number,
+    options?: { base_duration_minutes?: number; is_active?: boolean }
+  ) => {
     const catVariants = data.variants.filter(v => v.category_id === category_id);
     const currentMax = catVariants.length > 0 ? Math.max(...catVariants.map(v => v.display_order)) : 0;
-    
+
     const { error: e } = await supabase.from('service_variants').insert({
       category_id,
       name,
       base_price,
-      display_order: currentMax + 1
+      display_order: currentMax + 1,
+      ...(options?.base_duration_minutes !== undefined && { base_duration_minutes: options.base_duration_minutes }),
+      ...(options?.is_active !== undefined && { is_active: options.is_active }),
     });
     if (e) throw e;
     await fetchServices();

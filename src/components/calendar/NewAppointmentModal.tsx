@@ -27,14 +27,12 @@ interface NewAppointmentModalProps {
 }
 
 const BOOKING_COLORS = [
-  '#4ade80', // green
-  '#fbbf24', // yellow
-  '#60a5fa', // blue
-  '#a78bfa', // purple
-  '#f87171', // red
-  '#a3e635', // lime
-  '#2dd4bf', // teal
-  '#f472b6', // pink
+  '#8A9A5B', // Verde Musgo (Moss Green)
+  '#D4A373', // Arena / Terracota (Sand/Terracotta)
+  '#A78A7F', // Rosa Apagado (Muted Rose)
+  '#6D6875', // Morado Pizarra (Slate Purple)
+  '#7C98B3', // Azul Polvo (Dusty Blue)
+  '#E5989B', // Coral Suave (Soft Coral)
 ];
 
 /** Campo de formulario reutilizable */

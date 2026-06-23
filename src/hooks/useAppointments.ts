@@ -34,6 +34,7 @@ interface UseAppointmentsReturn {
   createAppointment: (payload: CreateAppointmentPayload) => Promise<Appointment | null>;
   updateAppointment: (id: string, payload: UpdateAppointmentPayload) => Promise<boolean>;
   checkEmployeeAvailability: (employeeId: string, start: Date, end: Date) => Promise<{ available: boolean; reason?: string }>;
+  deleteAppointment: (id: string) => Promise<boolean>;
   refetch: () => Promise<void>;
 }
 
@@ -282,12 +283,35 @@ export function useAppointments({
     [projectId]
   );
 
+  const deleteAppointment = useCallback(
+    async (id: string): Promise<boolean> => {
+      if (!projectId) {
+        setError('No hay un proyecto activo seleccionado.');
+        return false;
+      }
+      const { error: deleteError } = await supabase
+        .from('appointments')
+        .delete()
+        .eq('id', id)
+        .eq('project_id', projectId);
+
+      if (deleteError) {
+        setError(deleteError.message);
+        return false;
+      }
+
+      return true;
+    },
+    [projectId]
+  );
+
   return {
     appointments,
     isLoading,
     error,
     createAppointment,
     updateAppointment,
+    deleteAppointment,
     checkEmployeeAvailability,
     refetch: fetchAppointments,
   };

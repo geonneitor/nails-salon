@@ -82,10 +82,9 @@ export function useNotificationBell(): UseNotificationBellReturn {
       setPendingCount((c) => c + 1);
       setLastEvent(event);
 
-      // Notificación nativa SOLO si la pestaña está oculta y hay permiso.
+      // Notificación nativa si hay permiso concedido.
       if (
         typeof document !== 'undefined' &&
-        document.hidden &&
         Notification.permission === 'granted'
       ) {
         const title = event.payload?.title ?? defaultTitleFor(event.type);

@@ -24,7 +24,7 @@ WITH ranked AS (
     SELECT id,
            ROW_NUMBER() OVER (
                PARTITION BY project_id
-               ORDER BY created_at DESC NULLS LAST, ctid DESC
+               ORDER BY ctid DESC
            ) AS rn
     FROM public.business_settings
 )

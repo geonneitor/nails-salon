@@ -95,7 +95,7 @@ export function AppointmentDetailModal({
   const toast = useToast();
   const { activeProject } = useApp();
   const [isEditingEmployee, setIsEditingEmployee] = useState(false);
-  const { updateAppointment, error: updateError } = useAppointments({ projectId: activeProject?.id ?? null });
+  const { updateAppointment, deleteAppointment, error: updateError } = useAppointments({ projectId: activeProject?.id ?? null });
   const { employees, isLoading: employeesLoading } = useEmployees();
   const confirm = useConfirm();
 
@@ -231,6 +231,24 @@ export function AppointmentDetailModal({
     }
 
     onStatusChange(appointment.id, status);
+  };
+
+  const handleDelete = async () => {
+    const ok = await confirm({
+      title: 'Eliminar Cita',
+      message: '¿Estás seguro que quieres eliminar esta cita completamente? Ya no aparecerá en el calendario y no se podrá recuperar.',
+      danger: true,
+      confirmLabel: 'Sí, eliminar',
+    });
+    if (!ok) return;
+
+    const success = await deleteAppointment(appointment.id);
+    if (success) {
+      toast.success('Cita eliminada', 'La cita fue borrada exitosamente.');
+      onClose();
+    } else {
+      toast.error('Error al eliminar', updateError || 'No se pudo eliminar la cita.');
+    }
   };
 
   const renderTicketDetailsBreakdown = () => {
@@ -444,6 +462,16 @@ export function AppointmentDetailModal({
                   </button>
                 </div>
               )}
+
+              {/* Botón de Eliminar (Siempre visible al final) */}
+              <div className="mt-2 text-center">
+                <button
+                  onClick={handleDelete}
+                  className="text-red-400 hover:text-red-600 text-xs font-semibold uppercase tracking-wider underline decoration-red-200 transition-colors"
+                >
+                  Eliminar permanentemente
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>

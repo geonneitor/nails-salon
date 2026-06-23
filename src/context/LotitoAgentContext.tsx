@@ -112,6 +112,24 @@ export function LotitoAgentProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
+  // Escuchar notificaciones globales para inyectarlas en el chat de Lotito
+  useEffect(() => {
+    const unsubscribe = bellEvents.subscribe((event) => {
+      if (event.type === 'new_appointment') {
+        const msg: ChatMessage = {
+          id: `msg-sys-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+          sender: 'lotito',
+          text: `🔔 ¡Atención! Se ha agendado una nueva cita en el calendario.\n${event.payload?.customerName ? 'Cliente: ' + event.payload.customerName : ''}`,
+          timestamp: new Date(),
+          isActionable: true,
+        };
+        setMessages(prev => [...prev, msg]);
+        playZenSound();
+      }
+    });
+    return unsubscribe;
+  }, [playZenSound]);
+
   const sendMessage = useCallback(async (text: string) => {
     const userMsg: ChatMessage = {
       id: `msg-user-${Date.now()}`,

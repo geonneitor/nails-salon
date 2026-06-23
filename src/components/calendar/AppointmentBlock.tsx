@@ -8,6 +8,7 @@ import { rangeHeight, timeToYOffset } from '@/lib/calendarGrid';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useApp } from '@/context/AppContext';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 import { ReminderBadge, ReminderCard } from './ReminderBadge';
 import type { AppointmentWithRelations, AppointmentStatus } from '@/types/supabase';
 import type { AppointmentReminder } from '@/hooks/useAppointmentReminders';
@@ -269,9 +270,21 @@ function InlineStatusRow({
   const { activeProject } = useApp();
   const { updateAppointment } = useAppointments({ projectId: activeProject?.id ?? null });
   const toast = useToast();
+  const confirm = useConfirm();
 
   const change = async (next: AppointmentStatus) => {
     if (status === next) return;
+    
+    if (next === 'cancelled') {
+      const ok = await confirm({
+        title: 'Cancelar cita',
+        message: '¿Seguro que quieres cancelar esta cita?',
+        danger: true,
+        confirmLabel: 'Sí, cancelar'
+      });
+      if (!ok) return;
+    }
+    
     const ok = await updateAppointment(appointmentId, { status: next });
     if (ok) {
       const labels: Record<AppointmentStatus, string> = {

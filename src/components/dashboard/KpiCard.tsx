@@ -23,6 +23,10 @@ interface KpiCardProps {
   delta?: { value: number; label?: string } | null;
   /** Hint editorial arriba a la derecha (ej. "HOY"). */
   hint?: string;
+  /** Función al hacer clic para filtrar o accionar. */
+  onClick?: () => void;
+  /** Estado activo para indicar que el filtro está aplicado. */
+  isActive?: boolean;
 }
 
 const TONE_STYLES = {
@@ -61,6 +65,8 @@ export function KpiCard({
   tone = 'primary',
   delta,
   hint,
+  onClick,
+  isActive = false,
 }: KpiCardProps) {
   const toneStyle = TONE_STYLES[tone];
   const [display, setDisplay] = useState(0);
@@ -87,10 +93,13 @@ export function KpiCard({
   return (
     <motion.div
       ref={ref}
+      onClick={onClick}
       initial={{ opacity: 0, y: 12 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="card-depth relative rounded-3xl p-6 flex flex-col gap-5 group overflow-hidden"
+      className={`card-depth relative rounded-3xl p-6 flex flex-col gap-5 group overflow-hidden ${
+        onClick ? 'cursor-pointer hover:-translate-y-1 transition-all shadow-sm hover:shadow-md' : ''
+      } ${isActive ? 'ring-2 ring-offset-2 ring-offset-fondo-zen ring-primario-zen' : ''}`}
     >
       {/* Hairline dorado superior — un toque editorial */}
       <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-gold-primary/30 to-transparent" />

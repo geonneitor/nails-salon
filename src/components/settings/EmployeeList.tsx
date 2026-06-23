@@ -12,9 +12,11 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import type { Employee } from '@/types/supabase';
 import { DataTable, Column } from '@/components/ui/DataTable';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 export function EmployeeList() {
   const { employees, isLoading, error, createEmployee, updateEmployee, deleteEmployee } = useEmployees();
+  const confirm = useConfirm();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
@@ -28,8 +30,14 @@ export function EmployeeList() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('¿Estás segura de eliminar a esta empleada?')) {
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: '¿Eliminar empleada?',
+      message: 'Esta acción no se puede deshacer y borrará a la especialista de la lista.',
+      confirmLabel: 'Sí, eliminar',
+      danger: true,
+    });
+    if (ok) {
       deleteEmployee(id);
     }
   };

@@ -37,7 +37,7 @@ function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: strin
 export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelete }: CustomerDetailModalProps) {
   const confirm = useConfirm();
   const { fetchGallery, uploadPhoto } = useCustomers();
-  const [activeTab, setActiveTab] = useState<'info' | 'history' | 'gallery'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'history' | 'receipts'>('info');
 
   const [gallery, setGallery] = useState<CustomerGallery[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -47,7 +47,7 @@ export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelet
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   useEffect(() => {
-    if (isOpen && customer && activeTab === 'gallery') {
+    if (isOpen && customer && activeTab === 'receipts') {
       fetchGallery(customer.id).then(setGallery);
     }
     if (isOpen && customer && activeTab === 'history') {
@@ -127,7 +127,7 @@ export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelet
             </div>
 
             <div className="flex border-b border-secundario-zen/40 mb-5 shrink-0">
-              {(['info', 'history', 'gallery'] as const).map((tab) => (
+              {(['info', 'history', 'receipts'] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -137,7 +137,7 @@ export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelet
                       : 'text-primario-zen/40 hover:text-primario-zen/70'
                   }`}
                 >
-                  {tab === 'info' ? 'Ficha Clínica' : tab === 'history' ? 'Historial' : 'Galería'}
+                  {tab === 'info' ? 'Ficha Clínica' : tab === 'history' ? 'Historial' : 'Comprobantes'}
                 </button>
               ))}
             </div>
@@ -189,10 +189,10 @@ export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelet
                 </motion.div>
               )}
 
-              {activeTab === 'gallery' && (
+              {activeTab === 'receipts' && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col h-full">
                   <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xs uppercase tracking-widest font-bold text-primario-zen/60">Fotos Clínicas</h3>
+                    <h3 className="text-xs uppercase tracking-widest font-bold text-primario-zen/60">Comprobantes de Pago</h3>
                     <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleUpload} />
                     <button 
                       onClick={() => fileInputRef.current?.click()}
@@ -200,15 +200,15 @@ export function CustomerDetailModal({ customer, isOpen, onClose, onEdit, onDelet
                       className="flex items-center gap-2 bg-primario-zen/10 text-primario-zen px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-primario-zen/20 transition-colors disabled:opacity-50"
                     >
                       {isUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3" />}
-                      Subir Foto
+                      Subir Comprobante
                     </button>
                   </div>
                   
                   {gallery.length === 0 && !isUploading ? (
                     <div className="flex-1 flex flex-col items-center justify-center py-12 text-center text-primario-zen/40 border-2 border-dashed border-secundario-zen/50 rounded-2xl">
                       <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
-                      <p className="text-sm">Sin imágenes</p>
-                      <p className="text-xs mt-1">Sube el antes y después de tu clienta.</p>
+                      <p className="text-sm">Sin comprobantes</p>
+                      <p className="text-xs mt-1">Sube capturas de transferencias o recibos.</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

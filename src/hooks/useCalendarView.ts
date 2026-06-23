@@ -10,9 +10,9 @@ const STORAGE_KEY_ZOOM = 'zen-cal-zoom';
 
 /** Zoom vertical: altura en píxeles de cada hora. */
 export const ZOOM_LEVELS = {
-  compact: 60,
-  comfortable: 100,
-  airy: 140,
+  compact: 40,
+  comfortable: 48,
+  airy: 60,
 } as const;
 
 export type ZoomLevel = keyof typeof ZOOM_LEVELS;

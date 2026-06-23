@@ -7,6 +7,7 @@ import { useState, useRef } from 'react';
 import { useDynamicServices } from '@/hooks/useDynamicServices';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 import { Edit2, Check, X, Tag, Plus, Trash2, GripVertical, ChevronDown, ChevronRight } from 'lucide-react';
+import { useConfirm } from '@/components/ui/ConfirmDialog';
 
 export function ServiceList({
   onVariantEdited,
@@ -22,6 +23,7 @@ export function ServiceList({
     createVariant, updateVariant, deleteVariant,
     createModifier, updateModifier, deleteModifier
   } = useDynamicServices();
+  const confirm = useConfirm();
 
   // Estados de edición general
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -129,20 +131,38 @@ export function ServiceList({
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (window.confirm('¿Seguro que quieres borrar esta categoría y todos sus servicios?')) {
+    const ok = await confirm({
+      title: '¿Borrar categoría?',
+      message: '¿Seguro que quieres borrar esta categoría y todos sus servicios asociados?',
+      confirmLabel: 'Sí, borrar',
+      danger: true,
+    });
+    if (ok) {
       await deleteCategory(id);
     }
   };
 
   const handleDeleteVariant = async (id: string, categoryId: string) => {
-    if (window.confirm('¿Borrar esta opción?')) {
+    const ok = await confirm({
+      title: '¿Borrar esta opción?',
+      message: 'Se eliminará esta opción base permanentemente.',
+      confirmLabel: 'Borrar',
+      danger: true,
+    });
+    if (ok) {
       await deleteVariant(id);
       onVariantEdited?.(categoryId);
     }
   };
 
   const handleDeleteModifier = async (id: string, categoryId: string) => {
-    if (window.confirm('¿Borrar este adicional?')) {
+    const ok = await confirm({
+      title: '¿Borrar este adicional?',
+      message: 'Se eliminará este servicio adicional permanentemente.',
+      confirmLabel: 'Borrar',
+      danger: true,
+    });
+    if (ok) {
       await deleteModifier(id);
       onModifierEdited?.(categoryId);
     }

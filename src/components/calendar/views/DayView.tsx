@@ -127,7 +127,7 @@ export function DayView({
                 style={{ height: totalHeight }}
               >
                 {/* Nombre de la empleada (Header) */}
-                <div className="sticky top-0 z-30 bg-fondo-zen/90 backdrop-blur-sm border-b border-secundario-zen/40 px-2 py-2 text-center shadow-sm">
+                <div className="sticky top-0 z-50 bg-fondo-zen/90 backdrop-blur-sm border-b border-secundario-zen/40 px-2 py-2 text-center shadow-sm">
                   <span className="text-[11px] uppercase tracking-widest font-bold text-primario-zen/70">
                     {emp.name}
                   </span>

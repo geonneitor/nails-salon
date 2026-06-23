@@ -38,6 +38,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const { customers } = useCustomers();
 
+  // Estado para filtro del Timeline desde los KPIs
+  const [activeFilter, setActiveFilter] = useState<'all' | 'completed' | 'pending' | 'no_show'>('all');
+
   // dateRange con refresco a medianoche: evita el bug de "hoy congelado"
   // si la pestaña queda abierta entre días.
   const [today, setToday] = useState<Date>(() => startOfLocalDay(new Date()));
@@ -100,6 +103,15 @@ export default function DashboardPage() {
     () => todayAppts.filter((a) => a.status === 'pending_advance').length,
     [todayAppts]
   );
+
+  // Citas filtradas para la línea de tiempo
+  const displayedAppts = useMemo(() => {
+    if (activeFilter === 'all') return todayAppts;
+    if (activeFilter === 'completed') return todayAppts.filter(a => a.status === 'completed' || a.status === 'confirmed_advance');
+    if (activeFilter === 'pending') return todayAppts.filter(a => a.status === 'pending_advance');
+    if (activeFilter === 'no_show') return todayAppts.filter(a => a.status === 'no_show');
+    return todayAppts;
+  }, [todayAppts, activeFilter]);
 
   // ── Alertas (recordatorios pendientes, cumpleaños, no-shows) ─────
   const [remindersPending, setRemindersPending] = useState(0);
@@ -264,6 +276,8 @@ export default function DashboardPage() {
           caption="Citas programadas"
           hint="HOY"
           tone="primary"
+          onClick={() => setActiveFilter(activeFilter === 'all' ? 'all' : 'all')}
+          isActive={activeFilter === 'all'}
         />
         <KpiCard
           label="Cobrado hoy"
@@ -273,6 +287,8 @@ export default function DashboardPage() {
           suffix="MXN"
           hint="COBRADO"
           tone="gold"
+          onClick={() => setActiveFilter(activeFilter === 'completed' ? 'all' : 'completed')}
+          isActive={activeFilter === 'completed'}
         />
         <KpiCard
           label="Pendiente de cobrar"
@@ -282,14 +298,18 @@ export default function DashboardPage() {
           suffix="MXN"
           hint="PENDIENTE"
           tone="lavender"
+          onClick={() => setActiveFilter(activeFilter === 'pending' ? 'all' : 'pending')}
+          isActive={activeFilter === 'pending'}
         />
         <KpiCard
-          label="No-shows esta semana"
-          value={noShowsThisWeek}
+          label="No-shows hoy"
+          value={todayAppts.filter(a => a.status === 'no_show').length}
           icon={TrendingDown}
-          caption="Inasistencias"
-          hint="SEMANA"
+          caption="Inasistencias del día"
+          hint="HOY"
           tone="botanical"
+          onClick={() => setActiveFilter(activeFilter === 'no_show' ? 'all' : 'no_show')}
+          isActive={activeFilter === 'no_show'}
         />
       </section>
 
@@ -299,13 +319,13 @@ export default function DashboardPage() {
           <div className="flex items-baseline justify-between mb-5">
             <h2 className="font-serif text-2xl text-primario-zen">La jornada de hoy</h2>
             <span className="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant/60 font-sans">
-              {todayAppts.length === 0
+              {displayedAppts.length === 0
                 ? 'Sin citas'
-                : `${todayAppts.length} ${todayAppts.length === 1 ? 'cita' : 'citas'}`}
+                : `${displayedAppts.length} ${displayedAppts.length === 1 ? 'cita' : 'citas'}`}
             </span>
           </div>
           <TodayTimeline
-            appointments={todayAppts}
+            appointments={displayedAppts}
             isLoading={isLoading}
             onMarkPaid={handleMarkPaid}
             onConfirm={handleConfirm}

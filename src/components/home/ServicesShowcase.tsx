@@ -38,7 +38,7 @@ export default function ServicesShowcase() {
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
           <div className="max-w-2xl">
             <motion.span
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 1, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className="text-xs uppercase tracking-[0.2em] font-semibold text-primary/50 mb-4 block"
@@ -46,7 +46,7 @@ export default function ServicesShowcase() {
               Nuestra Colección
             </motion.span>
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 1, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
@@ -57,7 +57,7 @@ export default function ServicesShowcase() {
           </div>
           
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 1, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
@@ -77,7 +77,7 @@ export default function ServicesShowcase() {
           {SERVICES.map((srv, idx) => (
             <motion.div
               key={srv.title}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 1, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
               transition={{ delay: idx * 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}

@@ -45,7 +45,7 @@ export default function SmartBookingFeature() {
         
         {/* Lado Izquierdo: Textos */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 1, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}

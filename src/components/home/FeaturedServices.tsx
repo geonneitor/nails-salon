@@ -42,7 +42,7 @@ export default function FeaturedServices() {
             {services.map((svc, i) => (
               <motion.div 
                 key={i}
-                initial={{ opacity: 0, x: -50 }}
+                initial={{ opacity: 1, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ margin: "-20% 0px -20% 0px" }}
                 transition={{ duration: 0.8, ease: "easeOut" }}

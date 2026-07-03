@@ -43,7 +43,7 @@ export default function BookingTutorial() {
   return (
     <section className="w-full py-24 px-6 max-w-none">
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 1, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -81,7 +81,7 @@ export default function BookingTutorial() {
             return (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 1, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: idx * 0.14 }}

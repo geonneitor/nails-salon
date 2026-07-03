@@ -228,7 +228,7 @@ export default function DashboardPage() {
     <div className="p-6 md:p-8 max-w-none mx-auto w-full space-y-8">
       {/* HEADER */}
       <motion.header
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 1, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 pb-2"

@@ -28,9 +28,9 @@ function FAQAccordion({ faq }: { faq: {q: string, a: string} }) {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ height: 0, opacity: 0 }}
+            initial={{ height: 0, opacity: 1 }}
             animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
+            exit={{ height: 0, opacity: 1 }}
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
@@ -260,7 +260,7 @@ export default function LandingPage() {
         </div>
 
         <motion.div 
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
           className="relative z-10 flex flex-col items-center justify-center px-6 md:px-12 max-w-6xl mx-auto text-center md:text-left w-full"
@@ -269,12 +269,12 @@ export default function LandingPage() {
             Santuario de Uñas & Pedicura Spa
           </span>
           
-          <h1 className="font-serif text-6xl md:text-8xl lg:text-[8rem] text-white leading-[0.9] mb-12 drop-shadow-[0_10px_40px_rgba(0,0,0,0.9)] tracking-tight w-full flex flex-col items-center md:items-start">
+          <h1 className="font-serif text-5xl sm:text-6xl md:text-8xl lg:text-[8rem] text-white leading-[0.9] mb-8 md:mb-12 drop-shadow-[0_10px_40px_rgba(0,0,0,0.9)] tracking-tight w-full flex flex-col items-center md:items-start">
             <span>El arte en tus manos.</span>
-            <span className="italic text-primary/90 font-light md:ml-32 mt-2 md:mt-4 text-5xl md:text-7xl lg:text-[7rem]">La calma en tus pies.</span>
+            <span className="italic text-primary/90 font-light md:ml-32 mt-2 md:mt-4 text-4xl sm:text-5xl md:text-7xl lg:text-[7rem]">La calma en tus pies.</span>
           </h1>
           
-          <p className="text-xl md:text-3xl text-white/95 font-light mb-16 max-w-4xl drop-shadow-[0_5px_20px_rgba(0,0,0,0.9)] leading-[1.6] text-center md:text-left self-center md:self-start">
+          <p className="text-lg sm:text-xl md:text-3xl text-white/95 font-light mb-16 max-w-4xl drop-shadow-[0_5px_20px_rgba(0,0,0,0.9)] leading-[1.6] text-center md:text-left self-center md:self-start">
             Descubre un concepto de salón diferente. Nos especializamos en diseño de uñas impecable y pedicura botánica, fusionando la higiene clínica con una atmósfera de paz absoluta. <strong className="text-white font-normal">Sin prisas.</strong>
           </p>
           
@@ -318,7 +318,7 @@ export default function LandingPage() {
       {/* ── Manual / FAQ Section ── */}
       <section data-tour="faq" className="px-6 md:px-12 py-16 max-w-3xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
@@ -368,7 +368,7 @@ export default function LandingPage() {
             left: fabPos.isLeft ? '1.5rem' : 'auto', 
             right: fabPos.isLeft ? 'auto' : '1.5rem' 
           }}
-          initial={{ scale: 0, opacity: 0 }}
+          initial={{ scale: 1, opacity: 1 }}
           animate={controls}
           onDragEnd={handleDragEnd}
           whileHover={{ scale: 1.05 }}
@@ -396,9 +396,9 @@ export default function LandingPage() {
           The pulsing outer ring only animates when pulseCta is true (every ~9s). */}
       <AnimatePresence>
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
+          initial={{ y: 100, opacity: 1 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
+          exit={{ y: 100, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 20 }}
           className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-[300px]"
         >

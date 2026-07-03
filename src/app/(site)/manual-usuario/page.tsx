@@ -299,9 +299,9 @@ export default function ManualUsuarioPage() {
                     <AnimatePresence initial={false}>
                       {isOpen && (
                         <motion.div
-                          initial={{ height: 0, opacity: 0 }}
+                          initial={{ height: 0, opacity: 1 }}
                           animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
+                          exit={{ height: 0, opacity: 1 }}
                           transition={{ duration: 0.3 }}
                           className="border-t border-secundario-zen/20"
                         >

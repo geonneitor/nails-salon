@@ -102,7 +102,7 @@ export default function ClientPortal({ params }: { params: { id: string } }) {
       </button>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 1, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="bg-surface-container-lowest border border-outline-variant/30 rounded-[2rem] p-6 md:p-10 shadow-soft-shadow relative overflow-hidden"
       >

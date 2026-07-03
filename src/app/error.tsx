@@ -19,7 +19,7 @@ export default function Error({
   return (
     <main className="min-h-screen w-full bg-fondo-zen flex flex-col items-center justify-center p-6 text-center">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 1, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className="flex flex-col items-center gap-8 max-w-md"

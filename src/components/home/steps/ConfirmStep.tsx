@@ -138,7 +138,7 @@ export default function ConfirmStep({ data, onConfirm, onBack, isSubmitting, err
 
         {error && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 1, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="mt-6 p-4 bg-red-500/[0.06] border border-red-500/25 rounded-2xl flex gap-2.5 items-start text-red-700 text-left text-xs"
           >

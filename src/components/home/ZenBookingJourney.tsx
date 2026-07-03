@@ -372,7 +372,7 @@ export default function ZenBookingJourney() {
         {step === 1 && (
           <motion.div
             key="step1"
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 1, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3 }}
@@ -451,7 +451,7 @@ export default function ZenBookingJourney() {
         {step === 2 && (
           <motion.div
             key="step2"
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 1, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3 }}
@@ -572,7 +572,7 @@ export default function ZenBookingJourney() {
         {step === 3 && (
           <motion.div
             key="step3"
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 1, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
             transition={{ duration: 0.3 }}
@@ -696,7 +696,7 @@ export default function ZenBookingJourney() {
         {step === 4 && (
           <motion.div
             key="step4"
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 1, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             className="flex flex-col items-center text-center w-full max-w-3xl mx-auto"
           >
@@ -720,7 +720,7 @@ export default function ZenBookingJourney() {
 
               <div data-tour="proof-upload" className="w-full md:w-1/2 p-8 md:p-10 flex flex-col justify-center bg-surface-container-lowest">
                 {proofSent ? (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center text-center">
+                  <motion.div initial={{ opacity: 1 }} animate={{ opacity: 1 }} className="flex flex-col items-center text-center">
                     <motion.div 
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}

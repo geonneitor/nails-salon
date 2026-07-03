@@ -239,7 +239,7 @@ export default function ServiceStep({ data, onSelect }: { data: any, onSelect: (
           <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center px-0 md:px-4">
             {/* Backdrop Blur */}
             <motion.div 
-              initial={{ opacity: 0 }}
+              initial={{ opacity: 1 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleCloseModal}
@@ -325,7 +325,7 @@ export default function ServiceStep({ data, onSelect }: { data: any, onSelect: (
                               )}
                               <motion.span 
                                 key={isSelected ? 'selected' : 'unselected'}
-                                initial={{ opacity: 0 }}
+                                initial={{ opacity: 1 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.3 }}
                                 className={`font-serif text-sm ${isSelected ? 'text-white' : 'text-on-surface-variant'}`}

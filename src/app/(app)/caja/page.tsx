@@ -262,7 +262,7 @@ export default function CajaPage() {
     <div className="p-6 md:p-8 max-w-none mx-auto w-full space-y-8">
       {/* HEADER */}
       <motion.header
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 1, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 pb-2"
@@ -491,7 +491,7 @@ function CajaKpi({
   };
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 1, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       className={`card-depth rounded-3xl p-6 border-t-2 ${toneRing[tone]} relative overflow-hidden`}
@@ -548,9 +548,9 @@ function CajaRow({
   return (
     <motion.li
       layout
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 1, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: 20 }}
+      exit={{ opacity: 1, x: 20 }}
       transition={{ delay: 0.03 * idx, duration: 0.25 }}
     >
       <button

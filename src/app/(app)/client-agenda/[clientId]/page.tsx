@@ -45,7 +45,7 @@ export default function ClientAgendaPage() {
   return (
     <main className="min-h-screen bg-fondo-zen p-6 md:p-12 flex flex-col items-center">
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 1, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-none text-center mb-8 hidden" // Ocultamos el header anterior
       >

@@ -37,7 +37,7 @@ function TimelineItem({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: isLeft ? -50 : 50 }}
+      initial={{ opacity: 1, x: isLeft ? -50 : 50 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: idx * 0.15 }}
@@ -97,7 +97,7 @@ export default function TimeRules() {
   return (
     <section className="w-full py-24 px-6 max-w-none">
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 1, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}

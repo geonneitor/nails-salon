@@ -5,7 +5,7 @@ export default function ZenManifesto() {
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-32 z-10">
       <div className="px-6 md:px-12 max-w-5xl mx-auto text-center relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 1, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-20%" }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
@@ -20,7 +20,7 @@ export default function ZenManifesto() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={{ opacity: 1 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true, margin: "-20%" }}
           transition={{ duration: 1.5, delay: 0.3 }}

@@ -8,7 +8,7 @@ export default function NotFound() {
   return (
     <main className="min-h-screen w-full bg-fondo-zen flex flex-col items-center justify-center p-6 text-center">
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 1, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className="flex flex-col items-center gap-6"

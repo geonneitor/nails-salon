@@ -10,10 +10,10 @@ export default function PublicNavbar() {
 
   return (
     <motion.nav 
-      initial={{ y: -20, opacity: 0 }}
+      initial={{ y: 0, opacity: 1 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="absolute top-0 left-0 w-full z-50 py-6 px-6 md:px-12 flex justify-between items-center"
+      className="fixed top-0 left-0 w-full z-50 py-4 md:py-6 px-6 md:px-12 flex justify-between items-center bg-background/80 backdrop-blur-xl border-b border-outline-variant/10 shadow-sm"
     >
       {/* Left: Theme Toggle */}
       <div className="flex-1 flex justify-start">

@@ -1,5 +1,5 @@
-const url = "https://xeclkyydwouszqisgfmr.supabase.co/rest/v1/service_categories";
-const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhlY2xreXlkd291c3pxaXNnZm1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxOTY1NDYsImV4cCI6MjA5NTc3MjU0Nn0.DtT5Hc9Udh2gVO7lK3Wf7-02FR2xggBSA8xGT54-1Zk";
+const url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/service_categories`;
+const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const purpuraId = "a2f35147-30f2-4bcb-b724-042c6be1e749";
 const zenId = "489e898d-3b2a-4775-b784-93a0e1a473e0";

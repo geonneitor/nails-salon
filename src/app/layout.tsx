@@ -7,6 +7,7 @@ import { ToastProvider } from '@/components/ui/ToastProvider';
 import { ConfirmDialogProvider } from '@/components/ui/ConfirmDialog';
 import { ZenAssistantProvider } from '@/context/ZenAssistantContext';
 import { ZenAssistantOverlay } from '@/components/tutorial/ZenAssistantOverlay';
+import { Analytics } from '@vercel/analytics/next';
 
 const libreCaslon = Libre_Caslon_Text({ 
   weight: ['400', '700'],
@@ -71,6 +72,7 @@ export default function RootLayout({
             }
           `}
         </Script>
+        <Analytics />
       </body>
     </html>
   );
